@@ -1,0 +1,19 @@
+[run]
+branch = True
+source = .
+data_file=/tmp/coverage
+omit = 
+    sga-lti/wsgi.py
+    manage.py
+    ./.tox/*
+    */migrations/*
+    *_test.py
+    *_tests.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+show_missing = True
+
+[html]
+directory = ${COVERAGE_DIR}

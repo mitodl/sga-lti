@@ -1,0 +1,45 @@
+db:
+  image: postgres
+  ports:
+    - "5432"
+
+web:
+  build: .
+  command: >
+    /bin/bash -c '
+    sleep 3 &&
+    python3 manage.py migrate &&
+    ./with_host.sh python3 manage.py runserver 0.0.0.0:8071'
+  volumes:
+    - .:/src
+  environment:
+    DEBUG: 'True'
+    NODE_ENV: 'development'
+    PORT: 8071
+    COVERAGE_DIR: htmlcov
+    DATABASE_URL: postgres://postgres@db:5432/postgres
+    SGA-LTI_USE_WEBPACK_DEV_SERVER: 'True'
+    SGA-LTI_SECURE_SSL_REDIRECT: 'False'
+    SGA-LTI_DB_DISABLE_SSL: 'True'
+  env_file: .env
+  ports:
+    - "8071:8071"
+  links:
+    - db
+
+watch:
+  image: sga-lti_web
+  command: >
+    /bin/bash -c '
+    npm cache clean &&
+    npm install --no-bin-links &&
+    npm rebuild node-sass &&
+    echo Finished npm install &&
+    node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --config webpack.config.dev.js -d --content-base ./static --host 0.0.0.0 --port 8072 --progress --inline --hot'
+  ports:
+    - "8072:8072"
+  volumes:
+    - .:/src
+  env_file: .env
+  environment:
+    NODE_ENV: 'development'

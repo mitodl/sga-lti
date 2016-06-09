@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "sga-lti" %}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Hi, I'm sga-lti" %}</h1>
+<div id="container"></div>
+<script type="text/javascript">
+var SETTINGS = {{ js_settings_json|safe }};
+</script>
+<script src="{{ root_src }}" type="text/javascript"></script>
+{% endblock %}
+
