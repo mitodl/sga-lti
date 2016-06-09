@@ -1,5 +1,11 @@
 sga-lti
---------
+=========================
+:sga-lti: LTI implementation of Staff Graded Assignments
+:Version: 0.4.1
+:Author: MIT Office of Digital Learning
+:Homepage: http://odl.mit.edu
+:License: BSD
+
 .. image:: https://img.shields.io/travis/mitodl/sga-lti.svg
     :target: https://travis-ci.org/mitodl/sga-lti
 .. image:: https://img.shields.io/coveralls/mitodl/sga-lti.svg
