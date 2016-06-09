@@ -60,6 +60,7 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+<<<<<<< HEAD
 
 # Heroku/Foreman
 .env
