@@ -15,8 +15,8 @@ web:
     PORT: 8071
     NODE_ENV: 'production'
     DATABASE_URL: postgres://postgres@db:5432/postgres
-    SGA-LTI_SECURE_SSL_REDIRECT: 'False'
-    SGA-LTI_DB_DISABLE_SSL: 'True'
+    SGA_LTI_SECURE_SSL_REDIRECT: 'False'
+    SGA_LTI_DB_DISABLE_SSL: 'True'
   ports:
     - "8071:8071"
   links:

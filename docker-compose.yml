@@ -18,9 +18,9 @@ web:
     PORT: 8071
     COVERAGE_DIR: htmlcov
     DATABASE_URL: postgres://postgres@db:5432/postgres
-    SGA-LTI_USE_WEBPACK_DEV_SERVER: 'True'
-    SGA-LTI_SECURE_SSL_REDIRECT: 'False'
-    SGA-LTI_DB_DISABLE_SSL: 'True'
+    SGA_LTI_USE_WEBPACK_DEV_SERVER: 'True'
+    SGA_LTI_SECURE_SSL_REDIRECT: 'False'
+    SGA_LTI_DB_DISABLE_SSL: 'True'
   env_file: .env
   ports:
     - "8071:8071"
@@ -28,7 +28,7 @@ web:
     - db
 
 watch:
-  image: sga-lti_web
+  image: sga_lti_web
   command: >
     /bin/bash -c '
     npm cache clean &&

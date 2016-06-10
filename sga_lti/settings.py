@@ -20,7 +20,7 @@ import yaml
 VERSION = "0.0.0"
 
 CONFIG_PATHS = [
-    os.environ.get('SGA-LTI_CONFIG', ''),
+    os.environ.get('SGA_LTI_CONFIG', ''),
     os.path.join(os.getcwd(), 'sga-lti.yml'),
     os.path.join(os.path.expanduser('~'), 'sga-lti.yml'),
     '/etc/sga-lti.yml',
@@ -68,7 +68,7 @@ DEBUG = get_var('DEBUG', False)
 
 ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
 
-SECURE_SSL_REDIRECT = get_var('SGA-LTI_SECURE_SSL_REDIRECT', True)
+SECURE_SSL_REDIRECT = get_var('SGA_LTI_SECURE_SSL_REDIRECT', True)
 
 
 # Application definition
@@ -96,7 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'sga-lti.urls'
+ROOT_URLCONF = 'sga_lti.urls'
 
 TEMPLATES = [
     {
@@ -116,7 +116,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sga-lti.wsgi.application'
+WSGI_APPLICATION = 'sga_lti.wsgi.application'
 
 
 # Database
@@ -131,7 +131,7 @@ DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     )
 )
 
-if get_var('SGA-LTI_DB_DISABLE_SSL', False):
+if get_var('SGA_LTI_DB_DISABLE_SSL', False):
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {}
 else:
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {'sslmode': 'require'}
@@ -165,36 +165,36 @@ STATICFILES_DIRS = (
 )
 
 # Request files from the webpack dev server
-USE_WEBPACK_DEV_SERVER = get_var('SGA-LTI_USE_WEBPACK_DEV_SERVER', False)
-WEBPACK_SERVER_URL = get_var('SGA-LTI_WEBPACK_SERVER_URL', 'http://{host}:8072')
+USE_WEBPACK_DEV_SERVER = get_var('SGA_LTI_USE_WEBPACK_DEV_SERVER', False)
+WEBPACK_SERVER_URL = get_var('SGA_LTI_WEBPACK_SERVER_URL', 'http://{host}:8072')
 
 # Important to define this so DEBUG works properly
 INTERNAL_IPS = (get_var('HOST_IP', '127.0.0.1'), )
 
 # Configure e-mail settings
-EMAIL_BACKEND = get_var('SGA-LTI_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = get_var('SGA-LTI_EMAIL_HOST', 'localhost')
-EMAIL_PORT = get_var('SGA-LTI_EMAIL_PORT', 25)
-EMAIL_HOST_USER = get_var('SGA-LTI_EMAIL_USER', '')
-EMAIL_HOST_PASSWORD = get_var('SGA-LTI_EMAIL_PASSWORD', '')
-EMAIL_USE_TLS = get_var('SGA-LTI_EMAIL_TLS', False)
-EMAIL_SUPPORT = get_var('SGA-LTI_SUPPORT_EMAIL', 'support@example.com')
-DEFAULT_FROM_EMAIL = get_var('SGA-LTI_FROM_EMAIL', 'webmaster@localhost')
+EMAIL_BACKEND = get_var('SGA_LTI_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = get_var('SGA_LTI_EMAIL_HOST', 'localhost')
+EMAIL_PORT = get_var('SGA_LTI_EMAIL_PORT', 25)
+EMAIL_HOST_USER = get_var('SGA_LTI_EMAIL_USER', '')
+EMAIL_HOST_PASSWORD = get_var('SGA_LTI_EMAIL_PASSWORD', '')
+EMAIL_USE_TLS = get_var('SGA_LTI_EMAIL_TLS', False)
+EMAIL_SUPPORT = get_var('SGA_LTI_SUPPORT_EMAIL', 'support@example.com')
+DEFAULT_FROM_EMAIL = get_var('SGA_LTI_FROM_EMAIL', 'webmaster@localhost')
 
 # e-mail configurable admins
-ADMIN_EMAIL = get_var('SGA-LTI_ADMIN_EMAIL', '')
+ADMIN_EMAIL = get_var('SGA_LTI_ADMIN_EMAIL', '')
 if ADMIN_EMAIL is not '':
     ADMINS = (('Admins', ADMIN_EMAIL),)
 else:
     ADMINS = ()
 
 # Logging configuration
-LOG_LEVEL = get_var('SGA-LTI_LOG_LEVEL', 'DEBUG')
+LOG_LEVEL = get_var('SGA_LTI_LOG_LEVEL', 'DEBUG')
 DJANGO_LOG_LEVEL = get_var('DJANGO_LOG_LEVEL', 'DEBUG')
 
 # For logging to a remote syslog host
-LOG_HOST = get_var('SGA-LTI_LOG_HOST', 'localhost')
-LOG_HOST_PORT = get_var('SGA-LTI_LOG_HOST_PORT', 514)
+LOG_HOST = get_var('SGA_LTI_LOG_HOST', 'localhost')
+LOG_HOST_PORT = get_var('SGA_LTI_LOG_HOST_PORT', 514)
 
 HOSTNAME = platform.node().split('.')[0]
 LOGGING = {

@@ -14,7 +14,7 @@ import mock
 import semantic_version
 import yaml
 
-from sga-lti.settings import load_fallback, get_var
+from sga_lti.settings import load_fallback, get_var
 
 
 class TestSettings(TestCase):
@@ -27,10 +27,10 @@ class TestSettings(TestCase):
         Returns:
             dict: dictionary of the newly reloaded settings ``vars``
         """
-        importlib.reload(sys.modules['sga-lti.settings'])
+        importlib.reload(sys.modules['sga_lti.settings'])
         # Restore settings to original settings after test
-        self.addCleanup(importlib.reload, sys.modules['sga-lti.settings'])
-        return vars(sys.modules['sga-lti.settings'])
+        self.addCleanup(importlib.reload, sys.modules['sga_lti.settings'])
+        return vars(sys.modules['sga_lti.settings'])
 
     def test_load_fallback(self):
         """Verify our YAML load works as expected."""
@@ -40,7 +40,7 @@ class TestSettings(TestCase):
         with open(temp_config_path, 'w') as temp_config:
             temp_config.write(yaml.dump(config_settings))
 
-        with mock.patch('sga-lti.settings.CONFIG_PATHS') as config_paths:
+        with mock.patch('sga_lti.settings.CONFIG_PATHS') as config_paths:
             config_paths.__iter__.return_value = [temp_config_path]
             fallback_config = load_fallback()
             self.assertDictEqual(fallback_config, config_settings)
@@ -48,7 +48,7 @@ class TestSettings(TestCase):
     def test_get_var(self):
         """Verify that get_var does the right thing with precedence"""
         with mock.patch.dict(
-            'sga-lti.settings.FALLBACK_CONFIG',
+            'sga_lti.settings.FALLBACK_CONFIG',
             {'FOO': 'bar'}
         ):
             # Verify fallback
@@ -76,7 +76,7 @@ class TestSettings(TestCase):
             self.assertEqual(get_var('BAR', []), [1, 2, 3])
         # Make sure real types still work too (i.e. from yaml load)
         with mock.patch.dict(
-            'sga-lti.settings.FALLBACK_CONFIG',
+            'sga_lti.settings.FALLBACK_CONFIG',
             {'BLAH': True}
         ):
             self.assertEqual(get_var('BLAH', False), True)
@@ -85,14 +85,14 @@ class TestSettings(TestCase):
         """Verify that we configure email with environment variable"""
 
         with mock.patch.dict('os.environ', {
-            'SGA-LTI_ADMIN_EMAIL': ''
+            'SGA_LTI_ADMIN_EMAIL': ''
         }, clear=True):
             settings_vars = self.reload_settings()
             self.assertFalse(settings_vars.get('ADMINS', False))
 
         test_admin_email = 'cuddle_bunnies@example.com'
         with mock.patch.dict('os.environ', {
-            'SGA-LTI_ADMIN_EMAIL': test_admin_email,
+            'SGA_LTI_ADMIN_EMAIL': test_admin_email,
         }, clear=True):
             settings_vars = self.reload_settings()
             self.assertEqual(
@@ -110,7 +110,7 @@ class TestSettings(TestCase):
 
         # Check default state is SSL on
         with mock.patch.dict('os.environ', {
-            'SGA-LTI_DB_DISABLE_SSL': ''
+            'SGA_LTI_DB_DISABLE_SSL': ''
         }, clear=True):
             settings_vars = self.reload_settings()
             self.assertEqual(
@@ -120,7 +120,7 @@ class TestSettings(TestCase):
 
         # Check enabling the setting explicitly
         with mock.patch.dict('os.environ', {
-            'SGA-LTI_DB_DISABLE_SSL': 'True'
+            'SGA_LTI_DB_DISABLE_SSL': 'True'
         }, clear=True):
             settings_vars = self.reload_settings()
             self.assertEqual(
@@ -130,7 +130,7 @@ class TestSettings(TestCase):
 
         # Disable it
         with mock.patch.dict('os.environ', {
-            'SGA-LTI_DB_DISABLE_SSL': 'False'
+            'SGA_LTI_DB_DISABLE_SSL': 'False'
         }, clear=True):
             settings_vars = self.reload_settings()
             self.assertEqual(
