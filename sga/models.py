@@ -21,8 +21,8 @@ class TimeStampedModel(models.Model):
 
 class Grader(models.Model):
     max_students = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey("Course", on_delete=models.CASCADE)
+    user = models.ForeignKey(User)
+    course = models.ForeignKey("Course")
 
 
 class Student(models.Model):
@@ -35,7 +35,7 @@ class Course(TimeStampedModel):
     name = models.CharField(max_length=128)
     administrators = models.ManyToManyField(User, related_name="administrated_courses")
     graders = models.ManyToManyField(User, through=Grader, related_name="graded_courses")
-    students = models.ManyToManyField(Student)
+    students = models.ManyToManyField(User, through=Student)
 
 
 class Assignment(TimeStampedModel):
@@ -59,7 +59,7 @@ class Submission(TimeStampedModel):
     submitted = models.BooleanField(default=True)
     
     student_document = models.FileField()
-    grader_document = models.FileField()
+    grader_document = models.FileField(null=True)
     
     class Meta:
         unique_together = (("assignment", "student"),)
