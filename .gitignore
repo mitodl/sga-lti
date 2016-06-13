@@ -85,3 +85,8 @@ codekit-config.json
 
 # Django static
 staticfiles/
+
+# Project-specific
+db.sqlite3
+sga-lti.yml
+venv/
