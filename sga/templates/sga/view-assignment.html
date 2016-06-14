@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load bootstrap_tags %}
+
+{% block title %}{{ assignment_title }}{% endblock %}
+
+{% block content %}
+    <h1>Assignment: {{ assignment_title }}</h1>
+    <hr>
+    <div class="panel panel-primary">
+        <div class="panel-heading">Submission Status</div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Submitted:</dt>
+                <dd>{% if submission.submitted %}Yes{% else %}No{% endif %}</dd>
+                {% if submission.submitted %}
+                <dt>File Submission</dt>
+                <dd><a href="{{ submission.student_document.url }}" target="_blank">View File</a></dd>
+                <dt>File Description:</dt>
+                <dd>{{ submission.description }}</dd>
+                <br>
+                <dt>Grade:</dt>
+                <dd>{% if submission.grade %}{{ submission.grade }}{% else %}(Pending){% endif %}</dd>
+                <dt>Feedback:</dt>
+                <dd>{% if submission.feedback %}{{ submission.feedback }}{% else %}(Pending){% endif %}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    {% if not submission.submitted %}
+    <form action="{% url 'view-assignment' assignment_id=assignment_id %}" class="form-horizontal"
+          method="post" enctype="multipart/form-data">{% csrf_token %}
+        {{ submission_form.errors }}
+        {{ submission_form.non_field_errors }}
+        {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
+        <button class="btn btn-success pull-right" type="submit">Submit</button>
+    </form>
+    {% endif %}
+{% endblock %}
+

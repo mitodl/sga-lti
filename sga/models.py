@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from sga.constants import student_submission_file_path
+
+
 class TimeStampedModel(models.Model):
     """ Base model for create/update timestamps """
     created_on = models.DateTimeField(auto_now_add=True)  # UTC
@@ -28,6 +31,7 @@ class Grader(models.Model):
 class Student(models.Model):
     grader = models.ForeignKey(Grader, null=True, related_name="students", on_delete=models.SET_NULL)
     user = models.ForeignKey(User)
+    course = models.ForeignKey("Course")
 
   
 class Course(TimeStampedModel):
@@ -49,16 +53,16 @@ class Assignment(TimeStampedModel):
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")
     student = models.ForeignKey(User, related_name="submitted_assignments")
-    graded_by = models.ForeignKey(User, related_name="graded_assignments")
+    graded_by = models.ForeignKey(User, null=True, related_name="graded_assignments")
     
-    description = models.TextField()
-    feedback = models.TextField()
-    grade = models.IntegerField()  # 0-100
-    submitted_at = models.DateTimeField(auto_now_add=True)  # UTC
-    graded_at = models.DateTimeField()  # UTC
-    submitted = models.BooleanField(default=True)
+    description = models.TextField(null=True)
+    feedback = models.TextField(null=True)
+    grade = models.IntegerField(null=True)  # 0-100
+    submitted_at = models.DateTimeField(null=True)  # UTC
+    graded_at = models.DateTimeField(null=True)  # UTC
+    submitted = models.BooleanField(default=False)
     
-    student_document = models.FileField()
+    student_document = models.FileField(upload_to=student_submission_file_path, null=True)
     grader_document = models.FileField(null=True)
     
     class Meta:
