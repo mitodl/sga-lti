@@ -10,8 +10,9 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import Http404
 from django.shortcuts import render, redirect
 
+from sga.backend.authentication import is_student
 from sga.forms import AssignmentSubmissionForm
-from sga.models import Assignment, Submission
+from sga.models import Assignment, Submission, Course
 
 
 def get_bundle_url(request, bundle_name):
@@ -37,15 +38,18 @@ def index(request):
 
 
 def view_assignment(request, assignment_id):
+    if is_student(request.user):
+        return redirect("view_assignment_student", assignment_id=assignment_id)
+
+def view_assignment_student(request, assignment_id):
     """
     Assignment view for students
     """
-    print(settings.DEVELOPMENT)
     try:
         assignment = Assignment.objects.get(edx_id=assignment_id)
         submission, created = Submission.objects.get_or_create(student=request.user, assignment=assignment)
     except:
-        raise Http404("Page not found")
+        raise Http404()
     if request.method == "POST":
         submission_form = AssignmentSubmissionForm(request.POST, request.FILES, instance=submission)
         if submission_form.is_valid():
@@ -53,21 +57,35 @@ def view_assignment(request, assignment_id):
             submission.submitted = True
             submission.submitted_at = datetime.utcnow()
             submission.save()
-            redirect("view-assignment", assignment_id=assignment_id)
+            redirect("view_assignment", assignment_id=assignment_id)
     else:
         submission_form = AssignmentSubmissionForm(instance=submission)
-    return render(request, "sga/view-assignment.html", context={
+    return render(request, "sga/view_assignment_student.html", context={
         "submission_form": submission_form,
         "submission": submission,
-        "assignment_id": assignment_id
+        "assignment_id": assignment_id,
+        "assignment_name": "PLACEHOLDER"
     })
 
 
-def dev_start(request):
+def view_student_list(request, course_id):
+    try:
+        course = Course.objects.get(edx_id=course_id)
+    except:
+        raise Http404()
+    students = course.students.all()
+    return render(request, "sga/view_students_list.html", context={
+        "course_name": course.name,
+        "students": students
+    })
+
+
+def dev_start(request, username):
     """
     For local development only - sets session variables
     """
     if settings.DEVELOPMENT:
+        print(username)
         SESSION = {
             "user_id": "user_id1234",  # Edx user id
             "resource_link_title": "Assignment Title",  # Assignment title
@@ -78,6 +96,6 @@ def dev_start(request):
         }
         for var, val in SESSION.items():
             request.session[var] = val
-        user = authenticate(username="user_id1234", password=" ")
+        user = authenticate(username=username, password=" ")
         login(request, user)
     return redirect("sga-index")

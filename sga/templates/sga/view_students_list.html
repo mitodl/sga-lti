@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course_name }}</h1>
+    <hr>
+    <h3>Student List</h3>
+    <table class="table table-striped table-hover">
+        <thead>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Email</th>
+            <th>Ungraded Submissions</th>
+            <th>Student Info</th>
+        </thead>
+        <tbody>
+        {% for student in students %}
+            <tr>
+                <td>{{ student.last_name }}</td>
+                <td>{{ student.first_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.ungraded_submissions_count }}</td>
+                <td>(TBI)</td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
+{% endblock %}
+

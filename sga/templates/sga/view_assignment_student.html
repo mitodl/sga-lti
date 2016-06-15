@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load bootstrap_tags %}
 
-{% block title %}{{ assignment_title }}{% endblock %}
+{% block title %}{{ assignment_name }}{% endblock %}
 
 {% block content %}
-    <h1>Assignment: {{ assignment_title }}</h1>
+    <h1>Assignment: {{ assignment_name }}</h1>
     <hr>
     <div class="panel panel-primary">
         <div class="panel-heading">Submission Status</div>
@@ -27,7 +27,7 @@
         </div>
     </div>
     {% if not submission.submitted %}
-    <form action="{% url 'view-assignment' assignment_id=assignment_id %}" class="form-horizontal"
+    <form action="{% url 'view_assignment_student' assignment_id=assignment_id %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form.errors }}
         {{ submission_form.non_field_errors }}
