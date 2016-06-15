@@ -10,6 +10,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import Http404
 from django.shortcuts import render, redirect
 
+from sga.backend.authentication import student_view, grader_view
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader
 
@@ -21,6 +22,7 @@ def index(request):
     return render(request, "sga/index.html")
 
 
+@student_view
 def view_submission_student(request, assignment_id):
     """
     Submission view for students
@@ -47,6 +49,7 @@ def view_submission_student(request, assignment_id):
     })
 
 
+@grader_view
 def view_submission_grader(request, assignment_id, student_user_id):
     """
     Submission view for graders
@@ -80,6 +83,7 @@ def view_submission_grader(request, assignment_id, student_user_id):
     })
 
 
+@grader_view
 def view_assignment_grader(request, assignment_id):
     """
     Assignment view for graders
@@ -101,6 +105,7 @@ def view_assignment_grader(request, assignment_id):
     })
 
 
+@grader_view
 def view_student_list(request, course_id):
     try:
         course = Course.objects.get(edx_id=course_id)
@@ -122,11 +127,11 @@ def dev_start(request, username):
     if settings.DEVELOPMENT:
         print(username)
         SESSION = {
-            "user_id": "user_id1234",  # Edx user id
+            "user_id": "student1",  # Edx user id
             "resource_link_title": "Assignment Title",  # Assignment title
-            "resource_link_id": "assignment_id1234",  # Assignment Edx id
+            "resource_link_id": "assignment1id",  # Assignment Edx id
             "context_label": "Course Title",  # Course title
-            "context_id": "course_id1234",  # Course Edx id
+            "context_id": "courseid",  # Course Edx id
             "roles": "student",  # User role
         }
         for var, val in SESSION.items():
