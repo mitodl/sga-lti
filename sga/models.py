@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from django.db import models
 
 from sga.constants import student_submission_file_path
@@ -21,7 +21,7 @@ class TimeStampedModel(models.Model):
         self.save(update_fields=update_fields)
 
 
-class SGAUser(AbstractUser):
+class SGAUser(User):
     def ungraded_submissions_count(self):
         if not self.is_student():
             raise
@@ -36,6 +36,9 @@ class SGAUser(AbstractUser):
     
     def is_admin(self):
         return self.username.startswith("admin")
+    
+    class Meta:
+        proxy = True
 
 
 class Grader(models.Model):

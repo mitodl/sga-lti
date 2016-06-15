@@ -275,4 +275,3 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'uploaded')
 MEDIA_URL = '/uploaded/'
 
 DEVELOPMENT = get_var("DEVELOPMENT", False)
-AUTH_USER_MODEL = 'sga.SGAUser'
