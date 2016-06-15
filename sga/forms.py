@@ -3,14 +3,7 @@ from django import forms
 from sga.models import Submission
 
 
-class AssignmentSubmissionForm(forms.ModelForm):
-    
-    def clean(self):
-        upload_to = '/some/path'
-        if not 'file' in self.cleaned_data:
-            return self.cleaned_data
-        upload_to += self.cleaned_data['file'].name
-    
+class StudentAssignmentSubmissionForm(forms.ModelForm):
     class Meta:
         model = Submission
         fields = [
@@ -20,4 +13,18 @@ class AssignmentSubmissionForm(forms.ModelForm):
         labels = {
             "student_document": "File Submission",
             "description": "File Description"
+        }
+
+class GraderAssignmentSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = Submission
+        fields = [
+            "grader_document",
+            "feedback",
+            "grade"
+        ]
+        labels = {
+            "grader_document": "Annotated File Submission",
+            "feedback": "Feedback",
+            "grade": "Grade (0-100)"
         }

@@ -1,0 +1,22 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">Submission Status</div>
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Submitted:</dt>
+            <dd>{% if submission.submitted %}Yes{% else %}No{% endif %}</dd>
+            {% if submission.submitted %}
+            <dt>File Submission</dt>
+            <dd><a href="{{ submission.student_document.url }}" target="_blank">View File</a></dd>
+            <dt>File Description:</dt>
+            <dd>{{ submission.description }}</dd>
+            <br>
+            <dt>Grade:</dt>
+            <dd>{% if submission.grade %}{{ submission.grade }}{% else %}(Pending){% endif %}</dd>
+            <dt>Annotated File:</dt>
+            <dd>{% if submission.grader_document %}<a href="{{ submission.grader_document.url }}" target="_blank">View File</a>{% else %}(Pending){% endif %}</dd>
+            <dt>Feedback:</dt>
+            <dd>{% if submission.feedback %}{{ submission.feedback }}{% else %}(Pending){% endif %}</dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>

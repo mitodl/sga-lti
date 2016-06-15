@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load bootstrap_tags %}
+
+{% block title %}PLACEHOLDER{% endblock %}
+
+{% block content %}
+    <h1>Assignment: {{ assignment.name }}</h1>
+    <h3>Student: {{ student_user.last_name }}, {{ student_user.first_name }}</h3>
+    <hr>
+    {% include "common/submission_status.html" %}
+    {% if not submission.graded %}
+    <form action="{% url 'view_submission_grader' assignment_id=assignment.edx_id student_user_id=student_user.username %}" class="form-horizontal"
+          method="post" enctype="multipart/form-data">{% csrf_token %}
+        {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
+        <button class="btn btn-success pull-right" type="submit">Submit</button>
+    </form>
+    {% endif %}
+{% endblock %}
+

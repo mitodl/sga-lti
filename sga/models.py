@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from sga.constants import student_submission_file_path
+from sga.constants import student_submission_file_path, grader_submission_file_path
 
 
 class TimeStampedModel(models.Model):
@@ -52,6 +53,7 @@ class Course(TimeStampedModel):
     def ungraded_submissions(self, user):
         return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
+
 class Assignment(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
@@ -67,13 +69,16 @@ class Submission(TimeStampedModel):
     
     description = models.TextField(null=True)
     feedback = models.TextField(null=True)
-    grade = models.IntegerField(null=True)  # 0-100
+    grade = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], null=True)  # 0-100
     submitted_at = models.DateTimeField(null=True)  # UTC
     graded_at = models.DateTimeField(null=True)  # UTC
     submitted = models.BooleanField(default=False)
     
     student_document = models.FileField(upload_to=student_submission_file_path, null=True)
-    grader_document = models.FileField(null=True)
+    grader_document = models.FileField(upload_to=grader_submission_file_path, null=True)
+    
+    def graded(self):
+        return bool(self.submitted and self.graded_at)
     
     class Meta:
         unique_together = (("assignment", "student"),)
