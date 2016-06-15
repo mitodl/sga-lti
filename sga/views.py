@@ -10,7 +10,6 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from sga.backend.authentication import is_student
 from sga.forms import AssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course
 
@@ -38,8 +37,7 @@ def index(request):
 
 
 def view_assignment(request, assignment_id):
-    if is_student(request.user):
-        return redirect("view_assignment_student", assignment_id=assignment_id)
+    return redirect("view_assignment_student", assignment_id=assignment_id)
 
 def view_assignment_student(request, assignment_id):
     """
@@ -74,8 +72,10 @@ def view_student_list(request, course_id):
     except:
         raise Http404()
     students = course.students.all()
+    for student in students:
+        student.ungraded_submissions = course.ungraded_submissions(student)
     return render(request, "sga/view_students_list.html", context={
-        "course_name": course.name,
+        "course": course,
         "students": students
     })
 

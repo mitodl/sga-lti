@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sga.models import Course, Assignment, Grader, Student, SGAUser
+from sga.models import Course, Assignment, Grader, Student, User
 
 
 def create_mock_data():
-    admin_user = SGAUser.objects.create(
+    admin_user = User.objects.create(
         first_name="Admin",
         last_name="User",
         username="admin"
@@ -14,7 +14,7 @@ def create_mock_data():
         name="Course Name"
     )
     course.administrators.add(admin_user)
-    grader_user = SGAUser.objects.create(
+    grader_user = User.objects.create(
         first_name="Grader",
         last_name="User",
         username="grader"
@@ -24,19 +24,19 @@ def create_mock_data():
         user=grader_user,
         course=course
     )
-    student_user_1 = SGAUser.objects.create(
+    student_user_1 = User.objects.create(
         first_name="Student1",
         last_name="User",
         username="student1",
         email="student1@test"
     )
-    student_user_2 = SGAUser.objects.create(
+    student_user_2 = User.objects.create(
         first_name="Student2",
         last_name="User",
         username="student2",
         email="student2@test"
     )
-    student_user_3 = SGAUser.objects.create(
+    student_user_3 = User.objects.create(
         first_name="Student3",
         last_name="User",
         username="student3",
@@ -71,6 +71,6 @@ def create_mock_data():
         grace_period=1,
         course=course
     )
-    for user in SGAUser.objects.all():
+    for user in User.objects.all():
         user.set_password(" ")
         user.save()

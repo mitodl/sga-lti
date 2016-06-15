@@ -3,7 +3,7 @@
 {% block title %}Student List{% endblock %}
 
 {% block content %}
-    <h1>Course: {{ course_name }}</h1>
+    <h1>Course: {{ course.name }}</h1>
     <hr>
     <h3>Student List</h3>
     <table class="table table-striped table-hover">
@@ -20,7 +20,7 @@
                 <td>{{ student.last_name }}</td>
                 <td>{{ student.first_name }}</td>
                 <td>{{ student.email }}</td>
-                <td>{{ student.ungraded_submissions_count }}</td>
+                <td>{{ student.ungraded_submissions }}</td>
                 <td>(TBI)</td>
             </tr>
         {% endfor %}    

@@ -21,45 +21,36 @@ class TimeStampedModel(models.Model):
         self.save(update_fields=update_fields)
 
 
-class SGAUser(User):
-    def ungraded_submissions_count(self):
-        if not self.is_student():
-            raise
-        return self.submitted_assignments.filter(submitted=True, graded_at=None).count()
-            
-    # TODO: Implement real role methods
-    def is_student(self):
-        return self.username.startswith("student")
-    
-    def is_grader(self):
-        return self.username.startswith("grader")
-    
-    def is_admin(self):
-        return self.username.startswith("admin")
-    
-    class Meta:
-        proxy = True
-
-
 class Grader(models.Model):
     max_students = models.IntegerField()
-    user = models.ForeignKey(SGAUser)
+    user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
 
 class Student(models.Model):
     grader = models.ForeignKey(Grader, null=True, related_name="students", on_delete=models.SET_NULL)
-    user = models.ForeignKey(SGAUser)
+    user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
   
 class Course(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
-    administrators = models.ManyToManyField(SGAUser, related_name="administrated_courses")
-    graders = models.ManyToManyField(SGAUser, through=Grader, related_name="graded_courses")
-    students = models.ManyToManyField(SGAUser, through=Student)
+    administrators = models.ManyToManyField(User, related_name="administrator_courses")
+    graders = models.ManyToManyField(User, through=Grader, related_name="grader_courses")
+    students = models.ManyToManyField(User, through=Student, related_name="student_courses")
 
+    def has_student(self, user):
+        return self.students.filter(pk=user.pk).exists()
+    
+    def has_grader(self, user):
+        return self.graders.filter(pk=user.pk).exists()
+    
+    def has_admin(self, user):
+        return self.administrators.filter(pk=user.pk).exists()
+    
+    def ungraded_submissions(self, user):
+        return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 class Assignment(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
@@ -71,8 +62,8 @@ class Assignment(TimeStampedModel):
 
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")
-    student = models.ForeignKey(SGAUser, related_name="submitted_assignments")
-    graded_by = models.ForeignKey(SGAUser, null=True, related_name="graded_assignments")
+    student = models.ForeignKey(User, related_name="submitted_assignments")
+    graded_by = models.ForeignKey(User, null=True, related_name="graded_assignments")
     
     description = models.TextField(null=True)
     feedback = models.TextField(null=True)
