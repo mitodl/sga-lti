@@ -50,7 +50,7 @@ class Course(TimeStampedModel):
     def has_admin(self, user):
         return self.administrators.filter(pk=user.pk).exists()
     
-    def ungraded_submissions_by_user(self, user):
+    def not_graded_submissions_by_user(self, user):
         return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 
@@ -89,6 +89,9 @@ class Submission(TimeStampedModel):
     
     def graded(self):
         return bool(self.submitted and self.graded_at)
+    
+    def grade_display(self):
+        return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)
     
     class Meta:
         unique_together = (("assignment", "student"),)

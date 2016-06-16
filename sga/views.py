@@ -119,7 +119,7 @@ def view_student_list_as_grader(request, course_id):
         raise Http404()
     student_users = course.students.all()
     for student_user in student_users:
-        student_user.ungraded_submissions_by_user = course.ungraded_submissions_by_user(student_user)
+        student_user.not_graded_submissions = course.not_graded_submissions_by_user(student_user)
     return render(request, "sga/view_student_list_as_grader.html", context={
         "course": course,
         "student_users": student_users

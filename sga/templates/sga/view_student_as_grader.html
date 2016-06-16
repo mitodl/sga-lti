@@ -67,7 +67,7 @@
                 </td>
                 <td>
                 {% if assignment.submission.graded %}
-                    {{ assignment.submission.grade }}
+                    {{ assignment.submission.grade_display }}
                 {% else %}
                     (Pending)
                 {% endif %}
