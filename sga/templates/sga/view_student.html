@@ -68,20 +68,18 @@
                     (Not Graded)
                 {% endif %}
                 </td>
-                <td>
                 {% if assignment.submission.graded %}
-                    {{ assignment.submission.grade_display }}
+                <td data-sort="{{ assignment.submission.grade }}">{{ assignment.submission.grade_display }}</td>
                 {% else %}
-                    (Pending)
+                <td>(Pending)</td>
                 {% endif %}
-                </td>
                 <td>
-                    <a href="{% url 'view_submission_as_grader' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
                         View Submission
                     </a>
                 </td>
             </tr>
-        {% endfor %}    
+        {% endfor %}
         </tbody>
     </table>
 {% endblock %}

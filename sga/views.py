@@ -55,46 +55,44 @@ def view_submission_as_student(request, assignment_id):
 
 
 @allowed_roles([Roles.grader, Roles.admin])
-def view_submission_as_grader(request, assignment_id, student_user_id):
+def view_submission_as_staff(request, assignment_id, student_user_id):
     """
     Submission view for graders
     """
     try:
         assignment = Assignment.objects.get(edx_id=assignment_id)
-        grader = Grader.objects.get(user=request.user, course=assignment.course)
-        student_user = grader.students.get(user__username=student_user_id).user
-        submission, created = Submission.objects.get_or_create(student=student_user, assignment=assignment)
+        student = Student.objects.get(user__username=student_user_id)
+        submission, created = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     except:
         raise Http404()
     next_not_graded_submission = Submission.objects.filter(assignment=assignment, submitted=True,
                                                            graded_at=None).exclude(pk=submission.pk).first()
     if next_not_graded_submission:
-        next_not_graded_submission_url = reverse("view_submission_as_grader", kwargs={
+        next_not_graded_submission_url = reverse("view_submission_as_staff", kwargs={
             "assignment_id": assignment_id,
             "student_user_id": next_not_graded_submission.student.username
         })
     else:
         next_not_graded_submission_url = None
     if request.method == "POST":
-        print(submission.__dict__)
         submission_form = GraderAssignmentSubmissionForm(request.POST, request.FILES, instance=submission)
         if submission_form.is_valid():
             submission_form.save()
             submission.graded_at = datetime.utcnow()
-            submission.graded_by = grader.user
+            submission.graded_by = request.user
             submission.save()
-            redirect("view_submission_as_grader", assignment_id=assignment_id, student_user_id=student_user.username)
+            redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student.user.username)
         else:
             # Clear changes made to submission instance since form is invalid (form field values are untouched)
             submission = Submission.objects.get(pk=submission.pk)
     else:
         submission_form = GraderAssignmentSubmissionForm(instance=submission)
-    return render(request, "sga/view_submission_as_grader.html", context={
+    return render(request, "sga/view_submission_as_staff.html", context={
         "submission_form": submission_form,
         "next_not_graded_submission_url": next_not_graded_submission_url,
         "submission": submission,
         "assignment": assignment,
-        "student_user": student_user,
+        "student_user": student.user,
         "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from sga.views import index, dev_start, view_submission_as_student, view_student_list, \
-    view_assignment, view_submission_as_grader, view_assignment_list, view_student, \
+    view_assignment, view_submission_as_staff, view_assignment_list, view_student, \
     view_grader_list, view_grader
 from sga_lti import settings
 
@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^view-grader-list/(?P<course_id>\w{0,50})$', view_grader_list, name="view_grader_list"),
     url(r'^view-assignment-list/(?P<course_id>\w{0,50})$', view_assignment_list, name="view_assignment_list"),
     url(r'^view-submission-as-student/(?P<assignment_id>\w{0,50})$', view_submission_as_student, name="view_submission_as_student"),
-    url(r'^view-submission-as-grader/(?P<assignment_id>\w{0,50})/(?P<student_user_id>\w{0,50})$', view_submission_as_grader, name="view_submission_as_grader"),
+    url(r'^view-submission-as-staff/(?P<assignment_id>\w{0,50})/(?P<student_user_id>\w{0,50})$', view_submission_as_staff, name="view_submission_as_staff"),
     url(r'^view-assignment/(?P<assignment_id>\w{0,50})$', view_assignment, name="view_assignment"),
     url(r'^view-student/(?P<course_id>\w{0,50})/(?P<student_user_id>\w{0,50})$', view_student, name="view_student"),
     url(r'^view-grader/(?P<course_id>\w{0,50})/(?P<grader_user_id>\w{0,50})$', view_grader, name="view_grader"),

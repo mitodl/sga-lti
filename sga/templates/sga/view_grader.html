@@ -72,9 +72,9 @@
                     </a>
                 </td>
                 <td>{{ submission.graded_at|date:SGA_DATETIME_FORMAT }}</td>
-                <td>{{ submission.grade_display }}</td>
+                <td data-sort="{{ submission.grade }}">{{ submission.grade_display }}</td>
                 <td>
-                    <a href="{% url 'view_submission_as_grader' assignment_id=submission.assignment.edx_id student_user_id=submission.student.username %}">
+                    <a href="{% url 'view_submission_as_staff' assignment_id=submission.assignment.edx_id student_user_id=submission.student.username %}">
                         View Submission
                     </a>
                 </td>

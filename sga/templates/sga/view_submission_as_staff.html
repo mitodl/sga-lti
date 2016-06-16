@@ -9,7 +9,7 @@
     <hr>
     {% include "common/submission_status.html" %}
     {% if submission.submitted and not submission.graded %}
-    <form action="{% url 'view_submission_as_grader' assignment_id=assignment.edx_id student_user_id=student_user.username %}" class="form-horizontal"
+    <form action="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
