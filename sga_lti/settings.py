@@ -94,7 +94,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django_auth_lti.middleware.LTIAuthMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django_auth_lti.backends.LTIAuthBackend',
+)
+
+LTI_OAUTH_CREDENTIALS = get_var("LTI_OAUTH_CREDETIALS", {})
+print(LTI_OAUTH_CREDENTIALS)
 
 ROOT_URLCONF = 'sga_lti.urls'
 

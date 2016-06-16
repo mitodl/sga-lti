@@ -6,6 +6,7 @@ import json
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 
 def get_bundle_url(request, bundle_name):
@@ -23,11 +24,13 @@ def get_bundle_url(request, bundle_name):
         return static("bundles/{bundle}".format(bundle=bundle_name))
 
 
+@csrf_exempt
 def index(request):
     """
     The index view. Display available programs
     """
-
+    print(request.user.username)
+    print(request.session.get("LTI_LAUNCH"))
     host = request.get_host().split(":")[0]
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
