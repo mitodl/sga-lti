@@ -20,17 +20,23 @@
     <div class="panel panel-info">
         <div class="panel-heading">Actions</div>
         <div class="panel-body">
-        {% if next_not_graded_submission_url %}
-            <a href="{{ next_not_graded_submission_url }}" class="btn btn-primary">Next Not Graded Submission</a>
-        {% else %}
-            <button class="btn btn-default" disabled>Next Not Graded Submission</button>
-        {% endif %}
-        {% if role == Roles.admin %}
-            <a href="{% url 'unsubmit_submission' assignment_id=submission.assignment.edx_id student_user_id=student_user.username %}"
-               class="btn btn-primary">
-                Mark as Not Submitted
-            </a>
-        {% endif %}
+            <div class="col-sm-6">
+            {% if next_not_graded_submission_url %}
+                <a href="{{ next_not_graded_submission_url }}" class="btn btn-primary btn-block">
+                    Next Not Graded Submission
+                </a>
+            {% else %}
+                <button class="btn btn-default btn-block" disabled>Next Not Graded Submission</button>
+            {% endif %}
+            </div>
+            {% if role == Roles.admin %}
+            <div class="col-sm-6">
+                <a href="{% url 'unsubmit_submission' assignment_id=submission.assignment.edx_id student_user_id=student_user.username %}"
+                   class="btn btn-primary btn-block">
+                    Mark as Not Submitted
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

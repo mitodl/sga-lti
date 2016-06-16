@@ -22,6 +22,8 @@ def index(request):
     The index view. Display available programs
     """
     course = Course.objects.first()
+    if "role" not in request:
+        request.role = None
     return render(request, "sga/index.html", context={
         "course": course
     })
@@ -125,7 +127,7 @@ def view_assignment(request, assignment_id):
     for student_user in student_users:
         submission, created = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
-        student_user.graded = "Yes" if submission.graded() else "No"
+        student_user.graded = "Yes" if submission.graded else "No"
     return render(request, "sga/view_assignment.html", context={
         "student_users": student_users,
         "course": course,
@@ -142,12 +144,18 @@ def view_student_list(request, course_id):
         course = Course.objects.get(edx_id=course_id)
     except:
         raise Http404()
-    student_users = course.students.all()
-    for student_user in student_users:
-        student_user.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student_user)
+    if request.role == Roles.grader:
+        students = Student.objects.filter(course=course, grader__user=request.user)
+        grader_user = request.user
+    else:
+        students = Student.objects.filter(course=course)
+        grader_user = None
+    for student in students:
+        student.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student.user)
     return render(request, "sga/view_student_list.html", context={
         "course": course,
-        "student_users": student_users
+        "students": students,
+        "grader_user": grader_user
     })
 
 
