@@ -6,13 +6,12 @@ import json
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from sga.backend.authentication import student_view, grader_view, admin_view
-from sga.constants import SGA_DATETIME_FORMAT
+from sga.backend.authentication import allowed_roles
+from sga.constants import SGA_DATETIME_FORMAT, Roles
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader
 
@@ -27,7 +26,7 @@ def index(request):
     })
 
 
-@student_view
+@allowed_roles([Roles.student])
 def view_submission_as_student(request, assignment_id):
     """
     Submission view for students
@@ -55,7 +54,7 @@ def view_submission_as_student(request, assignment_id):
     })
 
 
-@grader_view
+@allowed_roles([Roles.grader])
 def view_submission_as_grader(request, assignment_id, student_user_id):
     """
     Submission view for graders
@@ -100,7 +99,7 @@ def view_submission_as_grader(request, assignment_id, student_user_id):
     })
 
 
-@grader_view
+@allowed_roles([Roles.grader])
 def view_assignment_as_grader(request, assignment_id):
     """
     Assignment view for graders
@@ -122,7 +121,7 @@ def view_assignment_as_grader(request, assignment_id):
     })
 
 
-@grader_view
+@allowed_roles([Roles.grader])
 def view_student_list_as_grader(request, course_id):
     """
     Student list view for graders
@@ -140,7 +139,7 @@ def view_student_list_as_grader(request, course_id):
     })
 
 
-@grader_view
+@allowed_roles([Roles.grader])
 def view_assignment_list_as_grader(request, course_id):
     """
     Assignment list view for graders
@@ -156,7 +155,7 @@ def view_assignment_list_as_grader(request, course_id):
     })
 
 
-@grader_view
+@allowed_roles([Roles.grader])
 def view_student_as_grader(request, course_id, student_user_id):
     """
     Student view for graders
@@ -178,7 +177,7 @@ def view_student_as_grader(request, course_id, student_user_id):
     })
 
 
-@admin_view
+@allowed_roles([Roles.admin])
 def view_grader_as_admin(request, course_id, grader_user_id):
     """
     Student view for graders
@@ -196,8 +195,7 @@ def view_grader_as_admin(request, course_id, grader_user_id):
         "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
-
-@admin_view
+@allowed_roles([Roles.admin])
 def view_grader_list_as_admin(request, course_id):
     """
     Grader list view for admins
