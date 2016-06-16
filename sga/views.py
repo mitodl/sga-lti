@@ -11,6 +11,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from sga.backend.authentication import student_view, grader_view
+from sga.constants import SGA_DATETIME_FORMAT
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader
 
@@ -19,7 +20,10 @@ def index(request):
     """
     The index view. Display available programs
     """
-    return render(request, "sga/index.html")
+    course = Course.objects.first()
+    return render(request, "sga/index.html", context={
+        "course": course
+    })
 
 
 @student_view
@@ -45,7 +49,8 @@ def view_submission_as_student(request, assignment_id):
     return render(request, "sga/view_submission_as_student.html", context={
         "submission_form": submission_form,
         "submission": submission,
-        "assignment": assignment
+        "assignment": assignment,
+        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 
@@ -79,7 +84,8 @@ def view_submission_as_grader(request, assignment_id, student_user_id):
         "submission_form": submission_form,
         "submission": submission,
         "assignment": assignment,
-        "student_user": student_user
+        "student_user": student_user,
+        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 
@@ -130,6 +136,25 @@ def view_assignment_list_as_grader(request, course_id):
     return render(request, "sga/view_assignment_list_as_grader.html", context={
         "course": course,
         "assignments": assignments
+    })
+
+
+@grader_view
+def view_student_as_grader(request, course_id, student_user_id):
+    try:
+        course = Course.objects.get(edx_id=course_id)
+        grader = Grader.objects.get(user=request.user, course=course)
+        student_user = grader.students.get(user__username=student_user_id).user
+    except:
+        raise Http404()
+    assignments = course.assignments.all()
+    for assignment in assignments:
+        assignment.submission, created = assignment.submissions.get_or_create(student=student_user)
+    return render(request, "sga/view_student_as_grader.html", context={
+        "course": course,
+        "student_user": student_user,
+        "assignments": assignments,
+        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 

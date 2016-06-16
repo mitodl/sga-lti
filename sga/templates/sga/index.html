@@ -90,6 +90,24 @@
             </a>
         </li>
     </ul>
+    <p><b>View student as grader</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id='student1' %}" target="_blank">
+                Student 1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id='student2' %}" target="_blank">
+                Student 2
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id='student3' %}" target="_blank">
+                Student 3
+            </a>
+        </li>
+    </ul>
 </div>
 {% endblock %}
 

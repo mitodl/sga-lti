@@ -29,11 +29,15 @@
         <tbody>
         {% for student_user in student_users %}
             <tr>
-                <td>{{ student_user.last_name }}, {{ student_user.first_name }}</td>
+                <td>
+                    <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id=student_user.username %}">
+                        {{ student_user.last_name }}, {{ student_user.first_name }}
+                    </a>
+                </td>
                 <td>{{ student_user.submitted }}</td>
                 <td>{{ student_user.graded }}</td>
                 <td>
-                    <a href="{% url 'view_submission_as_grader' assignment_id=assignment.edx_id student_user_id=student.username %}">
+                    <a href="{% url 'view_submission_as_grader' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
                         View Submission
                     </a>
                 </td>
