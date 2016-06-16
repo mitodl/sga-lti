@@ -2,6 +2,7 @@ import os
 
 
 SGA_DATETIME_FORMAT = "l, F j, Y, g:iA e"
+EPOCH_FORMAT = "U"
 
 class Roles():
     student = "student"

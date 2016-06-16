@@ -11,7 +11,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from sga.backend.authentication import allowed_roles
-from sga.constants import SGA_DATETIME_FORMAT, Roles
+from sga.constants import Roles
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader, Student
 
@@ -50,7 +50,6 @@ def view_submission_as_student(request, assignment_id):
         "submission_form": submission_form,
         "submission": submission,
         "assignment": assignment,
-        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 
@@ -93,7 +92,6 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
         "submission": submission,
         "assignment": assignment,
         "student_user": student.user,
-        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 
@@ -169,8 +167,7 @@ def view_student(request, course_id, student_user_id):
     return render(request, "sga/view_student.html", context={
         "course": course,
         "student_user": student_user,
-        "assignments": assignments,
-        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
+        "assignments": assignments
     })
 
 
@@ -189,7 +186,6 @@ def view_grader(request, course_id, grader_user_id):
         "course": course,
         "grader": grader,
         "graded_submissions": graded_submissions,
-        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
     })
 
 @allowed_roles([Roles.admin])

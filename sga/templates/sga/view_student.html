@@ -54,23 +54,20 @@
                         {{ assignment.name }}
                     </a>
                 </td>
-                <td>
                 {% if assignment.submission.submitted %}
-                    {{ assignment.submission.submitted_at|date:SGA_DATETIME_FORMAT }}
+                    <td data-sort="{{ assignment.submission.submitted_at|date:EPOCH_FORMAT }}">
+                        {{ assignment.submission.submitted_at|date:SGA_DATETIME_FORMAT }}
+                    </td>
                 {% else %}
-                    (Not Submitted)
+                    <td>(Not Submitted)</td>
                 {% endif %}
-                </td>
-                <td>
                 {% if assignment.submission.graded %}
+                <td data-sort="{{ assignment.submission.graded_at|date:EPOCH_FORMAT }}">
                     {{ assignment.submission.graded_at|date:SGA_DATETIME_FORMAT }}
-                {% else %}
-                    (Not Graded)
-                {% endif %}
                 </td>
-                {% if assignment.submission.graded %}
                 <td data-sort="{{ assignment.submission.grade }}">{{ assignment.submission.grade_display }}</td>
                 {% else %}
+                <td>(Not Graded)</td>
                 <td>(Pending)</td>
                 {% endif %}
                 <td>
