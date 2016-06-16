@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from sga.backend.authentication import allowed_roles
 from sga.constants import SGA_DATETIME_FORMAT, Roles
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
-from sga.models import Assignment, Submission, Course, Grader
+from sga.models import Assignment, Submission, Course, Grader, Student
 
 
 def index(request):
@@ -54,7 +54,7 @@ def view_submission_as_student(request, assignment_id):
     })
 
 
-@allowed_roles([Roles.grader])
+@allowed_roles([Roles.grader, Roles.admin])
 def view_submission_as_grader(request, assignment_id, student_user_id):
     """
     Submission view for graders
@@ -99,8 +99,8 @@ def view_submission_as_grader(request, assignment_id, student_user_id):
     })
 
 
-@allowed_roles([Roles.grader])
-def view_assignment_as_grader(request, assignment_id):
+@allowed_roles([Roles.grader, Roles.admin])
+def view_assignment(request, assignment_id):
     """
     Assignment view for graders
     """
@@ -114,15 +114,15 @@ def view_assignment_as_grader(request, assignment_id):
         submission, created = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
         student_user.graded = "Yes" if submission.graded() else "No"
-    return render(request, "sga/view_assignment_as_grader.html", context={
+    return render(request, "sga/view_assignment.html", context={
         "student_users": student_users,
         "course": course,
         "assignment": assignment
     })
 
 
-@allowed_roles([Roles.grader])
-def view_student_list_as_grader(request, course_id):
+@allowed_roles([Roles.grader, Roles.admin])
+def view_student_list(request, course_id):
     """
     Student list view for graders
     """
@@ -133,14 +133,14 @@ def view_student_list_as_grader(request, course_id):
     student_users = course.students.all()
     for student_user in student_users:
         student_user.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student_user)
-    return render(request, "sga/view_student_list_as_grader.html", context={
+    return render(request, "sga/view_student_list.html", context={
         "course": course,
         "student_users": student_users
     })
 
 
-@allowed_roles([Roles.grader])
-def view_assignment_list_as_grader(request, course_id):
+@allowed_roles([Roles.grader, Roles.admin])
+def view_assignment_list(request, course_id):
     """
     Assignment list view for graders
     """
@@ -149,27 +149,26 @@ def view_assignment_list_as_grader(request, course_id):
     except:
         raise Http404()
     assignments = course.assignments.all()
-    return render(request, "sga/view_assignment_list_as_grader.html", context={
+    return render(request, "sga/view_assignment_list.html", context={
         "course": course,
         "assignments": assignments
     })
 
 
-@allowed_roles([Roles.grader])
-def view_student_as_grader(request, course_id, student_user_id):
+@allowed_roles([Roles.student, Roles.grader, Roles.admin])
+def view_student(request, course_id, student_user_id):
     """
     Student view for graders
     """
     try:
         course = Course.objects.get(edx_id=course_id)
-        grader = Grader.objects.get(user=request.user, course=course)
-        student_user = grader.students.get(user__username=student_user_id).user
+        student_user = Student.objects.get(user__username=student_user_id).user
     except:
         raise Http404()
     assignments = course.assignments.all()
     for assignment in assignments:
         assignment.submission, created = assignment.submissions.get_or_create(student=student_user)
-    return render(request, "sga/view_student_as_grader.html", context={
+    return render(request, "sga/view_student.html", context={
         "course": course,
         "student_user": student_user,
         "assignments": assignments,
@@ -177,8 +176,8 @@ def view_student_as_grader(request, course_id, student_user_id):
     })
 
 
-@allowed_roles([Roles.admin])
-def view_grader_as_admin(request, course_id, grader_user_id):
+@allowed_roles([Roles.grader, Roles.admin])
+def view_grader(request, course_id, grader_user_id):
     """
     Student view for graders
     """
@@ -188,7 +187,7 @@ def view_grader_as_admin(request, course_id, grader_user_id):
     except:
         raise Http404()
     graded_submissions = grader.user.graded_submissions.all()
-    return render(request, "sga/view_grader_as_admin.html", context={
+    return render(request, "sga/view_grader.html", context={
         "course": course,
         "grader": grader,
         "graded_submissions": graded_submissions,
@@ -196,7 +195,7 @@ def view_grader_as_admin(request, course_id, grader_user_id):
     })
 
 @allowed_roles([Roles.admin])
-def view_grader_list_as_admin(request, course_id):
+def view_grader_list(request, course_id):
     """
     Grader list view for admins
     """
@@ -207,7 +206,7 @@ def view_grader_list_as_admin(request, course_id):
     graders = course.grader_set.all()
     # for grader_user in grader_users:
     #     grader_user.not_graded_submissions = course.not_graded_submissions_by_user(grader_user)
-    return render(request, "sga/view_grader_list_as_admin.html", context={
+    return render(request, "sga/view_grader_list.html", context={
         "course": course,
         "graders": graders
     })

@@ -62,12 +62,12 @@
         {% for submission in graded_submissions %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment_as_grader' assignment_id=submission.assignment.edx_id %}">
+                    <a href="{% url 'view_assignment' assignment_id=submission.assignment.edx_id %}">
                         {{ submission.assignment.name }}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id=submission.student.username %}">
+                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=submission.student.username %}">
                         {{ submission.student.last_name }}, {{ submission.student.first_name }}
                     </a>
                 </td>
@@ -79,7 +79,7 @@
                     </a>
                 </td>
             </tr>
-        {% endfor %}    
+        {% endfor %}
         </tbody>
     </table>
 {% endblock %}

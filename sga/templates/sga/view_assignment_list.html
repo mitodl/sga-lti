@@ -25,20 +25,18 @@
             <th>Not Submitted</th>
             <th>Not Graded</th>
             <th>Graded</th>
-            <th>View Assignment</th>
         </thead>
         <tbody>
         {% for assignment in assignments %}
             <tr>
-                <td>{{ assignment.name }}</td>
+                <td>
+                    <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}">
+                        {{ assignment.name }}
+                    </a>
+                </td>
                 <td>{{ assignment.not_submitted_submissions_count }}</td>
                 <td>{{ assignment.not_graded_submissions_count }}</td>
                 <td>{{ assignment.graded_submissions_count }}</td>
-                <td>
-                    <a href="{% url 'view_assignment_as_grader' assignment_id=assignment.edx_id %}">
-                        View Assignment
-                    </a>
-                </td>
             </tr>
         {% endfor %}    
         </tbody>
