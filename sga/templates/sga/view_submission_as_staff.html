@@ -8,16 +8,30 @@
     <h3>Student: {{ student_user.last_name }}, {{ student_user.first_name }}</h3>
     <hr>
     {% include "common/submission_status.html" %}
-    {% if submission.submitted and not submission.graded %}
+    {% if submission.submitted and not submission.graded or submission.submitted and role == Roles.admin %}
     <form action="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
     </form>
-    {% endif %}
-    {% if next_not_graded_submission_url %}
     <div class="clearfix"></div>
-    <a href="{{ next_not_graded_submission_url }}" class="btn btn-primary">Next Not Graded Submission</a>
+    <br>
     {% endif %}
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+        {% if next_not_graded_submission_url %}
+            <a href="{{ next_not_graded_submission_url }}" class="btn btn-primary">Next Not Graded Submission</a>
+        {% else %}
+            <button class="btn btn-default" disabled>Next Not Graded Submission</button>
+        {% endif %}
+        {% if role == Roles.admin %}
+            <a href="{% url 'unsubmit_submission' assignment_id=submission.assignment.edx_id student_user_id=student_user.username %}"
+               class="btn btn-primary">
+                Mark as Not Submitted
+            </a>
+        {% endif %}
+        </div>
+    </div>
 {% endblock %}
 

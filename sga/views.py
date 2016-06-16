@@ -9,6 +9,7 @@ from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
 
 from sga.backend.authentication import allowed_roles
 from sga.constants import Roles
@@ -56,7 +57,7 @@ def view_submission_as_student(request, assignment_id):
 @allowed_roles([Roles.grader, Roles.admin])
 def view_submission_as_staff(request, assignment_id, student_user_id):
     """
-    Submission view for graders
+    Submission view for staff
     """
     try:
         assignment = Assignment.objects.get(edx_id=assignment_id)
@@ -79,6 +80,7 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
             submission_form.save()
             submission.graded_at = datetime.utcnow()
             submission.graded_by = request.user
+            submission.graded = True
             submission.save()
             redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student.user.username)
         else:
@@ -93,6 +95,20 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
         "assignment": assignment,
         "student_user": student.user,
     })
+
+
+@allowed_roles([Roles.admin])
+def unsubmit_submission(request, assignment_id, student_user_id):
+    try:
+        assignment = Assignment.objects.get(edx_id=assignment_id)
+        student = Student.objects.get(user__username=student_user_id)
+        submission, created = Submission.objects.get_or_create(student=student.user, assignment=assignment)
+    except:
+        raise Http404()
+    submission.submitted = False
+    submission.graded = False
+    submission.save()
+    return redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student_user_id)
 
 
 @allowed_roles([Roles.grader, Roles.admin])

@@ -91,12 +91,10 @@ class Submission(TimeStampedModel):
     submitted_at = models.DateTimeField(null=True)  # UTC
     graded_at = models.DateTimeField(null=True)  # UTC
     submitted = models.BooleanField(default=False)
+    graded = models.BooleanField(default=False)
     
     student_document = models.FileField(upload_to=student_submission_file_path, null=True)
     grader_document = models.FileField(upload_to=grader_submission_file_path, null=True)
-    
-    def graded(self):
-        return bool(self.submitted and self.graded_at)
     
     def grade_display(self):
         return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)

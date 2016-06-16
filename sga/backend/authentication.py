@@ -37,6 +37,7 @@ def allowed_roles(allowed_roles_list):
         def _wrapped_view(request, *args, **kwargs):
             for role in allowed_roles_list:
                 if ROLE_TO_FUNC[role](request):
+                    request.role = role
                     return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()
         return _wrapped_view
