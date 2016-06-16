@@ -82,8 +82,8 @@ class Assignment(TimeStampedModel):
 
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")
-    student = models.ForeignKey(User, related_name="submitted_assignments")
-    graded_by = models.ForeignKey(User, null=True, related_name="graded_assignments")
+    student = models.ForeignKey(User, related_name="submitted_submissions")
+    graded_by = models.ForeignKey(User, null=True, related_name="graded_submissions")
     
     description = models.TextField(null=True)
     feedback = models.TextField(null=True)

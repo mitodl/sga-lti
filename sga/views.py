@@ -179,6 +179,25 @@ def view_student_as_grader(request, course_id, student_user_id):
 
 
 @admin_view
+def view_grader_as_admin(request, course_id, grader_user_id):
+    """
+    Student view for graders
+    """
+    try:
+        course = Course.objects.get(edx_id=course_id)
+        grader = Grader.objects.get(user__username=grader_user_id)
+    except:
+        raise Http404()
+    graded_submissions = grader.user.graded_submissions.all()
+    return render(request, "sga/view_grader_as_admin.html", context={
+        "course": course,
+        "grader": grader,
+        "graded_submissions": graded_submissions,
+        "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT
+    })
+
+
+@admin_view
 def view_grader_list_as_admin(request, course_id):
     """
     Grader list view for admins

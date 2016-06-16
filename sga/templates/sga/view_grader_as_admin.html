@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}PLACEHOLDER{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#grader-assignment-list").DataTable();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    <h3>Grader: {{ grader.user.last_name }}, {{ grader.user.first_name }}</h3>
+    <hr>
+    <div class="panel panel-primary">
+        <div class="panel-heading">Student Info</div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>First Name:</dt>
+                <dd>{{ grader.user.first_name }}</dd>
+                <dt>Last Name:</dt>
+                <dd>{{ grader.user.last_name }}</dd>
+                <dt>Username:</dt>
+                <dd>{{ grader.user.username }}</dd>
+                <br>
+                <dt>Date Joined:</dt>
+                <dd>{{ grader.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
+                <br>
+                <dt>Accepting Students:</dt>
+                <dd>{% if grader.students.count < grader.max_students %}Yes{% else %}No{% endif %}</dd>
+                <dt>Number of Students:</dt>
+                <dd>{{ grader.students.count }}</dd>
+                <dt>Max Students:</dt>
+                <dd>{{ grader.max_students }}</dd>
+                <br>
+                <dt>Graded:</dt>
+                <dd>{{ grader.graded_submissions_count }}</dd>
+                <dt>Not Graded:</dt>
+                <dd>{{ grader.not_graded_submissions_count }}</dd>
+            </dl>
+        </div>
+    </div>
+    <br>
+    <h3>Graded Submissions</h3>
+    <hr>
+    <table id="grader-assignment-list" class="table table-striped table-hover">
+        <thead>
+            <th>Assignment Name</th>
+            <th>Student Name</th>
+            <th>Graded At</th>
+            <th>Grade</th>
+            <th>View Submission</th>
+        </thead>
+        <tbody>
+        {% for submission in graded_submissions %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_assignment_as_grader' assignment_id=submission.assignment.edx_id %}">
+                        {{ submission.assignment.name }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'view_student_as_grader' course_id=course.edx_id student_user_id=submission.student.username %}">
+                        {{ submission.student.last_name }}, {{ submission.student.first_name }}
+                    </a>
+                </td>
+                <td>{{ submission.graded_at|date:SGA_DATETIME_FORMAT }}</td>
+                <td>{{ submission.grade_display }}</td>
+                <td>
+                    <a href="{% url 'view_submission_as_grader' assignment_id=submission.assignment.edx_id student_user_id=submission.student.username %}">
+                        View Submission
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
+{% endblock %}

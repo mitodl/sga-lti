@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 
 from sga.views import index, dev_start, view_submission_as_student, view_student_list_as_grader, \
     view_assignment_as_grader, view_submission_as_grader, view_assignment_list_as_grader, view_student_as_grader, \
-    view_grader_list_as_admin
+    view_grader_list_as_admin, view_grader_as_admin
 from sga_lti import settings
 
 
@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^view-submission-as-grader/(?P<assignment_id>\w{0,50})/(?P<student_user_id>\w{0,50})$', view_submission_as_grader, name="view_submission_as_grader"),
     url(r'^view-assignment-as-grader/(?P<assignment_id>\w{0,50})$', view_assignment_as_grader, name="view_assignment_as_grader"),
     url(r'^view-student-as-grader/(?P<course_id>\w{0,50})/(?P<student_user_id>\w{0,50})$', view_student_as_grader, name="view_student_as_grader"),
+    url(r'^view-grader-as-admin/(?P<course_id>\w{0,50})/(?P<grader_user_id>\w{0,50})$', view_grader_as_admin, name="view_grader_as_admin"),
 ]
 
 if settings.DEVELOPMENT:

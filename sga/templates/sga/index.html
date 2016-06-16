@@ -116,6 +116,14 @@
             </a>
         </li>
     </ul>
+    <p><b>View grader as admin</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_grader_as_admin' course_id=course.edx_id grader_user_id="grader" %}" target="_blank">
+                Grader
+            </a>
+        </li>
+    </ul>
 </div>
 {% endblock %}
 
