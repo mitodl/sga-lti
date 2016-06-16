@@ -33,7 +33,7 @@
                 <td>{{ student_user.submitted }}</td>
                 <td>{{ student_user.graded }}</td>
                 <td>
-                    <a href="{% url 'view_submission_grader' assignment_id=assignment.edx_id student_user_id=student.username %}">
+                    <a href="{% url 'view_submission_as_grader' assignment_id=assignment.edx_id student_user_id=student.username %}">
                         View Submission
                     </a>
                 </td>

@@ -35,7 +35,7 @@
                 <td>{{ assignment.not_graded_submissions }}</td>
                 <td>{{ assignment.graded_submissions }}</td>
                 <td>
-                    <a href="{% url 'view_assignment_grader' assignment_id=assignment.edx_id %}">
+                    <a href="{% url 'view_assignment_as_grader' assignment_id=assignment.edx_id %}">
                         View Assignment
                     </a>
                 </td>

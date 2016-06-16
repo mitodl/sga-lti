@@ -28,12 +28,12 @@
             <th>Student Info</th>
         </thead>
         <tbody>
-        {% for student in students %}
+        {% for student_user in student_users %}
             <tr>
-                <td>{{ student.last_name }}</td>
-                <td>{{ student.first_name }}</td>
-                <td>{{ student.email }}</td>
-                <td>{{ student.ungraded_submissions }}</td>
+                <td>{{ student_user.last_name }}</td>
+                <td>{{ student_user.first_name }}</td>
+                <td>{{ student_user.email }}</td>
+                <td>{{ student_user.ungraded_submissions }}</td>
                 <td>(TBI)</td>
             </tr>
         {% endfor %}    

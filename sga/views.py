@@ -23,7 +23,7 @@ def index(request):
 
 
 @student_view
-def view_submission_student(request, assignment_id):
+def view_submission_as_student(request, assignment_id):
     """
     Submission view for students
     """
@@ -39,10 +39,10 @@ def view_submission_student(request, assignment_id):
             submission.submitted = True
             submission.submitted_at = datetime.utcnow()
             submission.save()
-            redirect("view_submission_student", assignment_id=assignment_id)
+            redirect("view_submission_as_student", assignment_id=assignment_id)
     else:
         submission_form = StudentAssignmentSubmissionForm(instance=submission)
-    return render(request, "sga/view_submission_student.html", context={
+    return render(request, "sga/view_submission_as_student.html", context={
         "submission_form": submission_form,
         "submission": submission,
         "assignment": assignment
@@ -50,7 +50,7 @@ def view_submission_student(request, assignment_id):
 
 
 @grader_view
-def view_submission_grader(request, assignment_id, student_user_id):
+def view_submission_as_grader(request, assignment_id, student_user_id):
     """
     Submission view for graders
     """
@@ -69,13 +69,13 @@ def view_submission_grader(request, assignment_id, student_user_id):
             submission.graded_at = datetime.utcnow()
             submission.graded_by = grader.user
             submission.save()
-            redirect("view_submission_grader", assignment_id=assignment_id, student_user_id=student_user.username)
+            redirect("view_submission_as_grader", assignment_id=assignment_id, student_user_id=student_user.username)
         else:
             # Clear changes made to submission instance since form is invalid (form field values are untouched)
             submission = Submission.objects.get(pk=submission.pk)
     else:
         submission_form = GraderAssignmentSubmissionForm(instance=submission)
-    return render(request, "sga/view_submission_grader.html", context={
+    return render(request, "sga/view_submission_as_grader.html", context={
         "submission_form": submission_form,
         "submission": submission,
         "assignment": assignment,
@@ -84,7 +84,7 @@ def view_submission_grader(request, assignment_id, student_user_id):
 
 
 @grader_view
-def view_assignment_grader(request, assignment_id):
+def view_assignment_as_grader(request, assignment_id):
     """
     Assignment view for graders
     """
@@ -98,7 +98,7 @@ def view_assignment_grader(request, assignment_id):
         submission, created = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
         student_user.graded = "Yes" if submission.graded() else "No"
-    return render(request, "sga/view_assignment_grader.html", context={
+    return render(request, "sga/view_assignment_as_grader.html", context={
         "student_users": student_users,
         "course": course,
         "assignment": assignment
@@ -106,7 +106,7 @@ def view_assignment_grader(request, assignment_id):
 
 
 @grader_view
-def view_student_list(request, course_id):
+def view_student_list_as_grader(request, course_id):
     try:
         course = Course.objects.get(edx_id=course_id)
     except:
@@ -114,20 +114,20 @@ def view_student_list(request, course_id):
     student_users = course.students.all()
     for student_user in student_users:
         student_user.ungraded_submissions_by_user = course.ungraded_submissions_by_user(student_user)
-    return render(request, "sga/view_students_list.html", context={
+    return render(request, "sga/view_student_list_as_grader.html", context={
         "course": course,
         "student_users": student_users
     })
 
 
 @grader_view
-def view_assignment_list(request, course_id):
+def view_assignment_list_as_grader(request, course_id):
     try:
         course = Course.objects.get(edx_id=course_id)
     except:
         raise Http404()
     assignments = course.assignments.all()
-    return render(request, "sga/view_assignment_list_grader.html", context={
+    return render(request, "sga/view_assignment_list_as_grader.html", context={
         "course": course,
         "assignments": assignments
     })
