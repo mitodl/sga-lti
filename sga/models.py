@@ -26,6 +26,14 @@ class Grader(models.Model):
     max_students = models.IntegerField()
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
+    
+    def graded_submissions_count(self):
+        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
+                                  ).exclude(graded_at=None, submitted=False).count()
+    
+    def not_graded_submissions_count(self):
+        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
+                                         ).exclude(graded_at=None, submitted=True).count()
 
 
 class Student(models.Model):
@@ -50,7 +58,7 @@ class Course(TimeStampedModel):
     def has_admin(self, user):
         return self.administrators.filter(pk=user.pk).exists()
     
-    def not_graded_submissions_by_user(self, user):
+    def not_graded_submissions_count_by_user(self, user):
         return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 
@@ -61,15 +69,15 @@ class Assignment(TimeStampedModel):
     grace_period = models.IntegerField()
     course = models.ForeignKey(Course, related_name="assignments")
     
-    def graded_submissions(self):
+    def graded_submissions_count(self):
         return self.submissions.filter(submitted=True).exclude(graded_at=None).count()
     
-    def not_graded_submissions(self):
+    def not_graded_submissions_count(self):
         return self.submissions.filter(submitted=True, graded_at=None).count()
     
-    def not_submitted_submissions(self):
+    def not_submitted_submissions_count(self):
         students_in_course = self.course.students.count()
-        return students_in_course - self.graded_submissions() - self.not_graded_submissions()
+        return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
 
 class Submission(TimeStampedModel):

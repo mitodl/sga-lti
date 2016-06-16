@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from sga.backend.authentication import student_view, grader_view
+from sga.backend.authentication import student_view, grader_view, admin_view
 from sga.constants import SGA_DATETIME_FORMAT
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader
@@ -124,13 +124,16 @@ def view_assignment_as_grader(request, assignment_id):
 
 @grader_view
 def view_student_list_as_grader(request, course_id):
+    """
+    Student list view for graders
+    """
     try:
         course = Course.objects.get(edx_id=course_id)
     except:
         raise Http404()
     student_users = course.students.all()
     for student_user in student_users:
-        student_user.not_graded_submissions = course.not_graded_submissions_by_user(student_user)
+        student_user.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student_user)
     return render(request, "sga/view_student_list_as_grader.html", context={
         "course": course,
         "student_users": student_users
@@ -139,6 +142,9 @@ def view_student_list_as_grader(request, course_id):
 
 @grader_view
 def view_assignment_list_as_grader(request, course_id):
+    """
+    Assignment list view for graders
+    """
     try:
         course = Course.objects.get(edx_id=course_id)
     except:
@@ -152,6 +158,9 @@ def view_assignment_list_as_grader(request, course_id):
 
 @grader_view
 def view_student_as_grader(request, course_id, student_user_id):
+    """
+    Student view for graders
+    """
     try:
         course = Course.objects.get(edx_id=course_id)
         grader = Grader.objects.get(user=request.user, course=course)
@@ -169,9 +178,27 @@ def view_student_as_grader(request, course_id, student_user_id):
     })
 
 
+@admin_view
+def view_grader_list_as_admin(request, course_id):
+    """
+    Grader list view for admins
+    """
+    try:
+        course = Course.objects.get(edx_id=course_id)
+    except:
+        raise Http404()
+    graders = course.grader_set.all()
+    # for grader_user in grader_users:
+    #     grader_user.not_graded_submissions = course.not_graded_submissions_by_user(grader_user)
+    return render(request, "sga/view_grader_list_as_admin.html", context={
+        "course": course,
+        "graders": graders
+    })
+
+
 def dev_start(request, username):
     """
-    For local development only - sets session variables
+    For local development only - sets session variables and authenticates user
     """
     if settings.DEVELOPMENT:
         user = authenticate(username=username, password=" ")
