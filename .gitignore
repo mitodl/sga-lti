@@ -90,3 +90,4 @@ staticfiles/
 db.sqlite3
 sga-lti.yml
 venv/
+uploaded/

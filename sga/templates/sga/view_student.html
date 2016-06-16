@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}PLACEHOLDER{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#student-assignment-list").DataTable();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    <h3>Student: {{ student_user.last_name }}, {{ student_user.first_name }}</h3>
+    <hr>
+    <div class="panel panel-primary">
+        <div class="panel-heading">Student Info</div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>First Name:</dt>
+                <dd>{{ student_user.first_name }}</dd>
+                <dt>Last Name:</dt>
+                <dd>{{ student_user.last_name }}</dd>
+                <dt>Username:</dt>
+                <dd>{{ student_user.username }}</dd>
+                <br>
+                <dt>Date Joined:</dt>
+                <dd>{{ student_user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
+            </dl>
+        </div>
+    </div>
+    <br>
+    <h3>Submissions</h3>
+    <hr>
+    <table id="student-assignment-list" class="table table-striped table-hover">
+        <thead>
+            <th>Assignment Name</th>
+            <th>Submitted At</th>
+            <th>Graded At</th>
+            <th>Grade</th>
+            <th>View Submission</th>
+        </thead>
+        <tbody>
+        {% for assignment in assignments %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}">
+                        {{ assignment.name }}
+                    </a>
+                </td>
+                {% if assignment.submission.submitted %}
+                    <td data-sort="{{ assignment.submission.submitted_at|date:EPOCH_FORMAT }}">
+                        {{ assignment.submission.submitted_at|date:SGA_DATETIME_FORMAT }}
+                    </td>
+                {% else %}
+                    <td>(Not Submitted)</td>
+                {% endif %}
+                {% if assignment.submission.graded %}
+                <td data-sort="{{ assignment.submission.graded_at|date:EPOCH_FORMAT }}">
+                    {{ assignment.submission.graded_at|date:SGA_DATETIME_FORMAT }}
+                </td>
+                <td data-sort="{{ assignment.submission.grade }}">{{ assignment.submission.grade_display }}</td>
+                {% else %}
+                <td>(Not Graded)</td>
+                <td>(Pending)</td>
+                {% endif %}
+                <td>
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
+                        View Submission
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

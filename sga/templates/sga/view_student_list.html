@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Student List{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#student-list").DataTable();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    {% if grader_user %}
+    <h3>Student List (Grader: {{ grader_user.last_name }}, {{ grader_user.first_name }})</h3>
+    {% else %}
+    <h3>Student List (All)</h3>
+    {% endif %}
+    <hr>
+    <table id="student-list" class="table table-striped table-hover">
+        <thead>
+            <th>Name</th>
+            <th>Grader</th>
+            <th>Email</th>
+            <th>Ungraded Submissions</th>
+        </thead>
+        <tbody>
+        {% for student in students %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student.user.username %}">
+                        {{ student.user.last_name }}, {{ student.user.first_name }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=student.grader.user.username %}" target="_blank">
+                        {{ student.grader.user.last_name }}, {{ student.grader.user.first_name }}
+                    </a>
+                </td>
+                <td>{{ student.user.email }}</td>
+                <td>{{ student.not_graded_submissions_count }}</td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
+{% endblock %}
+

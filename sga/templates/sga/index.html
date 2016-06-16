@@ -1,14 +1,129 @@
 {% extends "base.html" %}
-{% load i18n static %}
 
-{% block title %}{% trans "sga-lti" %}{% endblock %}
+{% block title %}Site Map (DEVELOPMENT ONLY){% endblock %}
 
 {% block content %}
-<h1>{% trans "Hi, I'm sga-lti" %}</h1>
-<div id="container"></div>
-<script type="text/javascript">
-var SETTINGS = {{ js_settings_json|safe }};
-</script>
-<script src="{{ root_src }}" type="text/javascript"></script>
+<div id="container">
+    <h1>SGA-LTI</h1>
+    <hr>
+    <p>This page assumes you have the mock data created via create_mock_data.py.</p>
+    <p><b>Authentication</b></p>
+    <ul>
+        <li><a href="{% url 'dev_start' username='student1' %}">Log in as student1</a></li>
+        <li><a href="{% url 'dev_start' username='student2' %}">Log in as student2</a></li>
+        <li><a href="{% url 'dev_start' username='student3' %}">Log in as student3</a></li>
+        <li><a href="{% url 'dev_start' username='grader' %}">Log in as grader</a></li>
+        <li><a href="{% url 'dev_start' username='admin' %}">Log in as admin</a></li>
+    </ul>
+    <p><b>View submission as student (student)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_submission_as_student' assignment_id='assignment1id' %}" target="_blank">
+                Assignment 1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_student' assignment_id='assignment2id' %}" target="_blank">
+                Assignment 2
+            </a>
+        </li>
+    </ul>
+    <p><b>View submission as staff (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment1id' student_user_id='student1' %}" target="_blank">
+                Assignment 1 for student1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment1id' student_user_id='student2' %}" target="_blank">
+                Assignment 1 for student2
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment1id' student_user_id='student3' %}" target="_blank">
+                Assignment 1 for student3
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student1' %}" target="_blank">
+                Assignment 2 for student1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student2' %}" target="_blank">
+                Assignment 2 for student2
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student3' %}" target="_blank">
+                Assignment 2 for student3
+            </a>
+        </li>
+    </ul>
+    <p><b>View student list (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_student_list' course_id='courseid' %}" target="_blank">
+                Course 1
+            </a>
+        </li>
+    </ul>
+    <p><b>View assignment list (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_assignment_list' course_id='courseid' %}" target="_blank">
+                Course 1
+            </a>
+        </li>
+    </ul>
+    <p><b>View assignment (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_assignment' assignment_id='assignment1id' %}" target="_blank">
+                Assignment 1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_assignment' assignment_id='assignment2id' %}" target="_blank">
+                Assignment 2
+            </a>
+        </li>
+    </ul>
+    <p><b>View student (student, grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_student' course_id=course.edx_id student_user_id='student1' %}" target="_blank">
+                Student 1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_student' course_id=course.edx_id student_user_id='student2' %}" target="_blank">
+                Student 2
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_student' course_id=course.edx_id student_user_id='student3' %}" target="_blank">
+                Student 3
+            </a>
+        </li>
+    </ul>
+    <p><b>View grader list (admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_grader_list' course_id=course.edx_id %}" target="_blank">
+                Course 1
+            </a>
+        </li>
+    </ul>
+    <p><b>View grader (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id="grader" %}" target="_blank">
+                Grader
+            </a>
+        </li>
+    </ul>
+</div>
 {% endblock %}
 

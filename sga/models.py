@@ -1,5 +1,9 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+
+from sga.constants import student_submission_file_path, grader_submission_file_path
+
 
 class TimeStampedModel(models.Model):
     """ Base model for create/update timestamps """
@@ -18,24 +22,44 @@ class TimeStampedModel(models.Model):
         self.save(update_fields=update_fields)
 
 
-
 class Grader(models.Model):
     max_students = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey("Course", on_delete=models.CASCADE)
+    user = models.ForeignKey(User)
+    course = models.ForeignKey("Course")
+    
+    def graded_submissions_count(self):
+        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
+                                  ).exclude(graded_at=None, submitted=False).count()
+    
+    def not_graded_submissions_count(self):
+        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
+                                         ).exclude(graded_at=None, submitted=True).count()
 
 
 class Student(models.Model):
     grader = models.ForeignKey(Grader, null=True, related_name="students", on_delete=models.SET_NULL)
     user = models.ForeignKey(User)
+    course = models.ForeignKey("Course")
 
   
 class Course(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
-    administrators = models.ManyToManyField(User, related_name="administrated_courses")
-    graders = models.ManyToManyField(User, through=Grader, related_name="graded_courses")
-    students = models.ManyToManyField(Student)
+    administrators = models.ManyToManyField(User, related_name="administrator_courses")
+    graders = models.ManyToManyField(User, through=Grader, related_name="grader_courses")
+    students = models.ManyToManyField(User, through=Student, related_name="student_courses")
+
+    def has_student(self, user):
+        return self.students.filter(pk=user.pk).exists()
+    
+    def has_grader(self, user):
+        return self.graders.filter(pk=user.pk).exists()
+    
+    def has_admin(self, user):
+        return self.administrators.filter(pk=user.pk).exists()
+    
+    def not_graded_submissions_count_by_user(self, user):
+        return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 
 class Assignment(TimeStampedModel):
@@ -44,22 +68,36 @@ class Assignment(TimeStampedModel):
     due_date = models.DateTimeField()
     grace_period = models.IntegerField()
     course = models.ForeignKey(Course, related_name="assignments")
+    
+    def graded_submissions_count(self):
+        return self.submissions.filter(submitted=True).exclude(graded_at=None).count()
+    
+    def not_graded_submissions_count(self):
+        return self.submissions.filter(submitted=True, graded_at=None).count()
+    
+    def not_submitted_submissions_count(self):
+        students_in_course = self.course.students.count()
+        return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
 
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")
-    student = models.ForeignKey(User, related_name="submitted_assignments")
-    graded_by = models.ForeignKey(User, related_name="graded_assignments")
+    student = models.ForeignKey(User, related_name="submitted_submissions")
+    graded_by = models.ForeignKey(User, null=True, related_name="graded_submissions")
     
-    description = models.TextField()
-    feedback = models.TextField()
-    grade = models.IntegerField()  # 0-100
-    submitted_at = models.DateTimeField(auto_now_add=True)  # UTC
-    graded_at = models.DateTimeField()  # UTC
-    submitted = models.BooleanField(default=True)
+    description = models.TextField(null=True)
+    feedback = models.TextField(null=True)
+    grade = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], null=True)  # 0-100
+    submitted_at = models.DateTimeField(null=True)  # UTC
+    graded_at = models.DateTimeField(null=True)  # UTC
+    submitted = models.BooleanField(default=False)
+    graded = models.BooleanField(default=False)
     
-    student_document = models.FileField()
-    grader_document = models.FileField()
+    student_document = models.FileField(upload_to=student_submission_file_path, null=True)
+    grader_document = models.FileField(upload_to=grader_submission_file_path, null=True)
+    
+    def grade_display(self):
+        return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)
     
     class Meta:
         unique_together = (("assignment", "student"),)
