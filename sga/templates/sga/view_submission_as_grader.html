@@ -15,5 +15,9 @@
         <button class="btn btn-success pull-right" type="submit">Submit</button>
     </form>
     {% endif %}
+    {% if next_not_graded_submission_url %}
+    <div class="clearfix"></div>
+    <a href="{{ next_not_graded_submission_url }}" class="btn btn-primary">Next Not Graded Submission</a>
+    {% endif %}
 {% endblock %}
 

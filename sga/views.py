@@ -7,6 +7,7 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render, redirect
 
@@ -66,6 +67,15 @@ def view_submission_as_grader(request, assignment_id, student_user_id):
         submission, created = Submission.objects.get_or_create(student=student_user, assignment=assignment)
     except:
         raise Http404()
+    next_not_graded_submission = Submission.objects.filter(assignment=assignment, submitted=True,
+                                                           graded_at=None).exclude(pk=submission.pk).first()
+    if next_not_graded_submission:
+        next_not_graded_submission_url = reverse("view_submission_as_grader", kwargs={
+            "assignment_id": assignment_id,
+            "student_user_id": next_not_graded_submission.student.username
+        })
+    else:
+        next_not_graded_submission_url = None
     if request.method == "POST":
         print(submission.__dict__)
         submission_form = GraderAssignmentSubmissionForm(request.POST, request.FILES, instance=submission)
@@ -82,6 +92,7 @@ def view_submission_as_grader(request, assignment_id, student_user_id):
         submission_form = GraderAssignmentSubmissionForm(instance=submission)
     return render(request, "sga/view_submission_as_grader.html", context={
         "submission_form": submission_form,
+        "next_not_graded_submission_url": next_not_graded_submission_url,
         "submission": submission,
         "assignment": assignment,
         "student_user": student_user,

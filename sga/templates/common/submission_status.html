@@ -4,7 +4,7 @@
         <dl class="dl-horizontal">
             <dt>Submitted:</dt>
             <dd>{% if submission.submitted %}Yes{% else %}No{% endif %}</dd>
-        {% if submission.submitted %}
+            {% if submission.submitted %}
             <dt>File Submission:</dt>
             <dd><a href="{{ submission.student_document.url }}" target="_blank">View File</a></dd>
             <dt>File Description:</dt>
@@ -14,7 +14,7 @@
             <br>
             <dt>Graded:</dt>
             <dd>{% if submission.graded %}Yes{% else %}No{% endif %}</dd>
-        {% if submission.graded %}
+            {% if submission.graded %}
             <dt>Grade:</dt>
             <dd>{{ submission.grade_display }}</dd>
             <dt>Annotated File:</dt>
@@ -23,8 +23,8 @@
             <dd>{{ submission.feedback }}</dd>
             <dt>Graded at:</dt>
             <dd>{{ submission.graded_at|date:SGA_DATETIME_FORMAT }}</dd>
-        {% endif %}
-        {% endif %}
+            {% endif %}
+            {% endif %}
         </dl>
     </div>
 </div>
