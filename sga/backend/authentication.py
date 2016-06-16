@@ -23,8 +23,10 @@ def user_has_permission(test_func):
 
 
 def get_course_from_session(request):
-    course, created = Course.objects.get_or_create(edx_id=request.session.get("context_id"))
-    return course
+    try:
+        return Course.objects.get(edx_id=request.session.get("context_id"))
+    except:
+        raise("Log in again")
 
 
 def is_student(request):
