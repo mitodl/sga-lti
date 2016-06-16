@@ -103,7 +103,7 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_lti.backends.LTIAuthBackend',
 )
 
-LTI_OAUTH_CREDENTIALS = get_var("LTI_OAUTH_CREDETIALS", {})
+LTI_OAUTH_CREDENTIALS = get_var("LTI_OAUTH_CREDENTIALS", {})
 print(LTI_OAUTH_CREDENTIALS)
 
 ROOT_URLCONF = 'sga_lti.urls'
