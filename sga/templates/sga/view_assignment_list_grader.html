@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Student List{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#assignment-list").DataTable();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    <h3>Assignment List</h3>
+    <hr>
+    <table id="assignment-list" class="table table-striped table-hover">
+        <thead>
+            <th>Assignment Name</th>
+            <th>Not Submitted</th>
+            <th>Not Graded</th>
+            <th>Graded</th>
+            <th>View Assignment</th>
+        </thead>
+        <tbody>
+        {% for assignment in assignments %}
+            <tr>
+                <td>{{ assignment.name }}</td>
+                <td>{{ assignment.not_submitted_submissions }}</td>
+                <td>{{ assignment.not_graded_submissions }}</td>
+                <td>{{ assignment.graded_submissions }}</td>
+                <td>
+                    <a href="{% url 'view_assignment_grader' assignment_id=assignment.edx_id %}">
+                        View Assignment
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
+{% endblock %}
+

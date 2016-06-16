@@ -50,7 +50,7 @@ class Course(TimeStampedModel):
     def has_admin(self, user):
         return self.administrators.filter(pk=user.pk).exists()
     
-    def ungraded_submissions(self, user):
+    def ungraded_submissions_by_user(self, user):
         return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 
@@ -60,6 +60,16 @@ class Assignment(TimeStampedModel):
     due_date = models.DateTimeField()
     grace_period = models.IntegerField()
     course = models.ForeignKey(Course, related_name="assignments")
+    
+    def graded_submissions(self):
+        return self.submissions.filter(submitted=True).exclude(graded_at=None).count()
+    
+    def not_graded_submissions(self):
+        return self.submissions.filter(submitted=True, graded_at=None).count()
+    
+    def not_submitted_submissions(self):
+        students_in_course = self.course.students.count()
+        return students_in_course - self.graded_submissions() - self.not_graded_submissions()
 
 
 class Submission(TimeStampedModel):

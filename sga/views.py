@@ -113,10 +113,23 @@ def view_student_list(request, course_id):
         raise Http404()
     student_users = course.students.all()
     for student_user in student_users:
-        student_user.ungraded_submissions = course.ungraded_submissions(student_user)
+        student_user.ungraded_submissions_by_user = course.ungraded_submissions_by_user(student_user)
     return render(request, "sga/view_students_list.html", context={
         "course": course,
         "student_users": student_users
+    })
+
+
+@grader_view
+def view_assignment_list(request, course_id):
+    try:
+        course = Course.objects.get(edx_id=course_id)
+    except:
+        raise Http404()
+    assignments = course.assignments.all()
+    return render(request, "sga/view_assignment_list_grader.html", context={
+        "course": course,
+        "assignments": assignments
     })
 
 
@@ -125,9 +138,10 @@ def dev_start(request, username):
     For local development only - sets session variables
     """
     if settings.DEVELOPMENT:
-        print(username)
+        user = authenticate(username=username, password=" ")
+        login(request, user)
         SESSION = {
-            "user_id": "student1",  # Edx user id
+            "user_id": username,  # Edx user id
             "resource_link_title": "Assignment Title",  # Assignment title
             "resource_link_id": "assignment1id",  # Assignment Edx id
             "context_label": "Course Title",  # Course title
@@ -136,6 +150,4 @@ def dev_start(request, username):
         }
         for var, val in SESSION.items():
             request.session[var] = val
-        user = authenticate(username=username, password=" ")
-        login(request, user)
     return redirect("sga-index")
