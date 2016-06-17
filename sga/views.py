@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
-from sga.constants import Roles
+from sga.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
 from sga.models import Assignment, Submission, Course, Grader, Student
 
@@ -204,8 +204,23 @@ def view_student(request, course_id, student_user_id):
     return render(request, "sga/view_student.html", context={
         "course": course,
         "student_user": student_user,
-        "assignments": assignments
+        "assignments": assignments,
+        "STUDENT_TO_GRADER_CONFIRM": STUDENT_TO_GRADER_CONFIRM
     })
+
+
+@allowed_roles([Roles.admin])
+def change_student_to_grader(request, student_user_id):
+    try:
+        student = Student.objects.get(user__username=student_user_id)
+    except:
+        raise Http404()
+    grader = Grader.objects.create(
+        user=student.user,
+        course=student.course
+    )
+    student.delete()
+    return redirect("view_grader", course_id=grader.course.edx_id, grader_user_id=grader.user.username)
 
 
 @allowed_roles([Roles.grader, Roles.admin])
@@ -223,7 +238,23 @@ def view_grader(request, course_id, grader_user_id):
         "course": course,
         "grader": grader,
         "graded_submissions": graded_submissions,
+        "GRADER_TO_STUDENT_CONFIRM": GRADER_TO_STUDENT_CONFIRM
     })
+
+
+@allowed_roles([Roles.admin])
+def change_grader_to_student(request, grader_user_id):
+    try:
+        grader = Grader.objects.get(user__username=grader_user_id)
+    except:
+        raise Http404()
+    student = Student.objects.create(
+        user=grader.user,
+        course=grader.course
+    )
+    grader.delete()
+    return redirect("view_student", course_id=student.course.edx_id, student_user_id=student.user.username)
+
 
 @allowed_roles([Roles.admin])
 def view_grader_list(request, course_id):

@@ -1,22 +1,26 @@
 {% extends "base.html" %}
 {% load bootstrap_tags %}
 
-{% block title %}PLACEHOLDER{% endblock %}
+{% block title %}View Submission{% endblock %}
 
 {% block content %}
     <h1>Assignment: {{ assignment.name }}</h1>
     <h3>Student: {{ student_user.last_name }}, {{ student_user.first_name }}</h3>
     <hr>
+    
     {% include "common/submission_status.html" %}
+    
     {% if submission.submitted and not submission.graded or submission.submitted and role == Roles.admin %}
     <form action="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
     </form>
+    
     <div class="clearfix"></div>
     <br>
     {% endif %}
+    
     <div class="panel panel-info">
         <div class="panel-heading">Actions</div>
         <div class="panel-body">

@@ -23,7 +23,7 @@ class TimeStampedModel(models.Model):
 
 
 class Grader(models.Model):
-    max_students = models.IntegerField()
+    max_students = models.IntegerField(default=10)
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
     
@@ -114,6 +114,7 @@ class Assignment(TimeStampedModel):
         return (grader.students.count()
                 - self.graded_submissions_count_by_grader(grader_user=grader_user)
                 - self.not_graded_submissions_count_by_grader(grader=grader))
+
 
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")
