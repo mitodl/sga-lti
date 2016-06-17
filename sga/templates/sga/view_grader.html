@@ -5,6 +5,11 @@
 
 {% block head %}
     <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        .input-group-addon label {
+            margin-bottom: 0;
+        }
+    </style>
 {% endblock %}
 
 {% block js %}
@@ -101,15 +106,35 @@
     <div class="clearfix"></div>
     <br>
     
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-info">
-                <div class="panel-heading">Actions</div>
-                <div class="panel-body">
-                    <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
-                        Change Grader to Student
-                    </button>
-                </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
+                    Change Grader to Student
+                </button>
+            </div>
+            <br class="visible-xs">
+            <div class="col-sm-6">
+                <form action="" method="post">{% csrf_token %}
+                    <div id="div_id_{{ grader_form.max_students.name }}" class="input-group
+                         {% if grader_form.max_students.errors %}has-error{% endif %}">
+                        <div class="input-group-addon">
+                            <label for="{{ grader_form.max_students.id_for_label }}" class="control-label required-field">Max Students</label>
+                        </div>
+                        <input type="number" name="{{ grader_form.max_students.name }}"
+                               id="{{ grader_form.max_students.id_for_label }}" class="form-control"
+                               value="{{ grader_form.max_students.value }}">
+                        <span class="input-group-btn">
+                            <button class="btn btn-success" type="submit">Submit</button>
+                        </span>
+                    </div>
+                    {% if grader_form.max_students.errors %}
+                    <span id="error_id_{{ grader_form.max_students.name }}" class="error-msg">
+                        {{ grader_form.max_students.errors|first }}
+                    </span>
+                    {% endif %}
+                </form>
             </div>
         </div>
     </div>

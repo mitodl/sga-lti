@@ -1,6 +1,6 @@
 from django import forms
 
-from sga.models import Submission
+from sga.models import Submission, Grader
 
 
 class StudentAssignmentSubmissionForm(forms.ModelForm):
@@ -15,6 +15,7 @@ class StudentAssignmentSubmissionForm(forms.ModelForm):
             "description": "File Description"
         }
 
+
 class GraderAssignmentSubmissionForm(forms.ModelForm):
     class Meta:
         model = Submission
@@ -27,4 +28,15 @@ class GraderAssignmentSubmissionForm(forms.ModelForm):
             "grader_document": "Annotated File Submission",
             "feedback": "Feedback",
             "grade": "Grade (0-100)"
+        }
+
+
+class GraderMaxStudentsForm(forms.ModelForm):
+    class Meta:
+        model = Grader
+        fields = [
+            "max_students"
+        ]
+        labels = {
+            "max_students": "Max Students"
         }

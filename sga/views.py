@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
 from sga.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM
-from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
+from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
@@ -242,10 +242,17 @@ def view_grader(request, course_id, grader_user_id):
     except:
         raise Http404()
     graded_submissions = grader.user.graded_submissions.all()
+    if request.method == "POST":
+        grader_form = GraderMaxStudentsForm(request.POST, instance=grader)
+        if grader_form.is_valid():
+            grader_form.save()
+    else:
+        grader_form = GraderMaxStudentsForm(instance=grader)
     return render(request, "sga/view_grader.html", context={
         "course": course,
         "grader": grader,
         "graded_submissions": graded_submissions,
+        "grader_form": grader_form,
         "GRADER_TO_STUDENT_CONFIRM": GRADER_TO_STUDENT_CONFIRM
     })
 
