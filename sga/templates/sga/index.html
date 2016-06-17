@@ -5,8 +5,37 @@
 {% block content %}
 <div id="container">
     <h1>SGA-LTI</h1>
+    
     <hr>
-    <p>This page assumes you have the mock data created via create_mock_data.py.</p>
+    
+    <h3>Development Readme</h3>
+    <p>
+        This page works best with the mock data created via create_mock_data.py. If you haven't created these data yet,
+        the following will get you set up.
+    </p>
+    <ol>
+        <li>
+            Drop your local database so we can run a fresh install of mock data. The easiest way is to just delete your
+            default database file (e.g. db.sqlite3).
+        </li>
+        <li>
+            Regardless if whether or not you dropped your local database, run <pre>python manage.py migrate</pre> to
+            create/recreate missing tables and migrate existing data.
+        </li>
+        <li>Once you do that, you can use the links under "Authentication" to log in as the different users.</li>
+        <li>
+            The rest of the accessible pages can be found below, labeled with the user roles allowed to view that page
+            (in parentheses). Certain pages will also have certain actions only accessible to certain roles that won't
+            show up unless you're logged in with a user with that role.
+        </li>
+    </ol>
+    <p>
+        Note: We are still in the process of integrating authentication with LTI as well as developing functionality,
+        backend validation, etc.
+    </p>
+    
+    <hr>
+    
     <p><b>Authentication</b></p>
     <ul>
     {% for user in users %}
