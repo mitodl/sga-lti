@@ -52,6 +52,12 @@ def create_mock_data():
         username="student3",
         email="student3@test"
     )
+    student_user_4 = User.objects.create(
+        first_name="Student4",
+        last_name="User",
+        username="student4",
+        email="student4@test"
+    )
     student_1 = Student.objects.create(
         user=student_user_1,
         course=course,
@@ -66,6 +72,10 @@ def create_mock_data():
         user=student_user_3,
         course=course,
         grader=grader_2
+    )
+    student_4 = Student.objects.create(
+        user=student_user_4,
+        course=course
     )
     assignment_1 = Assignment.objects.create(
         edx_id="assignment1id",

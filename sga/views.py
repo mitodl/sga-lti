@@ -17,6 +17,8 @@ def index(request):
     """
     The index view. Display available programs
     """
+    from pprint import pprint
+    pprint(request.LTI)
     course = Course.objects.first()
     if "role" not in request:
         request.role = None

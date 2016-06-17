@@ -12,6 +12,7 @@
         <li><a href="{% url 'dev_start' username='student1' %}">Log in as student1</a></li>
         <li><a href="{% url 'dev_start' username='student2' %}">Log in as student2</a></li>
         <li><a href="{% url 'dev_start' username='student3' %}">Log in as student3</a></li>
+        <li><a href="{% url 'dev_start' username='student4' %}">Log in as student4</a></li>
         <li><a href="{% url 'dev_start' username='grader1' %}">Log in as grader1</a></li>
         <li><a href="{% url 'dev_start' username='grader2' %}">Log in as grader2</a></li>
         <li><a href="{% url 'dev_start' username='admin' %}">Log in as admin</a></li>
@@ -46,6 +47,12 @@
                 Assignment 1 for student3
             </a>
         </li>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment1id' student_user_id='student4' %}" target="_blank">
+                Assignment 1 for student4
+            </a>
+        </li>
         <li>
             <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student1' %}" target="_blank">
                 Assignment 2 for student1
@@ -59,6 +66,11 @@
         <li>
             <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student3' %}" target="_blank">
                 Assignment 2 for student3
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_submission_as_staff' assignment_id='assignment2id' student_user_id='student4' %}" target="_blank">
+                Assignment 2 for student4
             </a>
         </li>
     </ul>
@@ -106,6 +118,11 @@
         <li>
             <a href="{% url 'view_student' course_id=course.edx_id student_user_id='student3' %}" target="_blank">
                 Student 3
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_student' course_id=course.edx_id student_user_id='student4' %}" target="_blank">
+                Student 4
             </a>
         </li>
     </ul>
