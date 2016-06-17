@@ -83,7 +83,8 @@ INSTALLED_APPS = (
     'server_status',
     # Our INSTALLED_APPS
     'sga',
-    'django_forms_bootstrap'
+    'django_forms_bootstrap',
+    'sga.templatetags'
 )
 
 MIDDLEWARE_CLASSES = (

@@ -7,7 +7,7 @@ function filterReset(table) {
 
 function filterHasNoGrader(table, column) {
     filterReset(table);
-    table.columns(column).search("(No Grader)").draw();
+    table.columns(column).search("^(No Grader)$").draw();
 }
 
 function filterHasGrader(table, column) {
@@ -18,5 +18,10 @@ function filterHasGrader(table, column) {
 function filterGreaterThanZero(table, column) {
     filterReset(table);
     table.columns(column).search("^[0-9]*[1-9]$", true).draw();
+}
+
+function filterEqualToZero(table, column) {
+    filterReset(table);
+    table.columns(column).search("^0+$", true).draw();
 }
 

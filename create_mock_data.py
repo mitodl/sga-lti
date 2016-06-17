@@ -25,12 +25,12 @@ def create_mock_data():
         username="grader2"
     )
     grader_1 = Grader.objects.create(
-        max_students=1,
+        max_students=3,
         user=grader_user_1,
         course=course
     )
     grader_2 = Grader.objects.create(
-        max_students=10,
+        max_students=1,
         user=grader_user_2,
         course=course
     )

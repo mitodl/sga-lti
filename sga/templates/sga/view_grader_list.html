@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load math %}
 
 {% block title %}Grader List{% endblock %}
 
@@ -10,8 +11,16 @@
 {% block js %}
     <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.filters.js' %}"></script>
     <script>
-        $("#grader-list").DataTable();
+        var table = $("#grader-list").DataTable({
+            "columnDefs": [
+                {
+                    "targets": [5],
+                    "visible": false
+                }
+            ]
+        });
     </script>
 {% endblock %}
 
@@ -19,6 +28,26 @@
     <h1>Course: {{ course.name }}</h1>
     <h3>Grader List</h3>
     <hr>
+    <h4>Filters</h4>
+    <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default active" onclick="filterReset(table)">
+            <input type="radio" checked>All Graders
+        </label>
+        <label class="btn btn-default" onclick="filterGreaterThanZero(table, 5)">
+            <input type="radio">Accepting Students
+        </label>
+        <label class="btn btn-default" onclick="filterGreaterThanZero(table, 1)">
+            <input type="radio">Has Students
+        </label>
+        <label class="btn btn-default" onclick="filterEqualToZero(table, 1)">
+            <input type="radio">Has No Students
+        </label>
+        <label class="btn btn-default" onclick="filterGreaterThanZero(table, 4)">
+            <input type="radio">Has Not Graded Submissions
+        </label>
+    </div>
+    <br>
+    <br>
     <table id="grader-list" class="table table-striped table-hover">
         <thead>
             <th>Name</th>
@@ -26,6 +55,7 @@
             <th>Max Students</th>
             <th>Graded</th>
             <th>Not Graded</th>
+            <th>Students Remaining</th>
         </thead>
         <tbody>
         {% for grader in graders %}
@@ -35,6 +65,7 @@
                 <td>{{ grader.max_students }}</td>
                 <td>{{ grader.graded_submissions_count }}</td>
                 <td>{{ grader.not_graded_submissions_count }}</td>
+                <td>{{ grader.max_students|subtract:grader.students.count }}</td>
             </tr>
         {% endfor %}    
         </tbody>
