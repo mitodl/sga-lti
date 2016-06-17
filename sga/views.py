@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from sga.backend.authentication import allowed_roles
 from sga.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm
-from sga.models import Assignment, Submission, Course, Grader, Student
+from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
 @csrf_exempt
@@ -17,13 +17,21 @@ def index(request):
     """
     The index view. Display available programs
     """
-    from pprint import pprint
-    pprint(request.LTI)
     course = Course.objects.first()
+    assignments = course.assignments.all()
+    users = User.objects.all()
+    students = Student.objects.all()
+    graders = Grader.objects.all()
+    admins = course.administrators.all()
     if "role" not in request:
         request.role = None
     return render(request, "sga/index.html", context={
-        "course": course
+        "course": course,
+        "assignments": assignments,
+        "users": users,
+        "students": students,
+        "graders": graders,
+        "admins": admins
     })
 
 
