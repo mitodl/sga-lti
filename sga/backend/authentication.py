@@ -48,6 +48,6 @@ def get_course_from_session(request):
     try:
         return Course.objects.get(edx_id=request.session.get("context_id"))
     except:
-        raise Exception("Log in again")
+        raise Exception("Please log in")
 
 

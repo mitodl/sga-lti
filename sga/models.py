@@ -28,12 +28,20 @@ class Grader(models.Model):
     course = models.ForeignKey("Course")
     
     def graded_submissions_count(self):
-        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
-                                  ).exclude(graded_at=None, submitted=False).count()
+        return Submission.objects.filter(
+            graded_by=self.user,
+            assignment__course=self.course,
+            submitted=True,
+            graded=True
+        ).count()
     
     def not_graded_submissions_count(self):
-        return Submission.objects.filter(graded_by=self.user, assignment__course=self.course
-                                         ).exclude(graded_at=None, submitted=True).count()
+        return Submission.objects.filter(
+            graded_by=self.user,
+            assignment__course=self.course,
+            submitted=True,
+            graded=False
+        ).count()
 
 
 class Student(models.Model):
@@ -70,15 +78,42 @@ class Assignment(TimeStampedModel):
     course = models.ForeignKey(Course, related_name="assignments")
     
     def graded_submissions_count(self):
-        return self.submissions.filter(submitted=True).exclude(graded_at=None).count()
+        return self.submissions.filter(submitted=True, graded=True).count()
+    
+    def graded_submissions_count_by_grader(self, grader=None, grader_user=None):
+        if not grader_user:
+            grader_user = grader.user
+        return Submission.objects.filter(
+            graded_by=grader_user,
+            assignment=self,
+            submitted=True,
+            graded=True
+        ).count()
     
     def not_graded_submissions_count(self):
-        return self.submissions.filter(submitted=True, graded_at=None).count()
+        return self.submissions.filter(submitted=True, graded=False).count()
+    
+    def not_graded_submissions_count_by_grader(self, grader=None, grader_user=None):
+        if not grader:
+            grader = Grader.objects.get(user=grader_user, course=self.course)
+        student_users = [s.user for s in grader.students.all()]
+        return Submission.objects.filter(
+            student__in=student_users,
+            assignment=self,
+            submitted=True,
+            graded=False
+        ).count()
     
     def not_submitted_submissions_count(self):
         students_in_course = self.course.students.count()
         return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
-
+    
+    def not_submitted_submissions_count_by_grader(self, grader=None, grader_user=None):
+        if not grader:
+            grader = Grader.objects.get(user=grader_user, course=self.course)
+        return (grader.students.count()
+                - self.graded_submissions_count_by_grader(grader_user=grader_user)
+                - self.not_graded_submissions_count_by_grader(grader=grader))
 
 class Submission(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, related_name="submissions")

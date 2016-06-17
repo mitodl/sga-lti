@@ -1,15 +1,10 @@
-"""
-sga views
-"""
-import json
-
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
 from sga.constants import Roles
@@ -17,6 +12,7 @@ from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissio
 from sga.models import Assignment, Submission, Course, Grader, Student
 
 
+@csrf_exempt
 def index(request):
     """
     The index view. Display available programs
@@ -168,10 +164,25 @@ def view_assignment_list(request, course_id):
         course = Course.objects.get(edx_id=course_id)
     except:
         raise Http404()
+    if request.role == Roles.grader:
+        grader_user = request.user
+    else:
+        grader_user = None
     assignments = course.assignments.all()
+    for assignment in assignments:
+        if grader_user:
+            assignment.not_submitted_count = assignment.not_submitted_submissions_count_by_grader(grader_user=grader_user)
+            assignment.not_graded_count = assignment.not_graded_submissions_count_by_grader(grader_user=grader_user)
+            assignment.graded_count = assignment.graded_submissions_count_by_grader(grader_user=grader_user)
+        else:
+            assignment.not_submitted_count = assignment.not_submitted_submissions_count()
+            assignment.not_graded_count = assignment.not_graded_submissions_count()
+            assignment.graded_count = assignment.graded_submissions_count()
+            
     return render(request, "sga/view_assignment_list.html", context={
         "course": course,
-        "assignments": assignments
+        "assignments": assignments,
+        "grader_user": grader_user
     })
 
 

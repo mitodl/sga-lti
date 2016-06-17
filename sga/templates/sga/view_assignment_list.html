@@ -17,7 +17,11 @@
 
 {% block content %}
     <h1>Course: {{ course.name }}</h1>
-    <h3>Assignment List</h3>
+    {% if grader_user %}
+    <h3>Assignment List (Grader: {{ grader_user.last_name }}, {{ grader_user.first_name }})</h3>
+    {% else %}
+    <h3>Assignment List (All Graders)</h3>
+    {% endif %}
     <hr>
     <table id="assignment-list" class="table table-striped table-hover">
         <thead>
@@ -34,9 +38,9 @@
                         {{ assignment.name }}
                     </a>
                 </td>
-                <td>{{ assignment.not_submitted_submissions_count }}</td>
-                <td>{{ assignment.not_graded_submissions_count }}</td>
-                <td>{{ assignment.graded_submissions_count }}</td>
+                <td>{{ assignment.not_submitted_count }}</td>
+                <td>{{ assignment.not_graded_count }}</td>
+                <td>{{ assignment.graded_count }}</td>
             </tr>
         {% endfor %}    
         </tbody>

@@ -14,14 +14,24 @@ def create_mock_data():
         name="Course Name"
     )
     course.administrators.add(admin_user)
-    grader_user = User.objects.create(
-        first_name="Grader",
+    grader_user_1 = User.objects.create(
+        first_name="Grader 1",
         last_name="User",
-        username="grader"
+        username="grader1"
     )
-    grader = Grader.objects.create(
+    grader_user_2 = User.objects.create(
+        first_name="Grader 2",
+        last_name="User",
+        username="grader2"
+    )
+    grader_1 = Grader.objects.create(
+        max_students=1,
+        user=grader_user_1,
+        course=course
+    )
+    grader_2 = Grader.objects.create(
         max_students=10,
-        user=grader_user,
+        user=grader_user_2,
         course=course
     )
     student_user_1 = User.objects.create(
@@ -45,17 +55,17 @@ def create_mock_data():
     student_1 = Student.objects.create(
         user=student_user_1,
         course=course,
-        grader=grader
+        grader=grader_1
     )
     student_2 = Student.objects.create(
         user=student_user_2,
         course=course,
-        grader=grader
+        grader=grader_1
     )
     student_3 = Student.objects.create(
         user=student_user_3,
         course=course,
-        grader=grader
+        grader=grader_2
     )
     assignment_1 = Assignment.objects.create(
         edx_id="assignment1id",

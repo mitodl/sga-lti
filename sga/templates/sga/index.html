@@ -12,7 +12,8 @@
         <li><a href="{% url 'dev_start' username='student1' %}">Log in as student1</a></li>
         <li><a href="{% url 'dev_start' username='student2' %}">Log in as student2</a></li>
         <li><a href="{% url 'dev_start' username='student3' %}">Log in as student3</a></li>
-        <li><a href="{% url 'dev_start' username='grader' %}">Log in as grader</a></li>
+        <li><a href="{% url 'dev_start' username='grader1' %}">Log in as grader1</a></li>
+        <li><a href="{% url 'dev_start' username='grader2' %}">Log in as grader2</a></li>
         <li><a href="{% url 'dev_start' username='admin' %}">Log in as admin</a></li>
     </ul>
     <p><b>View submission as student (student)</b></p>
@@ -119,8 +120,13 @@
     <p><b>View grader (grader, admin)</b></p>
     <ul>
         <li>
-            <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id="grader" %}" target="_blank">
-                Grader
+            <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id="grader1" %}" target="_blank">
+                Grader 1
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id="grader2" %}" target="_blank">
+                Grader 2
             </a>
         </li>
     </ul>
