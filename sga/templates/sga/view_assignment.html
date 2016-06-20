@@ -45,5 +45,27 @@
         {% endfor %}    
         </tbody>
     </table>
+
+    <div class="clearfix"></div>
+    <br>
+    
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <a href="{% url 'download_not_graded_submissions' assignment_id=assignment.edx_id %}"
+                   class="btn btn-primary btn-block">
+                    Download Not Graded Submissions
+                </a>
+            </div>
+            <br class="visible-xs">
+            <div class="col-sm-6">
+                <a href="{% url 'download_all_submissions' assignment_id=assignment.edx_id %}"
+                   class="btn btn-default btn-block">
+                    Download All Submitted Submissions
+                </a>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
