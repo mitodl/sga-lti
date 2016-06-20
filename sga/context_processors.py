@@ -7,7 +7,7 @@ def logged_in_user(request):
     # TODO: Add auth
     try:
         return {
-            "user_name": request.user.get_full_name()
+            "user_name": request.user.get_full_name(),
             "role": request.role,
             "Roles": Roles
         }
