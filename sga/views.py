@@ -1,12 +1,17 @@
+import os
+
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from io import BytesIO
+from zipfile import ZipFile
 
 from sga.backend.authentication import allowed_roles
+from sga.backend.downloads import serve_zip_file
 from sga.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
@@ -139,6 +144,30 @@ def view_assignment(request, assignment_id):
         "course": course,
         "assignment": assignment
     })
+
+
+@allowed_roles([Roles.grader, Roles.admin])
+def download_all_submissions(request, assignment_id, not_graded_only=False, zipname="all_submissions"):
+    try:
+        assignment = Assignment.objects.get(edx_id=assignment_id)
+    except:
+        raise Http404()
+    if request.role == Roles.grader:
+        grader = Grader.objects.get(user=request.user, course=assignment.course)
+        student_users = [s.user for s in grader.students.all()]
+        submissions = Submission.objects.filter(assignment=assignment,
+                                                student__in=student_users).exclude(student_document="")
+    else:
+        submissions = Submission.objects.filter(assignment=assignment).exclude(student_document="")
+    if not_graded_only:
+        submissions = submissions.exclude(graded=True)
+    filepaths = [s.student_document.path for s in submissions]
+    return serve_zip_file(filepaths, zipname)
+
+
+@allowed_roles([Roles.grader, Roles.admin])
+def download_not_graded_submissions(request, assignment_id):
+    return download_all_submissions(request, assignment_id, not_graded_only=True, zipname="not_graded_submissions")
 
 
 @allowed_roles([Roles.grader, Roles.admin])
