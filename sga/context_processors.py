@@ -1,16 +1,13 @@
 from django.contrib.auth.models import User
 
-from sga.constants import SGA_DATETIME_FORMAT, EPOCH_FORMAT, Roles
+from sga.backend.constants import SGA_DATETIME_FORMAT, EPOCH_FORMAT, Roles
 
 
 def logged_in_user(request):
     # TODO: Add auth
     try:
         return {
-            "user_name": "{last_name}, {first_name}".format(
-                last_name=request.user.last_name,
-                first_name=request.user.first_name
-            ),
+            "user_name": request.user.get_full_name()
             "role": request.role,
             "Roles": Roles
         }

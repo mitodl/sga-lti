@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from sga.constants import student_submission_file_path, grader_submission_file_path
+from sga.backend.constants import student_submission_file_path, grader_submission_file_path
 
 
 class TimeStampedModel(models.Model):
@@ -42,12 +42,18 @@ class Grader(models.Model):
             submitted=True,
             graded=False
         ).count()
+    
+    def __str__(self):
+        return self.user.get_full_name()
 
 
 class Student(models.Model):
     grader = models.ForeignKey(Grader, null=True, related_name="students", on_delete=models.SET_NULL)
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
+
+    def __str__(self):
+        return self.user.get_full_name()
 
   
 class Course(TimeStampedModel):

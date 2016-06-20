@@ -18,7 +18,7 @@
 {% block content %}
     <h1>Course: {{ course.name }}</h1>
     {% if grader_user %}
-    <h3>Assignment List (Grader: {{ grader_user.last_name }}, {{ grader_user.first_name }})</h3>
+    <h3>Assignment List (Grader: {{ grader_user.get_full_name }})</h3>
     {% else %}
     <h3>Assignment List (All Graders)</h3>
     {% endif %}

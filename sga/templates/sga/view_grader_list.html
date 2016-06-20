@@ -60,7 +60,7 @@
         <tbody>
         {% for grader in graders %}
             <tr>
-                <td>{{ grader.user.last_name }}, {{ grader.user.first_name }}</td>
+                <td>{{ grader }}</td>
                 <td>{{ grader.students.count }}</td>
                 <td>{{ grader.max_students }}</td>
                 <td>{{ grader.graded_submissions_count }}</td>

@@ -16,14 +16,20 @@
             if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
                 return false
             }
-            window.location.href = "{% url 'change_student_to_grader' student_user_id=student_user.username %}";
+            window.location.href = "{% url 'change_student_to_grader' student_user_id=student.user.username %}";
+        }
+        function unassignGrader() {
+            if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
+                return false;
+            }
+            window.location.href = "{% url 'unassign_grader' student_user_id=student.user.username %}";
         }
     </script>
 {% endblock %}
 
 {% block content %}
     <h1>Course: {{ course.name }}</h1>
-    <h3>Student: {{ student_user.last_name }}, {{ student_user.first_name }}</h3>
+    <h3>Student: {{ student }}</h3>
     
     <hr>
     
@@ -32,14 +38,25 @@
         <div class="panel-body">
             <dl class="dl-horizontal">
                 <dt>First Name:</dt>
-                <dd>{{ student_user.first_name }}</dd>
+                <dd>{{ student.user.first_name }}</dd>
                 <dt>Last Name:</dt>
-                <dd>{{ student_user.last_name }}</dd>
+                <dd>{{ student.user.last_name }}</dd>
                 <dt>Username:</dt>
-                <dd>{{ student_user.username }}</dd>
+                <dd>{{ student.user.username }}</dd>
                 <br>
                 <dt>Date Joined:</dt>
-                <dd>{{ student_user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
+                <dd>{{ student.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
+                <br>
+                <dt>Assigned Grader:</dt>
+                <dd>
+                {% if student.grader %}
+                    <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=student.grader.user.username %}" target="_blank">
+                        {{ student.grader }}
+                    </a>
+                {% else %}
+                    (Not Assigned)
+                {% endif %}
+                </dd>
             </dl>
         </div>
     </div>
@@ -83,7 +100,7 @@
                 <td>(Pending)</td>
                 {% endif %}
                 <td>
-                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student.user.username %}">
                         View Submission
                     </a>
                 </td>
@@ -96,15 +113,41 @@
     <div class="clearfix"></div>
     <br>
     
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-info">
-                <div class="panel-heading">Actions</div>
-                <div class="panel-body">
-                    <button class="btn btn-primary btn-block" onclick="changeStudentToGrader()">
-                        Change Student to Grader
-                    </button>
-                </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <button class="btn btn-primary btn-block" onclick="changeStudentToGrader()">
+                    Change Student to Grader
+                </button>
+            </div>
+            <br class="visible-xs">
+            <div class="col-sm-6">
+            {% if not student.grader %}
+                <form action="" method="post">{% csrf_token %}
+                    <div id="div_id_{{ assign_grader_form.grader.name }}" class="input-group
+                         {% if assign_grader_form.grader.errors %}has-error{% endif %}">
+                        <select name="{{ assign_grader_form.grader.name }}"
+                               id="{{ assign_grader_form.grader.id_for_label }}" class="form-control">
+                        {% for id, name in assign_grader_form.fields.grader.choices %}
+                            <option value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                        </select>
+                        <span class="input-group-btn">
+                            <button class="btn btn-success" type="submit">Assign This Grader</button>
+                        </span>
+                    </div>
+                    {% if assign_grader_form.grader.errors %}
+                    <span id="error_id_{{ assign_grader_form.grader.name }}" class="error-msg">
+                        {{ assign_grader_form.grader.errors|first }}
+                    </span>
+                    {% endif %}
+                </form>
+            {% else %}
+                <button class="btn btn-warning btn-block" onclick="unassignGrader()">
+                    Unassign Grader
+                </button>
+            {% endif %}
             </div>
         </div>
     </div>

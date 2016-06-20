@@ -9,6 +9,8 @@ GRADER_TO_STUDENT_CONFIRM = ("Are you sure you want to change this grader to a s
                              "Students currently assigned to this grader will no longer " +
                              "be assigned to any grader.")
 STUDENT_TO_GRADER_CONFIRM = "Are you sure you want to change this student into a grader?"
+UNASSIGN_GRADER_CONFIRM = ("Are you sure you want to unassign the grader from this student? " +
+                           "(You can reassign the same grader or a new grader after this action.)")
 
 class Roles():
     student = "student"

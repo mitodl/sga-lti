@@ -28,7 +28,7 @@
 
 {% block content %}
     <h1>Course: {{ course.name }}</h1>
-    <h3>Grader: {{ grader.user.last_name }}, {{ grader.user.first_name }}</h3>
+    <h3>Grader: {{ grader }}</h3>
     
     <hr>
     
@@ -85,7 +85,7 @@
                 </td>
                 <td>
                     <a href="{% url 'view_student' course_id=course.edx_id student_user_id=submission.student.username %}">
-                        {{ submission.student.last_name }}, {{ submission.student.first_name }}
+                        {{ submission.student.get_full_name }}
                     </a>
                 </td>
                 <td data-sort="{{ submission.graded_at|date:EPOCH_FORMAT }}">

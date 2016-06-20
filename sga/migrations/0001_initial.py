@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import sga.constants
+import sga.backend.constants
 
 
 class Migration(migrations.Migration):
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                 ('submitted_at', models.DateTimeField(null=True)),
                 ('graded_at', models.DateTimeField(null=True)),
                 ('submitted', models.BooleanField(default=False)),
-                ('student_document', models.FileField(null=True, upload_to=sga.constants.student_submission_file_path)),
+                ('student_document', models.FileField(null=True, upload_to=sga.backend.constants.student_submission_file_path)),
                 ('grader_document', models.FileField(null=True, upload_to='')),
                 ('assignment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='submissions', to='sga.Assignment')),
                 ('graded_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='graded_assignments', to=settings.AUTH_USER_MODEL)),

@@ -19,7 +19,7 @@
 {% block content %}
     <h1>Course: {{ course.name }}</h1>
     {% if grader_user %}
-    <h3>Student List (Grader: {{ grader_user.last_name }}, {{ grader_user.first_name }})</h3>
+    <h3>Student List (Grader: {{ grader_user.get_full_name }})</h3>
     {% else %}
     <h3>Student List (All)</h3>
     {% endif %}
@@ -53,13 +53,13 @@
             <tr>
                 <td>
                     <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student.user.username %}">
-                        {{ student.user.last_name }}, {{ student.user.first_name }}
+                        {{ student }}
                     </a>
                 </td>
                 <td>
                 {% if student.grader %}
                     <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=student.grader.user.username %}" target="_blank">
-                        {{ student.grader.user.last_name }}, {{ student.grader.user.first_name }}
+                        {{ student.grader }}
                     </a>
                 {% else %}
                     (No Grader)

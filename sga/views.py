@@ -1,19 +1,17 @@
-import os
-
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponse
+from django.db.models import Count, F
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from io import BytesIO
-from zipfile import ZipFile
 
 from sga.backend.authentication import allowed_roles
 from sga.backend.downloads import serve_zip_file
-from sga.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM
-from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm
+from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM
+from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm, \
+    AssignGraderToStudentForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
@@ -232,18 +230,44 @@ def view_student(request, course_id, student_user_id):
     """
     try:
         course = Course.objects.get(edx_id=course_id)
-        student_user = Student.objects.get(user__username=student_user_id).user
+        student = Student.objects.get(user__username=student_user_id)
     except:
         raise Http404()
+    if request.method == "POST":
+        print("yeah")
+        assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
+        if assign_grader_form.is_valid():
+            print("huh...")
+            assign_grader_form.save()
+    else:
+        assign_grader_form = AssignGraderToStudentForm(instance=student)
     assignments = course.assignments.all()
     for assignment in assignments:
-        assignment.submission, created = assignment.submissions.get_or_create(student=student_user)
+        assignment.submission, created = assignment.submissions.get_or_create(student=student.user)
+    if request.role == Roles.admin:
+        available_graders = Grader.objects.annotate(Count("students")).filter(max_students__gt=F("students__count"))
+    else:
+        available_graders = None
     return render(request, "sga/view_student.html", context={
         "course": course,
-        "student_user": student_user,
+        "student": student,
         "assignments": assignments,
-        "STUDENT_TO_GRADER_CONFIRM": STUDENT_TO_GRADER_CONFIRM
+        "STUDENT_TO_GRADER_CONFIRM": STUDENT_TO_GRADER_CONFIRM,
+        "UNASSIGN_GRADER_CONFIRM": UNASSIGN_GRADER_CONFIRM,
+        "available_graders": available_graders,
+        "assign_grader_form": assign_grader_form
     })
+
+
+@allowed_roles([Roles.admin])
+def unassign_grader(request, student_user_id):
+    try:
+        student = Student.objects.get(user__username=student_user_id)
+    except:
+        raise Http404()
+    student.grader = None
+    student.save()
+    return redirect("view_student", course_id=student.course.edx_id, student_user_id=student_user_id)
 
 
 @allowed_roles([Roles.admin])

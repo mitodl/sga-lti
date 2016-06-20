@@ -1,7 +1,7 @@
 from django.http import HttpResponseForbidden
 from functools import wraps
 
-from sga.constants import Roles
+from sga.backend.constants import Roles
 from sga.models import Course
 
 

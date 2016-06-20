@@ -1,6 +1,7 @@
 from django import forms
+from django.db.models import Count, F
 
-from sga.models import Submission, Grader
+from sga.models import Submission, Grader, Student
 
 
 class StudentAssignmentSubmissionForm(forms.ModelForm):
@@ -40,3 +41,16 @@ class GraderMaxStudentsForm(forms.ModelForm):
         labels = {
             "max_students": "Max Students"
         }
+
+
+class AssignGraderToStudentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """ Filters graders for only ones that are available for assigning students to"""
+        super().__init__(*args, **kwargs)
+        self.fields["grader"].queryset = self.fields["grader"].queryset.annotate(Count("students")).filter(max_students__gt=F("students__count"))
+    
+    class Meta:
+        model = Student
+        fields = [
+            "grader"
+        ]

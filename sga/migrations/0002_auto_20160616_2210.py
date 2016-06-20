@@ -6,7 +6,7 @@ from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import sga.constants
+import sga.backend.constants
 
 
 class Migration(migrations.Migration):
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='submission',
             name='grader_document',
-            field=models.FileField(null=True, upload_to=sga.constants.grader_submission_file_path),
+            field=models.FileField(null=True, upload_to=sga.backend.constants.grader_submission_file_path),
         ),
         migrations.AlterField(
             model_name='submission',
