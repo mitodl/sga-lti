@@ -12,7 +12,7 @@ from sga.backend.downloads import serve_zip_file
 from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM, \
     UNASSIGN_STUDENT_CONFIRM
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm, \
-    AssignGraderToStudentForm
+    AssignGraderToStudentForm, AssignStudentToGraderForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
@@ -245,17 +245,12 @@ def view_student(request, course_id, student_user_id):
     assignments = course.assignments.all()
     for assignment in assignments:
         assignment.submission, created = assignment.submissions.get_or_create(student=student.user)
-    if request.role == Roles.admin:
-        available_graders = Grader.objects.annotate(Count("students")).filter(max_students__gt=F("students__count"))
-    else:
-        available_graders = None
     return render(request, "sga/view_student.html", context={
         "course": course,
         "student": student,
         "assignments": assignments,
         "STUDENT_TO_GRADER_CONFIRM": STUDENT_TO_GRADER_CONFIRM,
         "UNASSIGN_GRADER_CONFIRM": UNASSIGN_GRADER_CONFIRM,
-        "available_graders": available_graders,
         "assign_grader_form": assign_grader_form
     })
 
@@ -274,11 +269,8 @@ def unassign_grader(request, student_user_id):
 @allowed_roles([Roles.admin])
 def unassign_student(request, grader_user_id, student_user_id):
     try:
-        print(1)
         grader = Grader.objects.get(user__username=grader_user_id)
-        print(2)
         student = grader.students.get(user__username=student_user_id)
-        print(3)
     except:
         raise Http404()
     student.grader = None
@@ -310,21 +302,30 @@ def view_grader(request, course_id, grader_user_id):
         grader = Grader.objects.get(user__username=grader_user_id)
     except:
         raise Http404()
+    # Load forms and handle form submission
+    max_students_form = GraderMaxStudentsForm(instance=grader)
+    assign_student_form = AssignStudentToGraderForm(instance=grader)
+    if request.method == "POST":
+        if "max_students_submit" in request.POST:
+            max_students_form = GraderMaxStudentsForm(request.POST, instance=grader)
+            if max_students_form.is_valid():
+                max_students_form.save()
+        if "assign_student_submit" in request.POST:
+            assign_student_form = AssignStudentToGraderForm(request.POST, instance=grader)
+            if assign_student_form.is_valid():
+                assign_student_form.save(grader)
+    # Get other data for page
     graded_submissions = grader.user.graded_submissions.all()
     students = grader.students.all()
     for student in students:
         student.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student.user)
-    if request.method == "POST":
-        grader_form = GraderMaxStudentsForm(request.POST, instance=grader)
-        if grader_form.is_valid():
-            grader_form.save()
-    else:
-        grader_form = GraderMaxStudentsForm(instance=grader)
+    # Render page
     return render(request, "sga/view_grader.html", context={
         "course": course,
         "grader": grader,
         "graded_submissions": graded_submissions,
-        "grader_form": grader_form,
+        "max_students_form": max_students_form,
+        "assign_student_form": assign_student_form,
         "students": students,
         "GRADER_TO_STUDENT_CONFIRM": GRADER_TO_STUDENT_CONFIRM,
         "UNASSIGN_STUDENT_CONFIRM": UNASSIGN_STUDENT_CONFIRM
