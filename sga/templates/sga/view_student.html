@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}View Student{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#student-assignment-list").DataTable();
+        function changeStudentToGrader() {
+            if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
+                return false
+            }
+            window.location.href = "{% url 'change_student_to_grader' student_user_id=student.user.username %}";
+        }
+        function unassignGrader() {
+            if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
+                return false;
+            }
+            window.location.href = "{% url 'unassign_grader' student_user_id=student.user.username %}";
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    <h3>Student: {{ student }}</h3>
+    
+    <hr>
+    
+    <div class="panel panel-primary">
+        <div class="panel-heading">Student Info</div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>First Name:</dt>
+                <dd>{{ student.user.first_name }}</dd>
+                <dt>Last Name:</dt>
+                <dd>{{ student.user.last_name }}</dd>
+                <dt>Username:</dt>
+                <dd>{{ student.user.username }}</dd>
+                <br>
+                <dt>Date Joined:</dt>
+                <dd>{{ student.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
+                <br>
+                <dt>Assigned Grader:</dt>
+                <dd>
+                {% if student.grader %}
+                    <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=student.grader.user.username %}" target="_blank">
+                        {{ student.grader }}
+                    </a>
+                {% else %}
+                    (Not Assigned)
+                {% endif %}
+                </dd>
+            </dl>
+        </div>
+    </div>
+    
+    <br>
+    
+    <h3>Submissions</h3>
+    
+    <hr>
+    
+    <table id="student-assignment-list" class="table table-striped table-hover">
+        <thead>
+            <th>Assignment Name</th>
+            <th>Submitted At</th>
+            <th>Graded At</th>
+            <th>Grade</th>
+            <th>View Submission</th>
+        </thead>
+        <tbody>
+        {% for assignment in assignments %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}">
+                        {{ assignment.name }}
+                    </a>
+                </td>
+                {% if assignment.submission.submitted %}
+                    <td data-sort="{{ assignment.submission.submitted_at|date:EPOCH_FORMAT }}">
+                        {{ assignment.submission.submitted_at|date:SGA_DATETIME_FORMAT }}
+                    </td>
+                {% else %}
+                    <td>(Not Submitted)</td>
+                {% endif %}
+                {% if assignment.submission.graded %}
+                <td data-sort="{{ assignment.submission.graded_at|date:EPOCH_FORMAT }}">
+                    {{ assignment.submission.graded_at|date:SGA_DATETIME_FORMAT }}
+                </td>
+                <td data-sort="{{ assignment.submission.grade }}">{{ assignment.submission.grade_display }}</td>
+                {% else %}
+                <td>(Not Graded)</td>
+                <td>(Pending)</td>
+                {% endif %}
+                <td>
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student.user.username %}">
+                        View Submission
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if role == Roles.admin %}
+    <div class="clearfix"></div>
+    <br>
+    
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <button class="btn btn-primary btn-block" onclick="changeStudentToGrader()">
+                    Change Student to Grader
+                </button>
+            </div>
+            <br class="visible-xs">
+            <div class="col-sm-6">
+            {% if not student.grader %}
+                <form action="" method="post">{% csrf_token %}
+                    <div id="div_id_{{ assign_grader_form.grader.name }}" class="input-group
+                         {% if assign_grader_form.grader.errors %}has-error{% endif %}">
+                        <select name="{{ assign_grader_form.grader.name }}"
+                               id="{{ assign_grader_form.grader.id_for_label }}" class="form-control">
+                        {% for id, name in assign_grader_form.fields.grader.choices %}
+                            <option value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                        </select>
+                        <span class="input-group-btn">
+                            <button class="btn btn-success" type="submit">Assign This Grader</button>
+                        </span>
+                    </div>
+                    {% if assign_grader_form.grader.errors %}
+                    <span id="error_id_{{ assign_grader_form.grader.name }}" class="error-msg">
+                        {{ assign_grader_form.grader.errors|first }}
+                    </span>
+                    {% endif %}
+                </form>
+            {% else %}
+                <button class="btn btn-warning btn-block" onclick="unassignGrader()">
+                    Unassign Grader
+                </button>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

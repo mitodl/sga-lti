@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}View Assignment{% endblock %}
+
+{% block head %}
+    <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+    <script>
+        $("#student-list").DataTable();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Course: {{ course.name }}</h1>
+    <h3>Assignment: {{ assignment.name }}</h3>
+    <hr>
+    <table id="student-list" class="table table-striped table-hover">
+        <thead>
+            <th>Student</th>
+            <th>Submitted</th>
+            <th>Graded</th>
+            <th>Show Submission</th>
+        </thead>
+        <tbody>
+        {% for student_user in student_users %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student_user.username %}">
+                        {{ student_user.get_full_name }}
+                    </a>
+                </td>
+                <td>{{ student_user.submitted }}</td>
+                <td>{{ student_user.graded }}</td>
+                <td>
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
+                        View Submission
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
+
+    <div class="clearfix"></div>
+    <br>
+    
+    <div class="panel panel-info">
+        <div class="panel-heading">Actions</div>
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <a href="{% url 'download_not_graded_submissions' assignment_id=assignment.edx_id %}"
+                   class="btn btn-primary btn-block">
+                    Download Not Graded Submissions
+                </a>
+            </div>
+            <br class="visible-xs">
+            <div class="col-sm-6">
+                <a href="{% url 'download_all_submissions' assignment_id=assignment.edx_id %}"
+                   class="btn btn-default btn-block">
+                    Download All Submitted Submissions
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
