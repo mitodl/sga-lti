@@ -14,6 +14,8 @@ UNASSIGN_GRADER_CONFIRM = ("Are you sure you want to unassign the grader from th
 UNASSIGN_STUDENT_CONFIRM = ("Are you sure you want to unassign this student from this grader? " +
                            "(You can reassign the same grader or a new grader after this action.)")
 
+VALID_FILE_UPLOAD_EXTENSIONS = [".pdf"]
+
 class Roles():
     student = "student"
     grader = "grader"

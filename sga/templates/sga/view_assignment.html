@@ -31,7 +31,7 @@
             <tr>
                 <td>
                     <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student_user.username %}">
-                        {{ student_user.get_full_name() }}
+                        {{ student_user.get_full_name }}
                     </a>
                 </td>
                 <td>{{ student_user.submitted }}</td>

@@ -36,12 +36,19 @@
     
     <hr>
     
+    <br>
+    
+    <h4>START</h4>
     <p><b>Authentication</b></p>
     <ul>
     {% for user in users %}
         <li><a href="{% url 'dev_start' username=user.username %}">Log in as {{ user.username }}</a></li>
     {% endfor %}
     </ul>
+    
+    <br>
+    
+    <h4>SUBMISSIONS</h4>
     <p><b>View submission as student (student)</b></p>
     <ul>
     {% for assignment in assignments %}
@@ -65,10 +72,22 @@
     {% endfor %}
     {% endfor %}
     </ul>
+    
+    <br>
+    
+    <h4>LISTS</h4>
     <p><b>View student list (grader, admin)</b></p>
     <ul>
         <li>
             <a href="{% url 'view_student_list' course_id=course.edx_id %}" target="_blank">
+                {{ course.name }}
+            </a>
+        </li>
+    </ul>
+    <p><b>View grader list (admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_grader_list' course_id=course.edx_id %}" target="_blank">
                 {{ course.name }}
             </a>
         </li>
@@ -81,16 +100,10 @@
             </a>
         </li>
     </ul>
-    <p><b>View assignment (grader, admin)</b></p>
-    <ul>
-    {% for assignment in assignments %}
-        <li>
-            <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}" target="_blank">
-                {{ assignment.name }}
-            </a>
-        </li>
-    {% endfor %}
-    </ul>
+    
+    <br>
+    
+    <h4>SINGLE INSTANCES</h4>
     <p><b>View student (student, grader, admin)</b></p>
     <ul>
     {% for student in students %}
@@ -113,14 +126,18 @@
         </li>
     {% endfor %}
     </ul>
-    <p><b>View grader list (admin)</b></p>
+    <p><b>View assignment (grader, admin)</b></p>
     <ul>
+    {% for assignment in assignments %}
         <li>
-            <a href="{% url 'view_grader_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+            <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}" target="_blank">
+                {{ assignment.name }}
             </a>
         </li>
+    {% endfor %}
     </ul>
 </div>
+<br>
+<br>
 {% endblock %}
 

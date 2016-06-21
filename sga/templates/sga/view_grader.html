@@ -79,7 +79,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Not Graded Submissions</th>
-            <th>Unassign Student</th>
+            {% if role == Roles.admin %}<th>Unassign Student</th>{% endif %}
         </thead>
         <tbody>
         {% for student in students %}
@@ -91,12 +91,14 @@
                 </td>
                 <td>{{ student.user.email }}</td>
                 <td>{{ student.not_graded_submissions_count }}</td>
+                {% if role == Roles.admin %}
                 <td>
                     <a href="javascript:void(0)"
                        onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' grader_user_id=grader.user.username student_user_id=student.user.username %}')">
                         Unassign Student
                     </a>
                 </td>
+                {% endif %}
             </tr>
         {% endfor %}    
         </tbody>
@@ -217,4 +219,6 @@
         </div>
     </div>
     {% endif %}
+    <br>
+    <br>
 {% endblock %}

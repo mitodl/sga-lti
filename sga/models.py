@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from sga.backend.constants import student_submission_file_path, grader_submission_file_path
+from sga.backend.validators import validate_file_extension
 
 
 class TimeStampedModel(models.Model):
@@ -136,8 +137,8 @@ class Submission(TimeStampedModel):
     submitted = models.BooleanField(default=False)
     graded = models.BooleanField(default=False)
     
-    student_document = models.FileField(upload_to=student_submission_file_path, null=True)
-    grader_document = models.FileField(upload_to=grader_submission_file_path, null=True)
+    student_document = models.FileField(upload_to=student_submission_file_path, null=True, validators=[validate_file_extension])
+    grader_document = models.FileField(upload_to=grader_submission_file_path, null=True, validators=[validate_file_extension])
     
     def grade_display(self):
         return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)

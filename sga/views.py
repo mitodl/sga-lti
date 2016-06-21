@@ -2,8 +2,7 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
-from django.db.models import Count, F
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
@@ -302,6 +301,9 @@ def view_grader(request, course_id, grader_user_id):
         grader = Grader.objects.get(user__username=grader_user_id)
     except:
         raise Http404()
+    # Disallow if current user is not admin or this grader
+    if request.role == Roles.grader and grader.user != request.user:
+        return HttpResponseForbidden()
     # Load forms and handle form submission
     max_students_form = GraderMaxStudentsForm(instance=grader)
     assign_student_form = AssignStudentToGraderForm(instance=grader)
