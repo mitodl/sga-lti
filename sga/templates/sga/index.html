@@ -80,7 +80,7 @@
     <ul>
         <li>
             <a href="{% url 'view_student_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>
@@ -88,7 +88,7 @@
     <ul>
         <li>
             <a href="{% url 'view_grader_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>
@@ -96,7 +96,7 @@
     <ul>
         <li>
             <a href="{% url 'view_assignment_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>

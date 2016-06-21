@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='submission',
             name='grader_document',
-            field=models.FileField(null=True, upload_to=sga.backend.constants.grader_submission_file_path),
+            field=models.FileField(null=True, upload_to=sga.backend.files.grader_submission_file_path),
         ),
         migrations.AlterField(
             model_name='submission',

@@ -81,10 +81,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'server_status',
+    'django_forms_bootstrap',
     # Our INSTALLED_APPS
     'sga',
-    'django_forms_bootstrap',
-    'sga.templatetags'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -97,6 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
+    # 'sga.middleware.SGAMiddleware'
 )
 
 AUTHENTICATION_BACKENDS = (

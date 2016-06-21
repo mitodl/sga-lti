@@ -21,20 +21,3 @@ class Roles():
     grader = "grader"
     admin = "admin"
 
-def student_submission_file_path(instance, filename):
-    return "student-uploads/{course_id}/{last_name}_{first_name}-{assignment_name}{extension}".format(
-        course_id=instance.assignment.course.edx_id,
-        last_name=instance.student.last_name,
-        first_name=instance.student.first_name,
-        assignment_name=instance.assignment.name,
-        extension=os.path.splitext(filename)[-1]
-    )
-
-def grader_submission_file_path(instance, filename):
-    return "grader-uploads/{course_id}/{last_name}_{first_name}-{assignment_name}{extension}".format(
-        course_id=instance.assignment.course.edx_id,
-        last_name=instance.student.last_name,
-        first_name=instance.student.first_name,
-        assignment_name=instance.assignment.name,
-        extension=os.path.splitext(filename)[-1]
-    )

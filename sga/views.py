@@ -7,9 +7,9 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
-from sga.backend.downloads import serve_zip_file
 from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM, \
     UNASSIGN_STUDENT_CONFIRM
+from sga.backend.files import serve_zip_file
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm, \
     AssignGraderToStudentForm, AssignStudentToGraderForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
@@ -26,6 +26,8 @@ def index(request):
     students = Student.objects.all()
     graders = Grader.objects.all()
     admins = course.administrators.all()
+    from pprint import pprint
+    pprint(request.POST.dict())
     if "role" not in request:
         request.role = None
     return render(request, "sga/index.html", context={
