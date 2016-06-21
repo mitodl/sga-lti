@@ -82,7 +82,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'server_status',
     # Our INSTALLED_APPS
-    'sga'
+    'sga',
+    'django_forms_bootstrap',
+    'sga.templatetags'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -94,7 +96,15 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django_auth_lti.middleware.LTIAuthMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django_auth_lti.backends.LTIAuthBackend',
+)
+
+LTI_OAUTH_CREDENTIALS = get_var("LTI_OAUTH_CREDENTIALS", {})
 
 ROOT_URLCONF = 'sga_lti.urls'
 
@@ -111,6 +121,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'sga.context_processors.logged_in_user',
+                'sga.context_processors.datetime_formats'
             ],
         },
     },
@@ -265,3 +277,11 @@ HEALTH_CHECK = ['POSTGRES']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
+
+# File storage
+# TODO: Change this to use S3
+PROJECT_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'uploaded')
+MEDIA_URL = '/uploaded/'
+
+DEVELOPMENT = get_var("DEVELOPMENT", False)
