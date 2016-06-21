@@ -9,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
 from sga.backend.downloads import serve_zip_file
-from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM
+from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM, \
+    UNASSIGN_STUDENT_CONFIRM
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm, \
     AssignGraderToStudentForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
@@ -271,6 +272,21 @@ def unassign_grader(request, student_user_id):
 
 
 @allowed_roles([Roles.admin])
+def unassign_student(request, grader_user_id, student_user_id):
+    try:
+        print(1)
+        grader = Grader.objects.get(user__username=grader_user_id)
+        print(2)
+        student = grader.students.get(user__username=student_user_id)
+        print(3)
+    except:
+        raise Http404()
+    student.grader = None
+    student.save()
+    return redirect("view_grader", course_id=student.course.edx_id, grader_user_id=grader_user_id)
+
+
+@allowed_roles([Roles.admin])
 def change_student_to_grader(request, student_user_id):
     try:
         student = Student.objects.get(user__username=student_user_id)
@@ -295,6 +311,9 @@ def view_grader(request, course_id, grader_user_id):
     except:
         raise Http404()
     graded_submissions = grader.user.graded_submissions.all()
+    students = grader.students.all()
+    for student in students:
+        student.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student.user)
     if request.method == "POST":
         grader_form = GraderMaxStudentsForm(request.POST, instance=grader)
         if grader_form.is_valid():
@@ -306,7 +325,9 @@ def view_grader(request, course_id, grader_user_id):
         "grader": grader,
         "graded_submissions": graded_submissions,
         "grader_form": grader_form,
-        "GRADER_TO_STUDENT_CONFIRM": GRADER_TO_STUDENT_CONFIRM
+        "students": students,
+        "GRADER_TO_STUDENT_CONFIRM": GRADER_TO_STUDENT_CONFIRM,
+        "UNASSIGN_STUDENT_CONFIRM": UNASSIGN_STUDENT_CONFIRM
     })
 
 

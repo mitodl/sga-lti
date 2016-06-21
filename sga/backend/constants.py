@@ -11,6 +11,8 @@ GRADER_TO_STUDENT_CONFIRM = ("Are you sure you want to change this grader to a s
 STUDENT_TO_GRADER_CONFIRM = "Are you sure you want to change this student into a grader?"
 UNASSIGN_GRADER_CONFIRM = ("Are you sure you want to unassign the grader from this student? " +
                            "(You can reassign the same grader or a new grader after this action.)")
+UNASSIGN_STUDENT_CONFIRM = ("Are you sure you want to unassign this student from this grader? " +
+                           "(You can reassign the same grader or a new grader after this action.)")
 
 class Roles():
     student = "student"

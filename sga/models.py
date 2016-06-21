@@ -73,6 +73,7 @@ class Course(TimeStampedModel):
         return self.administrators.filter(pk=user.pk).exists()
     
     def not_graded_submissions_count_by_user(self, user):
+        print(user)
         return Submission.objects.filter(assignment__course=self, student=user, submitted=True, graded_at=None).count()
 
 

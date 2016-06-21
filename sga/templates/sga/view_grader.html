@@ -16,12 +16,19 @@
     <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
     <script>
+        $("#student-list").DataTable();
         $("#grader-assignment-list").DataTable();
         function changeGraderToStudent() {
             if (!confirm("{{ GRADER_TO_STUDENT_CONFIRM }}")) {
                 return false
             }
             window.location.href = "{% url 'change_grader_to_student' grader_user_id=grader.user.username %}";
+        }
+        function unassignStudent(studentName, url) {
+            if (!confirm(studentName + ":\n\n{{ UNASSIGN_STUDENT_CONFIRM }}")) {
+                return false;
+            }
+            window.location.href = url;
         }
     </script>
 {% endblock %}
@@ -60,6 +67,40 @@
             </dl>
         </div>
     </div>
+    
+    <br>
+    
+    <h3>Student List</h3>
+    
+    <hr>
+    
+    <table id="student-list" class="table table-striped table-hover">
+        <thead>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Not Graded Submissions</th>
+            <th>Unassign Student</th>
+        </thead>
+        <tbody>
+        {% for student in students %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student.user.username %}">
+                        {{ student }}
+                    </a>
+                </td>
+                <td>{{ student.user.email }}</td>
+                <td>{{ student.not_graded_submissions_count }}</td>
+                <td>
+                    <a href="javascript:void(0)"
+                       onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' grader_user_id=grader.user.username student_user_id=student.user.username %}')">
+                        Unassign Student
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+    </table>
     
     <br>
     
@@ -104,6 +145,7 @@
     
     {% if role == Roles.admin %}
     <div class="clearfix"></div>
+    <br>
     <br>
     
     <div class="panel panel-info">
