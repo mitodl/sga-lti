@@ -1,4 +1,6 @@
-""" Custom middleware """
+"""
+Custom middleware
+"""
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.dateparse import parse_datetime
@@ -8,9 +10,13 @@ from sga.backend.constants import Roles
 
 
 class SGAMiddleware(object):
-    """ Middleware for processing incoming LTI requests """
+    """
+    Middleware for processing incoming LTI requests
+    """
     def process_request(self, request):  # pylint: disable=no-self-use
-        """ Processes incoming LTI requests """
+        """
+        Processes incoming LTI requests
+        """
         if not hasattr(request, "LTI"):
             raise ImproperlyConfigured("LTI middleware not installed")
         if "context_id" in request.LTI:

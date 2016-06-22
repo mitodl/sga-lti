@@ -6,7 +6,9 @@ from sga.backend.constants import SGA_DATETIME_FORMAT, EPOCH_FORMAT, Roles
 
 
 def logged_in_user(request):
-    """ Injects user data and roles """
+    """
+    Injects user data and roles
+    """
     try:
         return {
             "user_name": request.user.get_full_name(),
@@ -18,7 +20,9 @@ def logged_in_user(request):
 
 
 def datetime_formats(request):  # pylint: disable=unused-argument
-    """ Injects custom datetime formats """
+    """
+    Injects custom datetime formats
+    """
     return {
         "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT,
         "EPOCH_FORMAT": EPOCH_FORMAT

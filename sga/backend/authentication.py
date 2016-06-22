@@ -1,7 +1,10 @@
-from django.http import HttpResponseForbidden
+"""
+Authentication decorators
+"""
+
 from functools import wraps
 
-from sga.backend.constants import Roles
+from django.http import HttpResponseForbidden
 
 
 def allowed_roles(allowed_roles_list):
@@ -12,8 +15,10 @@ def allowed_roles(allowed_roles_list):
     user has permission.
     """
     def decorator(view_func):
+        """ Decorator """
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
+            """ Wrapped function """
             if request.role in allowed_roles_list:
                 return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()

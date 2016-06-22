@@ -278,8 +278,7 @@ HEALTH_CHECK = ['POSTGRES']
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
 
-# File storage
-# TODO: Change this to use S3
+# Local file storage (for development)
 PROJECT_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'uploaded')
 MEDIA_URL = '/uploaded/'

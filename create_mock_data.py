@@ -8,7 +8,9 @@ from sga.models import Course, Assignment, Grader, Student, User
 
 
 def create_mock_data():
-    """ Function for creating mock data """
+    """
+    Function for creating mock data
+    """
     admin_user = User.objects.create(
         first_name="Admin",
         last_name="User",
