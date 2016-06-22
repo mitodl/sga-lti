@@ -64,6 +64,9 @@ class Grader(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
+    class Meta():
+        unique_together=(("user", "course"),)
+
 
 class Student(models.Model):
     """
@@ -75,6 +78,9 @@ class Student(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
+
+    class Meta():
+        unique_together=(("user", "course"),)
 
 
 class Course(TimeStampedModel):
