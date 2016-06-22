@@ -22,7 +22,7 @@ class TimeStampedModel(models.Model):
         Automatically update updated_on timestam
         """
         update_fields = {"updated_on"}
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self, k, v)
             update_fields.add(k)
         self.save(update_fields=update_fields)
