@@ -270,7 +270,7 @@ def unassign_student(request, grader_user_id, student_user_id):  # pylint: disab
     Unassign a student from a grader
     """
     grader = get_object_or_404(Grader, user__id=grader_user_id)
-    student = get_object_or_404(grader, user__id=student_user_id)
+    student = get_object_or_404(Student, user__id=student_user_id, grader=grader)
     student.grader = None
     student.save()
     return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
