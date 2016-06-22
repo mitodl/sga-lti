@@ -18,6 +18,11 @@ class TestViews(TestCase):
         self.client = Client()
         UserModel = get_user_model()
         user, _ = UserModel.objects.get_or_create(username="test_user_id")
+        self.client.force_login(user)
+        self.setup_lti_params()
+
+    def setup_lti_params(self):
+        """ Initializes LTI parameters in session """
         lti_params = {
             "context_id": "test_course",
             "resource_link_id": "test_assignment",
@@ -26,21 +31,24 @@ class TestViews(TestCase):
         session = self.client.session
         session["LTI_LAUNCH"] = lti_params
         session.save()
-        self.client.force_login(user)
 
     def log_in_as_admin(self):
+        """ Logs in as an admin in the test course """
         UserModel = get_user_model()
         user, _ = UserModel.objects.get_or_create(username="test_admin_id")
         course = self.get_test_course()
         course.administrators.add(user)
         self.client.force_login(user)
+        self.setup_lti_params()
 
     def log_in_as_grader(self):
+        """ Logs in as a grader in the test course """
         UserModel = get_user_model()
         user, _ = UserModel.objects.get_or_create(username="test_grader_id")
         course = self.get_test_course()
         Grader.objects.get_or_create(course=course, user=user)
         self.client.force_login(user)
+        self.setup_lti_params()
 
     def get_test_course(self):  # pylint: disable=no-self-use
         """ Creates a course object for testing """

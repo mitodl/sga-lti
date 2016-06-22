@@ -22,6 +22,7 @@ class SGAMiddleware(object):
         if "context_id" in request.LTI:
             # Get course
             course, _ = Course.objects.get_or_create(edx_id=request.LTI["context_id"])
+            print(course.id)
             request.course = course
         else:
             request.course = None
