@@ -42,7 +42,7 @@
     <p><b>Authentication</b></p>
     <ul>
     {% for user in users %}
-        <li><a href="{% url 'dev_start' username=user.username %}">Log in as {{ user.username }}</a></li>
+        <li><a href="{# url 'dev_start' username=user.username #}">Log in as {{ user.username }}</a></li>
     {% endfor %}
     </ul>
     
@@ -53,7 +53,7 @@
     <ul>
     {% for assignment in assignments %}
         <li>
-            <a href="{% url 'view_submission_as_student' assignment_id=assignment.edx_id %}" target="_blank">
+            <a href="{% url 'view_submission_as_student' assignment_id=assignment.id %}" target="_blank">
                 {{ assignment.name }}
             </a>
         </li>
@@ -64,7 +64,7 @@
     {% for assignment in assignments %}
     {% for student in students %}
         <li>
-            <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student.user.username %}"
+            <a href="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student.user.id %}"
                target="_blank">
                 {{ assignment.name }} for {{ student.user.username }}
             </a>
@@ -79,24 +79,24 @@
     <p><b>View student list (grader, admin)</b></p>
     <ul>
         <li>
-            <a href="{% url 'view_student_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+            <a href="{% url 'view_student_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>
     <p><b>View grader list (admin)</b></p>
     <ul>
         <li>
-            <a href="{% url 'view_grader_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+            <a href="{% url 'view_grader_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>
     <p><b>View assignment list (grader, admin)</b></p>
     <ul>
         <li>
-            <a href="{% url 'view_assignment_list' course_id=course.edx_id %}" target="_blank">
-                {{ course.name }}
+            <a href="{% url 'view_assignment_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
             </a>
         </li>
     </ul>
@@ -108,7 +108,7 @@
     <ul>
     {% for student in students %}
         <li>
-            <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student.user.username %}"
+            <a href="{% url 'view_student' course_id=course.id student_user_id=student.user.id %}"
                target="_blank">
                 {{ student.user.username }}
             </a>
@@ -119,7 +119,7 @@
     <ul>
     {% for grader in graders %}
         <li>
-            <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=grader.user.username %}"
+            <a href="{% url 'view_grader' course_id=course.id grader_user_id=grader.user.id %}"
                target="_blank">
                 {{ grader.user.username }}
             </a>
@@ -130,7 +130,7 @@
     <ul>
     {% for assignment in assignments %}
         <li>
-            <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}" target="_blank">
+            <a href="{% url 'view_assignment' assignment_id=assignment.id %}" target="_blank">
                 {{ assignment.name }}
             </a>
         </li>

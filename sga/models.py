@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from sga.backend.constants import student_submission_file_path, grader_submission_file_path
+from sga.backend.files import student_submission_file_path, grader_submission_file_path
 from sga.backend.validators import validate_file_extension
 
 
@@ -56,14 +56,13 @@ class Student(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
-  
+
 class Course(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
-    name = models.CharField(max_length=128)
     administrators = models.ManyToManyField(User, related_name="administrator_courses")
     graders = models.ManyToManyField(User, through=Grader, related_name="grader_courses")
     students = models.ManyToManyField(User, through=Student, related_name="student_courses")
-
+    
     def has_student(self, user):
         return self.students.filter(pk=user.pk).exists()
     
@@ -81,8 +80,8 @@ class Course(TimeStampedModel):
 class Assignment(TimeStampedModel):
     edx_id = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
-    due_date = models.DateTimeField()
-    grace_period = models.IntegerField()
+    due_date = models.DateTimeField(null=True)
+    grace_period = models.IntegerField(default=0)
     course = models.ForeignKey(Course, related_name="assignments")
     
     def graded_submissions_count(self):

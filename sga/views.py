@@ -7,27 +7,29 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
-from sga.backend.downloads import serve_zip_file
 from sga.backend.constants import Roles, GRADER_TO_STUDENT_CONFIRM, STUDENT_TO_GRADER_CONFIRM, UNASSIGN_GRADER_CONFIRM, \
     UNASSIGN_STUDENT_CONFIRM
+from sga.backend.files import serve_zip_file
 from sga.forms import StudentAssignmentSubmissionForm, GraderAssignmentSubmissionForm, GraderMaxStudentsForm, \
     AssignGraderToStudentForm, AssignStudentToGraderForm
 from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
 @csrf_exempt
+@allowed_roles([Roles.student, Roles.grader, Roles.admin])
 def index(request):
     """
     The index view. Display available programs
     """
-    course = Course.objects.first()
+    course = request.course
     assignments = course.assignments.all()
     users = User.objects.all()
     students = Student.objects.all()
     graders = Grader.objects.all()
     admins = course.administrators.all()
-    if "role" not in request:
-        request.role = None
+    from pprint import pprint
+    pprint(request.user.username)
+    pprint(request.POST.dict())
     return render(request, "sga/index.html", context={
         "course": course,
         "assignments": assignments,
@@ -44,7 +46,7 @@ def view_submission_as_student(request, assignment_id):
     Submission view for students
     """
     try:
-        assignment = Assignment.objects.get(edx_id=assignment_id)
+        assignment = Assignment.objects.get(id=assignment_id)
         submission, created = Submission.objects.get_or_create(student=request.user, assignment=assignment)
     except:
         raise Http404()
@@ -71,8 +73,8 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
     Submission view for staff
     """
     try:
-        assignment = Assignment.objects.get(edx_id=assignment_id)
-        student = Student.objects.get(user__username=student_user_id)
+        assignment = Assignment.objects.get(id=assignment_id)
+        student = Student.objects.get(user__id=student_user_id)
         submission, created = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     except:
         raise Http404()
@@ -81,7 +83,7 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
     if next_not_graded_submission:
         next_not_graded_submission_url = reverse("view_submission_as_staff", kwargs={
             "assignment_id": assignment_id,
-            "student_user_id": next_not_graded_submission.student.username
+            "student_user_id": next_not_graded_submission.student.id
         })
     else:
         next_not_graded_submission_url = None
@@ -93,7 +95,7 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
             submission.graded_by = request.user
             submission.graded = True
             submission.save()
-            redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student.user.username)
+            redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student.user.id)
         else:
             # Clear changes made to submission instance since form is invalid (form field values are untouched)
             submission = Submission.objects.get(pk=submission.pk)
@@ -111,8 +113,8 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
 @allowed_roles([Roles.admin])
 def unsubmit_submission(request, assignment_id, student_user_id):
     try:
-        assignment = Assignment.objects.get(edx_id=assignment_id)
-        student = Student.objects.get(user__username=student_user_id)
+        assignment = Assignment.objects.get(id=assignment_id)
+        student = Student.objects.get(user__id=student_user_id)
         submission, created = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     except:
         raise Http404()
@@ -128,7 +130,7 @@ def view_assignment(request, assignment_id):
     Assignment view for graders
     """
     try:
-        assignment = Assignment.objects.get(edx_id=assignment_id)
+        assignment = Assignment.objects.get(id=assignment_id)
         course = assignment.course
     except:
         raise Http404()
@@ -147,7 +149,7 @@ def view_assignment(request, assignment_id):
 @allowed_roles([Roles.grader, Roles.admin])
 def download_all_submissions(request, assignment_id, not_graded_only=False, zipname="all_submissions"):
     try:
-        assignment = Assignment.objects.get(edx_id=assignment_id)
+        assignment = Assignment.objects.get(id=assignment_id)
     except:
         raise Http404()
     if request.role == Roles.grader:
@@ -174,7 +176,7 @@ def view_student_list(request, course_id):
     Student list view for graders
     """
     try:
-        course = Course.objects.get(edx_id=course_id)
+        course = Course.objects.get(id=course_id)
     except:
         raise Http404()
     if request.role == Roles.grader:
@@ -198,7 +200,7 @@ def view_assignment_list(request, course_id):
     Assignment list view for graders
     """
     try:
-        course = Course.objects.get(edx_id=course_id)
+        course = Course.objects.get(id=course_id)
     except:
         raise Http404()
     if request.role == Roles.grader:
@@ -229,8 +231,8 @@ def view_student(request, course_id, student_user_id):
     Student view for graders
     """
     try:
-        course = Course.objects.get(edx_id=course_id)
-        student = Student.objects.get(user__username=student_user_id)
+        course = Course.objects.get(id=course_id)
+        student = Student.objects.get(user__id=student_user_id)
     except:
         raise Http404()
     if request.method == "POST":
@@ -257,30 +259,30 @@ def view_student(request, course_id, student_user_id):
 @allowed_roles([Roles.admin])
 def unassign_grader(request, student_user_id):
     try:
-        student = Student.objects.get(user__username=student_user_id)
+        student = Student.objects.get(user__id=student_user_id)
     except:
         raise Http404()
     student.grader = None
     student.save()
-    return redirect("view_student", course_id=student.course.edx_id, student_user_id=student_user_id)
+    return redirect("view_student", course_id=student.course.id, student_user_id=student_user_id)
 
 
 @allowed_roles([Roles.admin])
 def unassign_student(request, grader_user_id, student_user_id):
     try:
-        grader = Grader.objects.get(user__username=grader_user_id)
-        student = grader.students.get(user__username=student_user_id)
+        grader = Grader.objects.get(user__id=grader_user_id)
+        student = grader.students.get(user__id=student_user_id)
     except:
         raise Http404()
     student.grader = None
     student.save()
-    return redirect("view_grader", course_id=student.course.edx_id, grader_user_id=grader_user_id)
+    return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
 
 
 @allowed_roles([Roles.admin])
 def change_student_to_grader(request, student_user_id):
     try:
-        student = Student.objects.get(user__username=student_user_id)
+        student = Student.objects.get(user__id=student_user_id)
     except:
         raise Http404()
     grader = Grader.objects.create(
@@ -288,7 +290,7 @@ def change_student_to_grader(request, student_user_id):
         course=student.course
     )
     student.delete()
-    return redirect("view_grader", course_id=grader.course.edx_id, grader_user_id=grader.user.username)
+    return redirect("view_grader", course_id=grader.course.id, grader_user_id=grader.user.id)
 
 
 @allowed_roles([Roles.grader, Roles.admin])
@@ -297,8 +299,8 @@ def view_grader(request, course_id, grader_user_id):
     Student view for graders
     """
     try:
-        course = Course.objects.get(edx_id=course_id)
-        grader = Grader.objects.get(user__username=grader_user_id)
+        course = Course.objects.get(id=course_id)
+        grader = Grader.objects.get(user__id=grader_user_id)
     except:
         raise Http404()
     # Disallow if current user is not admin or this grader
@@ -337,7 +339,7 @@ def view_grader(request, course_id, grader_user_id):
 @allowed_roles([Roles.admin])
 def change_grader_to_student(request, grader_user_id):
     try:
-        grader = Grader.objects.get(user__username=grader_user_id)
+        grader = Grader.objects.get(user__id=grader_user_id)
     except:
         raise Http404()
     student = Student.objects.create(
@@ -345,7 +347,7 @@ def change_grader_to_student(request, grader_user_id):
         course=grader.course
     )
     grader.delete()
-    return redirect("view_student", course_id=student.course.edx_id, student_user_id=student.user.username)
+    return redirect("view_student", course_id=student.course.id, student_user_id=student.user.id)
 
 
 @allowed_roles([Roles.admin])
@@ -354,7 +356,7 @@ def view_grader_list(request, course_id):
     Grader list view for admins
     """
     try:
-        course = Course.objects.get(edx_id=course_id)
+        course = Course.objects.get(id=course_id)
     except:
         raise Http404()
     graders = course.grader_set.all()
