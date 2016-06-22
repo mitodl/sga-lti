@@ -52,13 +52,13 @@
         {% for student in students %}
             <tr>
                 <td>
-                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student.user.username %}">
+                    <a href="{% url 'view_student' course_id=course.id student_user_id=student.user.id %}">
                         {{ student }}
                     </a>
                 </td>
                 <td>
                 {% if student.grader %}
-                    <a href="{% url 'view_grader' course_id=course.edx_id grader_user_id=student.grader.user.username %}" target="_blank">
+                    <a href="{% url 'view_grader' course_id=course.id grader_user_id=student.grader.user.id %}" target="_blank">
                         {{ student.grader }}
                     </a>
                 {% else %}

@@ -10,7 +10,7 @@
     </head>
     <body>
         <div class="container">
-            <h4 class="pull-right"><b>Logged In As:</b> {{ user_name }}</h4>
+            <h4 class="pull-right"><b>Logged In As:</b> {{ request.user.username }}</h4>
             {% block content %}{% endblock %}
         </div>
         <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>

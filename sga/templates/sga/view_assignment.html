@@ -30,14 +30,14 @@
         {% for student_user in student_users %}
             <tr>
                 <td>
-                    <a href="{% url 'view_student' course_id=course.edx_id student_user_id=student_user.username %}">
+                    <a href="{% url 'view_student' course_id=course.id student_user_id=student_user.id %}">
                         {{ student_user.get_full_name }}
                     </a>
                 </td>
                 <td>{{ student_user.submitted }}</td>
                 <td>{{ student_user.graded }}</td>
                 <td>
-                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.edx_id student_user_id=student_user.username %}">
+                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student_user.id %}">
                         View Submission
                     </a>
                 </td>
@@ -53,14 +53,14 @@
         <div class="panel-heading">Actions</div>
         <div class="panel-body">
             <div class="col-sm-6">
-                <a href="{% url 'download_not_graded_submissions' assignment_id=assignment.edx_id %}"
+                <a href="{% url 'download_not_graded_submissions' assignment_id=assignment.id %}"
                    class="btn btn-primary btn-block">
                     Download Not Graded Submissions
                 </a>
             </div>
             <br class="visible-xs">
             <div class="col-sm-6">
-                <a href="{% url 'download_all_submissions' assignment_id=assignment.edx_id %}"
+                <a href="{% url 'download_all_submissions' assignment_id=assignment.id %}"
                    class="btn btn-default btn-block">
                     Download All Submitted Submissions
                 </a>

@@ -96,7 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
-    # 'sga.middleware.SGAMiddleware'
+    'sga.middleware.SGAMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
