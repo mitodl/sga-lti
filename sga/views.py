@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from sga.backend.authentication import allowed_roles
@@ -56,7 +56,7 @@ def view_submission_as_student(request, assignment_id):
     """
     View submission (for student)
     """
-    assignment = Assignment.objects.get_or_404(id=assignment_id)
+    assignment = get_object_or_404(Assignment, id=assignment_id)
     submission, _ = Submission.objects.get_or_create(student=request.user, assignment=assignment)
     if request.method == "POST":
         submission_form = StudentAssignmentSubmissionForm(request.POST, request.FILES, instance=submission)
@@ -80,8 +80,8 @@ def view_submission_as_staff(request, assignment_id, student_user_id):
     """
     View submission (for staff)
     """
-    assignment = Assignment.objects.get_or_404(id=assignment_id)
-    student = Student.objects.get_or_404(user__id=student_user_id)
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = get_object_or_404(Student, user__id=student_user_id)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     next_not_graded_submission = Submission.objects.filter(
         assignment=assignment,
@@ -123,8 +123,8 @@ def unsubmit_submission(request, assignment_id, student_user_id):  # pylint: dis
     """
     Unsubmits a submission
     """
-    assignment = Assignment.objects.get_or_404(id=assignment_id)
-    student = Student.objects.get_or_404(user__id=student_user_id)
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = get_object_or_404(Student, user__id=student_user_id)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     submission.submitted = False
     submission.graded = False
@@ -137,7 +137,7 @@ def view_assignment(request, assignment_id):
     """
     View assignment
     """
-    assignment = Assignment.objects.get_or_404(id=assignment_id)
+    assignment = get_object_or_404(Assignment, id=assignment_id)
     student_users = assignment.course.students.all()
     for student_user in student_users:
         submission, _ = Submission.objects.get_or_create(student=student_user, assignment=assignment)
@@ -155,7 +155,7 @@ def download_all_submissions(request, assignment_id, not_graded_only=False, zipn
     """
     Generate and serve zip file with submission files
     """
-    assignment = Assignment.objects.get_or_404(id=assignment_id)
+    assignment = get_object_or_404(Assignment, id=assignment_id)
     if request.role == Roles.grader:
         grader = Grader.objects.get(user=request.user, course=assignment.course)
         student_users = [s.user for s in grader.students.all()]
@@ -182,7 +182,7 @@ def view_student_list(request, course_id):
     """
     View student list
     """
-    course = Course.objects.get_or_404(id=course_id)
+    course = get_object_or_404(Course, id=course_id)
     if request.role == Roles.grader:
         students = Student.objects.filter(course=course, grader__user=request.user)
         grader_user = request.user
@@ -203,7 +203,7 @@ def view_assignment_list(request, course_id):
     """
     View assignment list
     """
-    course = Course.objects.get_or_404(id=course_id)
+    course = get_object_or_404(Course, id=course_id)
     if request.role == Roles.grader:
         grader_user = request.user
     else:
@@ -230,8 +230,8 @@ def view_student(request, course_id, student_user_id):
     """
     View student
     """
-    course = Course.objects.get_or_404(id=course_id)
-    student = Student.objects.get_or_404(user__id=student_user_id)
+    course = get_object_or_404(Course, id=course_id)
+    student = get_object_or_404(Student, user__id=student_user_id)
     if request.method == "POST":
         print("yeah")
         assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
@@ -258,7 +258,7 @@ def unassign_grader(request, student_user_id):  # pylint: disable=unused-argumen
     """
     Unassign a grader from a student
     """
-    student = Student.objects.get_or_404(user__id=student_user_id)
+    student = get_object_or_404(Student, user__id=student_user_id)
     student.grader = None
     student.save()
     return redirect("view_student", course_id=student.course.id, student_user_id=student_user_id)
@@ -269,8 +269,8 @@ def unassign_student(request, grader_user_id, student_user_id):  # pylint: disab
     """
     Unassign a student from a grader
     """
-    grader = Grader.objects.get_or_404(user__id=grader_user_id)
-    student = grader.students.get_or_404(user__id=student_user_id)
+    grader = get_object_or_404(Grader, user__id=grader_user_id)
+    student = get_object_or_404(grader, user__id=student_user_id)
     student.grader = None
     student.save()
     return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
@@ -281,7 +281,7 @@ def change_student_to_grader(request, student_user_id):  # pylint: disable=unuse
     """
     Change student to grader
     """
-    student = Student.objects.get_or_404(user__id=student_user_id)
+    student = get_object_or_404(Student, user__id=student_user_id)
     grader = Grader.objects.create(
         user=student.user,
         course=student.course
@@ -295,8 +295,8 @@ def view_grader(request, course_id, grader_user_id):
     """
     View grader
     """
-    course = Course.objects.get_or_404(id=course_id)
-    grader = Grader.objects.get_or_404(user__id=grader_user_id)
+    course = get_object_or_404(Course, id=course_id)
+    grader = get_object_or_404(Grader, user__id=grader_user_id)
     # Disallow if current user is not admin or this grader
     if request.role == Roles.grader and grader.user != request.user:
         return HttpResponseForbidden()
@@ -335,7 +335,7 @@ def change_grader_to_student(request, grader_user_id):  # pylint: disable=unused
     """
     Change grader to student
     """
-    grader = Grader.objects.get_or_404(user__id=grader_user_id)
+    grader = get_object_or_404(Grader, user__id=grader_user_id)
     student = Student.objects.create(
         user=grader.user,
         course=grader.course
@@ -349,7 +349,7 @@ def view_grader_list(request, course_id):
     """
     View grader list
     """
-    course = Course.objects.get_or_404(id=course_id)
+    course = get_object_or_404(Course, id=course_id)
     graders = course.grader_set.all()
     # for grader_user in grader_users:
     #     grader_user.not_graded_submissions = course.not_graded_submissions_by_user(grader_user)
