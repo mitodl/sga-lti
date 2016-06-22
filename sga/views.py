@@ -16,20 +16,17 @@ from sga.models import Assignment, Submission, Course, Grader, Student, User
 
 
 @csrf_exempt
-@allowed_roles([Roles.student, Roles.grader, Roles.admin])
+@allowed_roles([Roles.student, Roles.grader, Roles.admin, None])
 def index(request):
     """
     The index view. Display available programs
     """
-    course = request.course
+    course = request.course or Course.objects.first()
     assignments = course.assignments.all()
     users = User.objects.all()
     students = Student.objects.all()
     graders = Grader.objects.all()
     admins = course.administrators.all()
-    from pprint import pprint
-    pprint(request.user.username)
-    pprint(request.POST.dict())
     return render(request, "sga/index.html", context={
         "course": course,
         "assignments": assignments,
@@ -186,7 +183,7 @@ def view_student_list(request, course_id):
         students = Student.objects.filter(course=course)
         grader_user = None
     for student in students:
-        student.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student.user)
+        student.not_graded_submissions_count = course.not_graded_submissions_count_by_student(student)
     return render(request, "sga/view_student_list.html", context={
         "course": course,
         "students": students,
@@ -322,7 +319,7 @@ def view_grader(request, course_id, grader_user_id):
     graded_submissions = grader.user.graded_submissions.all()
     students = grader.students.all()
     for student in students:
-        student.not_graded_submissions_count = course.not_graded_submissions_count_by_user(student.user)
+        student.not_graded_submissions_count = course.not_graded_submissions_count_by_student(student)
     # Render page
     return render(request, "sga/view_grader.html", context={
         "course": course,

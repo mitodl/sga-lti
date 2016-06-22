@@ -1,9 +1,14 @@
+"""
+Contains a function for creating mock data
+"""
+
 from datetime import datetime
 
 from sga.models import Course, Assignment, Grader, Student, User
 
 
 def create_mock_data():
+    """ Function for creating mock data """
     admin_user = User.objects.create(
         first_name="Admin",
         last_name="User",
@@ -58,33 +63,33 @@ def create_mock_data():
         username="student4",
         email="student4@test"
     )
-    student_1 = Student.objects.create(
+    Student.objects.create(
         user=student_user_1,
         course=course,
         grader=grader_1
     )
-    student_2 = Student.objects.create(
+    Student.objects.create(
         user=student_user_2,
         course=course,
         grader=grader_1
     )
-    student_3 = Student.objects.create(
+    Student.objects.create(
         user=student_user_3,
         course=course,
         grader=grader_2
     )
-    student_4 = Student.objects.create(
+    Student.objects.create(
         user=student_user_4,
         course=course
     )
-    assignment_1 = Assignment.objects.create(
+    Assignment.objects.create(
         edx_id="assignment1id",
         name="Assignment 1 Name",
         due_date=datetime.utcnow(),
         grace_period=1,
         course=course
     )
-    assignment_2 = Assignment.objects.create(
+    Assignment.objects.create(
         edx_id="assignment2id",
         name="Assignment 2 Name",
         due_date=datetime.utcnow(),
