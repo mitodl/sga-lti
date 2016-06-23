@@ -140,7 +140,7 @@ class SGATestCase(TestCase):
     def get_test_grader(self, username=DEFAULT_GRADER_USERNAME):
         """
         Creates or retrieves a user object for testing and attaches it to a course as a grader.
-        Returns the Grader object
+        Returns the Grader object.
         @param username: (optional[str]) username for User
         """
         grader_user, _ = self.user_model.objects.get_or_create(username=username)
@@ -156,6 +156,10 @@ class SGATestCase(TestCase):
         return grader.user
 
     def get_test_admin_user(self):
+        """
+        Creates or retrieves a user object for testing and attaches it to a course as an admin.
+        Returns the User object.
+        """
         admin_user, _ = self.user_model.objects.get_or_create(username=DEFAULT_ADMIN_USERNAME)
         course = self.get_test_course()
         course.administrators.add(admin_user)
