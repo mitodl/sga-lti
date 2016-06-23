@@ -185,8 +185,8 @@ class Assignment(TimeStampedModel):
         if not grader:
             grader = Grader.objects.get(user=grader_user, course=self.course)
         return (grader.students.count()
-                - self.graded_submissions_count_by_grader(grader_user=grader_user)  # nopep8
-                - self.not_graded_submissions_count_by_grader(grader=grader))  # noqa
+                - self.graded_submissions_count_by_grader(grader_user=grader_user)
+                - self.not_graded_submissions_count_by_grader(grader=grader))
 
 
 class Submission(TimeStampedModel):

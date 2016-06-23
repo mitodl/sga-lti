@@ -209,15 +209,15 @@ def view_assignment_list(request, course_id):
     else:
         grader_user = None
     assignments = course.assignments.all()
-    for a in assignments:
+    for assgnmnt in assignments:
         if grader_user:
-            a.not_submitted_count = a.not_submitted_submissions_count_by_grader(grader_user=grader_user)
-            a.not_graded_count = a.not_graded_submissions_count_by_grader(grader_user=grader_user)
-            a.graded_count = a.graded_submissions_count_by_grader(grader_user=grader_user)
+            assgnmnt.not_submitted_count = assgnmnt.not_submitted_submissions_count_by_grader(grader_user=grader_user)
+            assgnmnt.not_graded_count = assgnmnt.not_graded_submissions_count_by_grader(grader_user=grader_user)
+            assgnmnt.graded_count = assgnmnt.graded_submissions_count_by_grader(grader_user=grader_user)
         else:
-            a.not_submitted_count = a.not_submitted_submissions_count()
-            a.not_graded_count = a.not_graded_submissions_count()
-            a.graded_count = a.graded_submissions_count()
+            assgnmnt.not_submitted_count = assgnmnt.not_submitted_submissions_count()
+            assgnmnt.not_graded_count = assgnmnt.not_graded_submissions_count()
+            assgnmnt.graded_count = assgnmnt.graded_submissions_count()
     return render(request, "sga/view_assignment_list.html", context={
         "course": course,
         "assignments": assignments,
