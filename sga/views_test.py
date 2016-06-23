@@ -129,12 +129,12 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         student = self.get_test_student()
         return student.user
 
-    def get_test_grader(self):
+    def get_test_grader(self, username="test_grader_id"):
         """
         Creates or retrieves a user object for testing and attaches it to a course as a grader.
         Returns the Grader object
         """
-        grader_user, _ = self.user_model.objects.get_or_create(username="test_grader_id")
+        grader_user, _ = self.user_model.objects.get_or_create(username=username)
         course = self.get_test_course()
         grader, _ = Grader.objects.get_or_create(course=course, user=grader_user)
         return grader
@@ -277,6 +277,28 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
                 ]
             )
 
+    def test_view_assignment(self):
+        """
+        Verify view assignment is as expected
+        """
+        assignment = self.get_test_assignment()
+        url = reverse("view_assignment", kwargs={"assignment_id": assignment.id})
+        for role in [Roles.grader, Roles.admin]:
+            self.do_test_successful_view(
+                url,
+                role,
+                template="sga/view_assignment.html",
+                context_keys=["student_users", "course", "assignment"]
+            )
+
+    def test_view_assignment_staff_only(self):
+        """
+        Verify view assignment page is only accessible for staff
+        """
+        assignment = self.get_test_assignment()
+        url = reverse("view_assignment", kwargs={"assignment_id": assignment.id})
+        self.do_test_forbidden_view(url, Roles.student)
+
     def test_view_student_list(self):
         """
         Verify view student list page is as expected
@@ -291,6 +313,14 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
                 context_keys=["course", "students", "grader_user"]
             )
 
+    def test_view_student_list_staff_only(self):
+        """
+        Verify view student list page is only accessible for staff
+        """
+        course = self.get_test_course()
+        url = reverse("view_student_list", kwargs={"course_id": course.id})
+        self.do_test_forbidden_view(url, Roles.student)
+
     def test_view_assignment_list(self):
         """
         Verify view assignment list page is as expected
@@ -304,6 +334,36 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
                 template="sga/view_assignment_list.html",
                 context_keys=["course", "assignments", "grader_user"]
             )
+
+    def test_view_assignment_list_staff_only(self):
+        """
+        Verify view assignment list page is only accessible for staff
+        """
+        course = self.get_test_course()
+        url = reverse("view_assignment_list", kwargs={"course_id": course.id})
+        self.do_test_forbidden_view(url, Roles.student)
+
+    def test_view_grader_list(self):
+        """
+        Verify view grader list page is as expected
+        """
+        course = self.get_test_course()
+        url = reverse("view_grader_list", kwargs={"course_id": course.id})
+        self.do_test_successful_view(
+            url,
+            Roles.admin,
+            template="sga/view_grader_list.html",
+            context_keys=["course", "graders"]
+        )
+
+    def test_view_grader_list_admin_only(self):
+        """
+        Verify view grader list page is only accessible for admins
+        """
+        course = self.get_test_course()
+        url = reverse("view_grader_list", kwargs={"course_id": course.id})
+        for role in [Roles.grader, Roles.student]:
+            self.do_test_forbidden_view(url, role)
 
     def test_view_student(self):
         """
@@ -349,3 +409,15 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
                     "UNASSIGN_STUDENT_CONFIRM"
                 ]
             )
+
+    def test_view_grader_admin_or_self_grader_only(self):
+        """
+        Verify view grader list page is only accessible for admins and the logged in grader if it's the
+        logged in grader's own page.
+        """
+        # We want to try to view the grader that isn't the default grader that's logged in
+        grader_2 = self.get_test_grader(username="test_grader_2_id")
+        course = self.get_test_course()
+        url = reverse("view_grader", kwargs={"course_id": course.id, "grader_user_id": grader_2.user.id})
+        for role in [Roles.grader, Roles.student]:
+            self.do_test_forbidden_view(url, role)
