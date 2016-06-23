@@ -108,9 +108,11 @@ class TestModels(SGATestCase):
         submission = self.get_test_submission()  # Uses get_test_assignment() to set submission.assignment
         # Submission not yet graded, so count should be 0
         self.assertEqual(assignment.graded_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.graded_submissions_count_by_grader(grader_user=grader.user), 0)
         submission.update(submitted=True, graded=True, graded_by=grader.user)
         # Submission graded, so count should be 1
         self.assertEqual(assignment.graded_submissions_count_by_grader(grader=grader), 1)
+        self.assertEqual(assignment.graded_submissions_count_by_grader(grader_user=grader.user), 1)
         # Earlier submission not graded by grader_2, so count should be 0
         self.assertEqual(assignment.graded_submissions_count_by_grader(grader=grader_2), 0)
 
@@ -135,24 +137,29 @@ class TestModels(SGATestCase):
         grader_2 = self.get_test_grader(username="test_grader_2")
         # No student yet, so count should be 0
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader_2), 0)
         student = self.get_test_student()
         # Student exists, but not assigned to either grader, so count should be 0
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader_2), 0)
         student.grader = grader
         student.save()
         # Student assigned to grader now, but submission is not submitted, so count should still be 0
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader_2), 0)
         submission = self.get_test_submission()  # Uses get_test_assignment() to set submission.assignment
         submission.update(submitted=True)
         # Submission submitted, so count should be 1 for grader, 0 for grader_2
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader), 1)
+        self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader_user=grader.user), 1)
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader_2), 0)
         submission.update(graded=True, graded_by=grader.user)
         # Submission graded by grader, so count should be back to 0
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_graded_submissions_count_by_grader(grader=grader_2), 0)
 
     def test_assignment_not_submitted_submissions_count(self):
@@ -181,20 +188,24 @@ class TestModels(SGATestCase):
         grader_2 = self.get_test_grader(username="test_grader_2")
         # No student yet, so count should be 0
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader_2), 0)
         student = self.get_test_student()
         # Student exists, but not assigned to either grader, so count should be 0
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader_2), 0)
         student.grader = grader
         student.save()
         # Student assigned to grader now, so count should be 1 for grader, and 0 for grader_2
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader), 1)
+        self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader_user=grader.user), 1)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader_2), 0)
         submission = self.get_test_submission()  # Uses get_test_assignment() to set submission.assignment
         submission.update(submitted=True)
         # Submission submitted, so count should be back to 0 for both graders
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader), 0)
+        self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader_2), 0)
 
     def test_submission_grade_display(self):
