@@ -91,3 +91,4 @@ db.sqlite3
 sga-lti.yml
 venv/
 uploaded/
+html_coverage_dir/

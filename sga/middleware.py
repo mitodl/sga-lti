@@ -1,3 +1,7 @@
+"""
+Custom middleware
+"""
+
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.dateparse import parse_datetime
 
@@ -6,7 +10,13 @@ from sga.backend.constants import Roles
 
 
 class SGAMiddleware(object):
-    def process_request(self, request):
+    """
+    Middleware for processing incoming LTI requests
+    """
+    def process_request(self, request):  # pylint: disable=no-self-use
+        """
+        Processes incoming LTI requests
+        """
         if not hasattr(request, "LTI"):
             raise ImproperlyConfigured("LTI middleware not installed")
         if "context_id" in request.LTI:
@@ -15,11 +25,11 @@ class SGAMiddleware(object):
             request.course = course
         else:
             request.course = None
-        
+
         initial_request = (request.method == "POST" and
                            request.POST.get("lti_message_type") == "basic-lti-launch-request")
         if (initial_request and request.user.is_authenticated() and
-            request.course and "resource_link_id" in request.LTI):
+                request.course and "resource_link_id" in request.LTI):
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
             # request.LTI["lis_outcome_service_url"]
@@ -35,7 +45,7 @@ class SGAMiddleware(object):
             else:
                 course.administrators.remove(request.user)
                 course.students.add(request.user)
-        
+
         # Determine roll of user based on database state; this should be accurate
         # because we update the database state on the initial LTI request
         if not request.user.is_authenticated() or not request.course:

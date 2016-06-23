@@ -1,3 +1,9 @@
+"""
+Constant definitions
+"""
+
+
+# Datetime formats
 SGA_DATETIME_FORMAT = "l, F j, Y, g:iA e"
 EPOCH_FORMAT = "U"
 
@@ -9,11 +15,15 @@ STUDENT_TO_GRADER_CONFIRM = "Are you sure you want to change this student into a
 UNASSIGN_GRADER_CONFIRM = ("Are you sure you want to unassign the grader from this student? " +
                            "(You can reassign the same grader or a new grader after this action.)")
 UNASSIGN_STUDENT_CONFIRM = ("Are you sure you want to unassign this student from this grader? " +
-                           "(You can reassign the same grader or a new grader after this action.)")
+                            "(You can reassign the same grader or a new grader after this action.)")
 
 VALID_FILE_UPLOAD_EXTENSIONS = [".pdf"]
 
+
 class Roles():
+    """
+    Role definitions
+    """
     student = "student"
     grader = "grader"
     admin = "admin"
