@@ -10,6 +10,12 @@ from sga.backend.constants import Roles
 from sga.models import Assignment, Course, Submission, Student, Grader
 
 
+DEFAULT_STUDENT_USERNAME = "test_student_id"
+DEFAULT_GRADER_USERNAME = "test_grader_id"
+DEFAULT_ADMIN_USERNAME = "test_admin_id"
+DEFAULT_ASSIGNMENT_EDX_ID = "test_assignment"
+
+
 class TestViews(TestCase):  # pylint: disable=too-many-public-methods
     """
     Test that the views work as expected.
@@ -45,6 +51,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
     def log_in_as(self, role):
         """
         Logs in as the role provided
+        @param role: (str) role
         """
         if role == Roles.student:
             self.log_in_as_student()
@@ -60,7 +67,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         Logs in as an admin in the test course
         """
-        user, _ = self.user_model.objects.get_or_create(username="test_admin_id")
+        user, _ = self.user_model.objects.get_or_create(username=DEFAULT_ADMIN_USERNAME)
         course = self.get_test_course()
         course.administrators.add(user)
         self.client.force_login(user)
@@ -96,13 +103,15 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         return Course.objects.get_or_create(edx_id="test_course")[0]
 
-    def get_test_assignment(self):
+    def get_test_assignment(self, edx_id=DEFAULT_ASSIGNMENT_EDX_ID):
         """
         Creates or retrieves an assignment object for testing. Returns the Assignment object.
         Returns the Assignment object.
+
+        @param edx_id: (optional[str]) edx_id for Assignment to be created/retrieved
         """
         return Assignment.objects.get_or_create(
-            edx_id="test_assignment",
+            edx_id=edx_id,
             course=self.get_test_course()
         )[0]
 
@@ -112,27 +121,30 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         return self.user_model.objects.get_or_create(username="test_user_id")[0]
 
-    def get_test_student(self):
+    def get_test_student(self, username=DEFAULT_STUDENT_USERNAME):
         """
         Creates or retrieves a user object for testing and attaches it to a course as a student.
         Returns the Student object.
+        @param username: (optional[str]) username for User
         """
-        student_user, _ = self.user_model.objects.get_or_create(username="test_student_id")
+        student_user, _ = self.user_model.objects.get_or_create(username=username)
         course = self.get_test_course()
         student, _ = Student.objects.get_or_create(course=course, user=student_user)
         return student
 
-    def get_test_student_user(self):
+    def get_test_student_user(self, username=DEFAULT_STUDENT_USERNAME):
         """
         Returns the User object attached to the Student from get_test_student()
+        @param username: (optional[str]) username for User
         """
-        student = self.get_test_student()
+        student = self.get_test_student(username=username)
         return student.user
 
-    def get_test_grader(self, username="test_grader_id"):
+    def get_test_grader(self, username=DEFAULT_GRADER_USERNAME):
         """
         Creates or retrieves a user object for testing and attaches it to a course as a grader.
         Returns the Grader object
+        @param username: (optional[str]) username for User
         """
         grader_user, _ = self.user_model.objects.get_or_create(username=username)
         course = self.get_test_course()
@@ -146,12 +158,13 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         grader = self.get_test_grader()
         return grader.user
 
-    def get_test_submission(self):
+    def get_test_submission(self, student_username=DEFAULT_STUDENT_USERNAME):
         """
         Creates or retrieves a submission object for testing. Returns the Submission object.
+        @param username: (optional[str]) username for student User attached to Submission
         """
         return Submission.objects.get_or_create(
-            student=self.get_test_student_user(),
+            student=self.get_test_student_user(username=student_username),
             assignment=self.get_test_assignment()
         )[0]
 
@@ -174,9 +187,9 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
 
         @param url_path: (str) url path for self.client.get()
         @param role: (str) role to log in as; must be in of [Roles.student, Roles.grader, Roles.admin]
-        @param template: (str) template path
-        @param context_keys: (list) keys expected to be in context
-        @param contains: (str) str expected to occur in html of view
+        @param template: (optional[str]) template path
+        @param context_keys: (optional[list]) keys expected to be in context
+        @param contains: (optional[str]) str expected to occur in html of view
         """
         self.log_in_as(role)
         response = self.client.get(url_path, follow=True)
@@ -261,6 +274,11 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         student_user = self.get_test_student_user()
         assignment = self.get_test_assignment()
+        # Create another submission to for next_not_graded_submission link in view function
+        another_submission = self.get_test_submission(student_username="test_student_2_id")
+        another_submission.submitted = True
+        another_submission.graded = True
+        another_submission.save()
         kwargs = {"assignment_id": assignment.id, "student_user_id": student_user.id}
         url = reverse("view_submission_as_staff", kwargs=kwargs)
         for role in [Roles.grader, Roles.admin]:
@@ -282,6 +300,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         Verify view assignment is as expected
         """
         assignment = self.get_test_assignment()
+        self.get_test_student()  # Create a student for testing view
         url = reverse("view_assignment", kwargs={"assignment_id": assignment.id})
         for role in [Roles.grader, Roles.admin]:
             self.do_test_successful_view(
@@ -304,6 +323,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         Verify view student list page is as expected
         """
         course = self.get_test_course()
+        self.get_test_student()  # Create a student for testing view
         url = reverse("view_student_list", kwargs={"course_id": course.id})
         for role in [Roles.grader, Roles.admin]:
             self.do_test_successful_view(
@@ -326,6 +346,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         Verify view assignment list page is as expected
         """
         course = self.get_test_course()
+        self.get_test_assignment()  # Create an assignment for testing view
         url = reverse("view_assignment_list", kwargs={"course_id": course.id})
         for role in [Roles.grader, Roles.admin]:
             self.do_test_successful_view(
@@ -371,6 +392,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         student_user = self.get_test_student_user()
         course = self.get_test_course()
+        self.get_test_assignment()  # Create assignment for testing view
         url = reverse("view_student", kwargs={"course_id": course.id, "student_user_id": student_user.id})
         self.do_test_successful_view(
             url,
@@ -392,6 +414,7 @@ class TestViews(TestCase):  # pylint: disable=too-many-public-methods
         """
         grader_user = self.get_test_grader_user()
         course = self.get_test_course()
+        self.get_test_student()  # Create student for testing view
         url = reverse("view_grader", kwargs={"course_id": course.id, "grader_user_id": grader_user.id})
         for role in [Roles.grader, Roles.admin]:
             self.do_test_successful_view(
