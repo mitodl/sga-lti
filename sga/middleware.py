@@ -5,7 +5,7 @@ Custom middleware
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.dateparse import parse_datetime
 
-from sga.models import Course, Assignment
+from sga.models import Course, Assignment, Student
 from sga.backend.constants import Roles
 
 
@@ -44,7 +44,7 @@ class SGAMiddleware(object):
                 course.administrators.add(request.user)
             else:
                 course.administrators.remove(request.user)
-                course.students.add(request.user)
+                Student.objects.get_or_create(course=course, user=request.user)
 
         # Determine roll of user based on database state; this should be accurate
         # because we update the database state on the initial LTI request
