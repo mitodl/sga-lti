@@ -12,7 +12,7 @@ sga-lti
     :target: https://coveralls.io/r/mitodl/sga-lti
 .. image:: https://img.shields.io/github/issues/mitodl/sga-lti.svg
     :target: https://github.com/mitodl/sga-lti/issues
-.. image:: https://img.shields.io/badge/license-AGPLv3-blue.svg
+.. image:: https://img.shields.io/badge/license-BSD-blue.svg
     :target: https://github.com/mitodl/sga-lti/blob/master/LICENSE
 
 an LTI implementation of Staff Graded Assignments, for use with edX
