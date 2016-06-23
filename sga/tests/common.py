@@ -9,9 +9,9 @@ from sga.backend.constants import Roles
 from sga.models import Assignment, Course, Submission, Student, Grader
 
 
-DEFAULT_STUDENT_USERNAME = "test_student_id"
-DEFAULT_GRADER_USERNAME = "test_grader_id"
-DEFAULT_ADMIN_USERNAME = "test_admin_id"
+DEFAULT_STUDENT_USERNAME = "test_student"
+DEFAULT_GRADER_USERNAME = "test_grader"
+DEFAULT_ADMIN_USERNAME = "test_admin"
 DEFAULT_ASSIGNMENT_EDX_ID = "test_assignment"
 
 
@@ -66,10 +66,8 @@ class SGATestCase(TestCase):
         """
         Logs in as an admin in the test course
         """
-        user, _ = self.user_model.objects.get_or_create(username=DEFAULT_ADMIN_USERNAME)
-        course = self.get_test_course()
-        course.administrators.add(user)
-        self.client.force_login(user)
+        admin_user = self.get_test_admin_user()
+        self.client.force_login(admin_user)
         self.setup_lti_params()
 
     def log_in_as_grader(self):
@@ -156,6 +154,12 @@ class SGATestCase(TestCase):
         """
         grader = self.get_test_grader()
         return grader.user
+
+    def get_test_admin_user(self):
+        admin_user, _ = self.user_model.objects.get_or_create(username=DEFAULT_ADMIN_USERNAME)
+        course = self.get_test_course()
+        course.administrators.add(admin_user)
+        return admin_user
 
     def get_test_submission(self, student_username=DEFAULT_STUDENT_USERNAME):
         """

@@ -19,7 +19,7 @@ class TimeStampedModel(models.Model):
 
     def update(self, **kwargs):
         """
-        Automatically update updated_on timestam
+        Automatically update updated_on timestamp
         """
         update_fields = {"updated_on"}
         for k, v in kwargs.items():
@@ -39,29 +39,7 @@ class Grader(models.Model):
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
-    def graded_submissions_count(self):
-        """
-        Returns a count of submission that are graded by this grader
-        """
-        return Submission.objects.filter(
-            graded_by=self.user,
-            assignment__course=self.course,
-            submitted=True,
-            graded=True
-        ).count()
-
-    def not_graded_submissions_count(self):
-        """
-        Returns a count of submission that are submitted but not graded by this grader
-        """
-        return Submission.objects.filter(
-            graded_by=self.user,
-            assignment__course=self.course,
-            submitted=True,
-            graded=False
-        ).count()
-
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.user.get_full_name()
 
     class Meta():
@@ -76,7 +54,7 @@ class Student(models.Model):
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.user.get_full_name()
 
     class Meta():
@@ -118,7 +96,7 @@ class Course(TimeStampedModel):
             assignment__course=self,
             student=student.user,
             submitted=True,
-            graded_at=None
+            graded=False
         ).count()
 
 
@@ -185,7 +163,7 @@ class Assignment(TimeStampedModel):
         if not grader:
             grader = Grader.objects.get(user=grader_user, course=self.course)
         return (grader.students.count()
-                - self.graded_submissions_count_by_grader(grader_user=grader_user)
+                - self.graded_submissions_count_by_grader(grader_user=grader.user)
                 - self.not_graded_submissions_count_by_grader(grader=grader))
 
 
@@ -220,7 +198,10 @@ class Submission(TimeStampedModel):
         """
         Human-readable display of this submission's grade
         """
-        return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)
+        if self.grade:
+            return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)
+        else:
+            return "(Not Graded)"
 
     class Meta:
         unique_together = (("assignment", "student"),)
