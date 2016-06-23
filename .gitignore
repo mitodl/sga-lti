@@ -89,5 +89,5 @@ staticfiles/
 # Project-specific
 db.sqlite3
 sga-lti.yml
-venv/
+html_coverage_dir/
 uploaded/
