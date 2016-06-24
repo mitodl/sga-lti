@@ -17,8 +17,7 @@ def create_mock_data():
         username="admin"
     )
     course = Course.objects.create(
-        edx_id="courseid",
-        name="Course Name"
+        edx_id="courseid"
     )
     course.administrators.add(admin_user)
     grader_user_1 = User.objects.create(
