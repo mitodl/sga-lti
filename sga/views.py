@@ -34,20 +34,13 @@ def index(request):
     """
     Development index
     """
-    course = request.course or Course.objects.first()
-    assignments = course.assignments.all()
-    users = User.objects.all()
-    students = Student.objects.all()
-    graders = Grader.objects.all()
-    admins = course.administrators.all()
-    return render(request, "sga/index.html", context={
-        "course": course,
-        "assignments": assignments,
-        "users": users,
-        "students": students,
-        "graders": graders,
-        "admins": admins
-    })
+    if not request.initial_lti_request:
+        return render(request, "sga/index.html")
+    return redirect(
+        "view_submission",
+        course_id=request.LTI.get("context_id"),
+        assignment_id=request.LTI.get("resource_link_id")
+    )
 
 
 @allowed_roles([Roles.student])

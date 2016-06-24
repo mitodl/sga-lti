@@ -32,6 +32,7 @@ class TimeStampedModel(models.Model):
     class Meta:
         abstract = True
 
+
 class CourseModel(TimeStampedModel):
     """
     Base model for models relating to the course to allow authentication checks
