@@ -57,8 +57,9 @@ class Grader(models.Model):
         """
         Returns a count of submission that are submitted but not graded by this grader
         """
+        student_users = [s.user for s in self.students.all()]
         return Submission.objects.filter(
-            graded_by=self.user,
+            student__in=student_users,
             assignment__course=self.course,
             submitted=True,
             graded=False

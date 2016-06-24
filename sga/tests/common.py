@@ -30,6 +30,7 @@ class SGATestCase(TestCase):
         super(SGATestCase, self).setUp()
         self.client = Client()
         self.user_model = get_user_model()
+        self.default_course = self.get_test_course()
 
     ###
     # Helper functions
