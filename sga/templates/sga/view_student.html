@@ -16,13 +16,13 @@
             if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
                 return false
             }
-            window.location.href = "{% url 'change_student_to_grader' student_user_id=student.user.id %}";
+            window.location.href = "{% url 'change_student_to_grader' course_id=course.id student_user_id=student.user.id %}";
         }
         function unassignGrader() {
             if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
                 return false;
             }
-            window.location.href = "{% url 'unassign_grader' student_user_id=student.user.id %}";
+            window.location.href = "{% url 'unassign_grader' course_id=course.id student_user_id=student.user.id %}";
         }
     </script>
 {% endblock %}
@@ -79,7 +79,7 @@
         {% for assignment in assignments %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment' assignment_id=assignment.id %}">
+                    <a href="{% url 'view_assignment' course_id=course.id assignment_id=assignment.id %}">
                         {{ assignment.name }}
                     </a>
                 </td>
@@ -100,7 +100,7 @@
                 <td>(Pending)</td>
                 {% endif %}
                 <td>
-                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student.user.id %}">
+                    <a href="{% url 'view_submission_as_staff' course_id=course.id assignment_id=assignment.id student_user_id=student.user.id %}">
                         View Submission
                     </a>
                 </td>

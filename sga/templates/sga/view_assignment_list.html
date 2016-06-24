@@ -52,7 +52,7 @@
         {% for assignment in assignments %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}">
+                    <a href="{% url 'view_assignment' course_id=course.id assignment_id=assignment.edx_id %}">
                         {{ assignment.name }}
                     </a>
                 </td>

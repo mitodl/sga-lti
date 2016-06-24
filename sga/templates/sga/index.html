@@ -53,7 +53,7 @@
     <ul>
     {% for assignment in assignments %}
         <li>
-            <a href="{% url 'view_submission_as_student' assignment_id=assignment.id %}" target="_blank">
+            <a href="{% url 'view_submission_as_student' course_id=course.id assignment_id=assignment.id %}" target="_blank">
                 {{ assignment.name }}
             </a>
         </li>
@@ -64,7 +64,7 @@
     {% for assignment in assignments %}
     {% for student in students %}
         <li>
-            <a href="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student.user.id %}"
+            <a href="{% url 'view_submission_as_staff' course_id=course.id assignment_id=assignment.id student_user_id=student.user.id %}"
                target="_blank">
                 {{ assignment.name }} for {{ student.user.username }}
             </a>
@@ -130,7 +130,7 @@
     <ul>
     {% for assignment in assignments %}
         <li>
-            <a href="{% url 'view_assignment' assignment_id=assignment.id %}" target="_blank">
+            <a href="{% url 'view_assignment' course_id=course.id assignment_id=assignment.id %}" target="_blank">
                 {{ assignment.name }}
             </a>
         </li>

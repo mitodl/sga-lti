@@ -11,7 +11,7 @@
     {% include "common/submission_status.html" %}
     
     {% if submission.submitted and not submission.graded or submission.submitted and role == Roles.admin %}
-    <form action="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student_user.id %}" class="form-horizontal"
+    <form action="{% url 'view_submission_as_staff' course_id=course.id assignment_id=assignment.id student_user_id=student_user.id %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
@@ -35,7 +35,7 @@
             </div>
             {% if role == Roles.admin %}
             <div class="col-sm-6">
-                <a href="{% url 'unsubmit_submission' assignment_id=submission.assignment.id student_user_id=student_user.id %}"
+                <a href="{% url 'unsubmit_submission' course_id=course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
                    class="btn btn-primary btn-block">
                     Mark as Not Submitted
                 </a>
