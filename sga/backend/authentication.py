@@ -20,7 +20,7 @@ def allowed_roles(allowed_roles_list):
         @wraps(view_func)
         def _wrapped_view(request, course_id, *args, **kwargs):
             """ Wrapped function """
-            if request.session.course_roles[course_id] in allowed_roles_list:
+            if request.session.course_roles.get(course_id) in allowed_roles_list:
                 return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()
         return _wrapped_view
@@ -28,10 +28,14 @@ def allowed_roles(allowed_roles_list):
 
 
 def get_role(user, course_id):
-    """ Returns the roll a user has in a course given the course id """
+    """
+    Returns the role a user has in a course given the course id
+    """
     if user.administrator_courses.filter(id=course_id).count():
         return Roles.admin
     elif user.grader_courses.filter(id=course_id).count():
         return Roles.grader
-    else:
+    elif user.student_courses.filter(id=course_id).count():
         return Roles.student
+    else:
+        return Roles.none

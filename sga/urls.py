@@ -27,7 +27,7 @@ from sga_lti import settings
 
 
 urlpatterns = [
-    url(r"^$", index, name="sga-index"),
+    url(r"^$", index, name="sga_index"),
     url(r"^dev-start/(?P<username>[a-zA-Z0-9-_]{0,50})$", dev_start, name="dev_start"),
     url(r"^view-student-list/(?P<course_id>\d+)$", view_student_list, name="view_student_list"),
     url(r"^view-grader-list/(?P<course_id>\d+)$", view_grader_list, name="view_grader_list"),

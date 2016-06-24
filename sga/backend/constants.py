@@ -27,3 +27,4 @@ class Roles():
     student = "student"
     grader = "grader"
     admin = "admin"
+    none = "none"

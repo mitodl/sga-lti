@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 
+from sga.backend.authentication import get_role
 from sga.backend.constants import Roles
 from sga.models import Assignment, Course, Submission, Student, Grader
 
@@ -12,7 +13,9 @@ from sga.models import Assignment, Course, Submission, Student, Grader
 DEFAULT_STUDENT_USERNAME = "test_student"
 DEFAULT_GRADER_USERNAME = "test_grader"
 DEFAULT_ADMIN_USERNAME = "test_admin"
+DEFAULT_USER_USERNAME = "test_user_id"
 DEFAULT_ASSIGNMENT_EDX_ID = "test_assignment"
+DEFAULT_TEST_COURSE_ID = "test_course"
 
 
 class SGATestCase(TestCase):
@@ -35,17 +38,22 @@ class SGATestCase(TestCase):
     ###
     # Helper functions
     ###
-    def setup_lti_params(self):
+    def setup_session_params(self, user):
         """
-        Initializes LTI parameters in session
+        Initializes session parameters (assumes test course)
         """
+        # LTI params
         lti_params = {
-            "context_id": "test_course",
-            "resource_link_id": "test_assignment",
-            "user_id": "test_user_id",
+            "context_id": DEFAULT_TEST_COURSE_ID,
+            "resource_link_id": DEFAULT_ASSIGNMENT_EDX_ID,
+            "user_id": DEFAULT_USER_USERNAME,
         }
         session = self.client.session
         session["LTI_LAUNCH"] = lti_params
+        # Role params
+        course = self.get_test_course()
+        session.course_roles = {}
+        session.course_roles[str(course.id)] = get_role(user, course.id)
         session.save()
 
     def log_in_as(self, role):
@@ -69,15 +77,15 @@ class SGATestCase(TestCase):
         """
         admin_user = self.get_test_admin_user()
         self.client.force_login(admin_user)
-        self.setup_lti_params()
+        self.setup_session_params(admin_user)
 
     def log_in_as_grader(self):
         """
         Logs in as a grader in the test course
         """
-        grader = self.get_test_grader()
-        self.client.force_login(grader.user)
-        self.setup_lti_params()
+        grader_user = self.get_test_grader_user()
+        self.client.force_login(grader_user)
+        self.setup_session_params(grader_user)
 
     def log_in_as_student(self):
         """
@@ -85,7 +93,7 @@ class SGATestCase(TestCase):
         """
         student_user = self.get_test_student_user()
         self.client.force_login(student_user)
-        self.setup_lti_params()
+        self.setup_session_params(student_user)
 
     def log_in_as_non_role_user(self):
         """
@@ -93,13 +101,13 @@ class SGATestCase(TestCase):
         """
         user = self.get_test_user()
         self.client.force_login(user)
-        self.setup_lti_params()
+        self.setup_session_params(user)
 
     def get_test_course(self):  # pylint: disable=no-self-use
         """
         Creates or retrieves a course object for testing. Returns the Course object.
         """
-        return Course.objects.get_or_create(edx_id="test_course")[0]
+        return Course.objects.get_or_create(edx_id=DEFAULT_TEST_COURSE_ID)[0]
 
     def get_test_assignment(self, edx_id=DEFAULT_ASSIGNMENT_EDX_ID):
         """
@@ -117,7 +125,7 @@ class SGATestCase(TestCase):
         """
         Creates or retrieves test user (with no role). Returns the User object.
         """
-        return self.user_model.objects.get_or_create(username="test_user_id")[0]
+        return self.user_model.objects.get_or_create(username=DEFAULT_USER_USERNAME)[0]
 
     def get_test_student(self, username=DEFAULT_STUDENT_USERNAME):
         """

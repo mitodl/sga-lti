@@ -19,8 +19,8 @@ class SGAMiddleware(object):
         """
         if not hasattr(request, "LTI"):
             raise ImproperlyConfigured("LTI middleware not installed")
-        if not hasattr(request.session, "course_rolls"):
-            request.session.course_rolls = {}
+        if not hasattr(request.session, "course_roles"):
+            request.session.course_roles = {}
 
         initial_lti_request = (request.method == "POST" and
                                request.POST.get("lti_message_type") == "basic-lti-launch-request")
@@ -59,7 +59,8 @@ class SGAMiddleware(object):
                 # student object, since they are promoted from students and
                 # if they are ever demoted, their student data should still exist
                 Student.objects.get_or_create(course=course, user=request.user)
-            # We only check for roll on the initial LTI request since the user's session
-            # in our tool is expected to be short-lived enough to not warrant
-            # checking on every request
-            request.session.course_rolls[course.id] = get_role(request.user, course.id)
+            # We only check for role on the initial LTI request since the user's session in our tool
+            # is expected to be short-lived enough to not warrant checking on every request.
+            # We also need to cast str on course.id because the url parameters are passed as string
+            # to the decorator and views.
+            request.session.course_roles[str(course.id)] = get_role(request.user, course.id)

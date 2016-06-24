@@ -375,4 +375,4 @@ def dev_start(request, username):  # pragma: no cover
         }
         for var, val in SESSION.items():
             request.session[var] = val
-    return redirect("sga-index")
+    return redirect("sga_index")
