@@ -357,7 +357,7 @@ def view_grader_list(request, course_id):
     })
 
 
-def dev_start(request, username):
+def dev_start(request, username):  # pragma: no cover
     """
     For local development only - sets session variables and authenticates user
     """
