@@ -5,7 +5,7 @@ Custom middleware
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.dateparse import parse_datetime
 
-from sga.models import Course, Assignment, Student
+from sga.models import Course, Assignment, Student, Grader
 from sga.backend.constants import Roles
 
 
@@ -19,6 +19,9 @@ class SGAMiddleware(object):
         """
         if not hasattr(request, "LTI"):
             raise ImproperlyConfigured("LTI middleware not installed")
+        if not hasattr(request.session, "course_rolls"):
+            request.session.course_rolls = {}
+
         if "context_id" in request.LTI:
             # Get course
             course, _ = Course.objects.get_or_create(edx_id=request.LTI["context_id"])
@@ -38,21 +41,31 @@ class SGAMiddleware(object):
                 due_date = parse_datetime(due_date)
             defaults = {"course": request.course, "due_date": due_date,
                         "name": request.POST.get("custom_component_display_name")}
-            Assignment.objects.update_or_create(edx_id=request.LTI["resource_link_id"],
-                                                defaults=defaults)
+            Assignment.objects.update_or_create(
+                edx_id=request.LTI["resource_link_id"],
+                defaults=defaults
+            )
             if "Instructor" in request.LTI.get("roles", []):
                 course.administrators.add(request.user)
+                Grader.objects.filter(user=request.user, course=request.course).delete()
+                Student.objects.filter(user=request.user, course=request.course).delete()
             else:
                 course.administrators.remove(request.user)
+                # Ensure the student object exists; graders also should have a
+                # student object, since they are promoted from students and
+                # if they are ever demoted, their student data should still exist
                 Student.objects.get_or_create(course=course, user=request.user)
+            # We only check for roll on the initial LTI request since the user's session
+            # in our tool is expected to be short-lived enough to not warrant
+            # checking on every request
+            request.session.course_rolls[course.id] = get_roll(request.user, course)
 
-        # Determine roll of user based on database state; this should be accurate
-        # because we update the database state on the initial LTI request
-        if not request.user.is_authenticated() or not request.course:
-            request.role = None
-        elif course.has_admin(request.user):
-            request.role = Roles.admin
-        elif course.has_grader(request.user):
-            request.role = Roles.grader
-        else:
-            request.role = Roles.student
+
+def get_roll(user, course):
+    """ Returns the roll a user has in a course given the course id """
+    if user.administrator_courses.filter(id=course.id).count():
+        return Roles.admin
+    elif user.grader_courses.filter(id=course.id).count():
+        return Roles.grader
+    else:
+        return Roles.student

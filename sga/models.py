@@ -8,6 +8,8 @@ from django.db import models
 
 from sga.backend.files import student_submission_file_path, grader_submission_file_path
 from sga.backend.validators import validate_file_extension
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import PermissionDenied
 
 
 class TimeStampedModel(models.Model):
@@ -30,8 +32,22 @@ class TimeStampedModel(models.Model):
     class Meta:
         abstract = True
 
+class CourseModel(TimeStampedModel):
+    """
+    Base model for models relating to the course to allow authentication checks
+    """
+    @classmethod
+    def get_or_404_check_course(cls, course_id, **kwargs):
+        obj = get_object_or_404(cls, **kwargs)
+        if obj.course_id != course_id:
+            raise PermissionDenied()
+        return obj
 
-class Grader(models.Model):
+    class Meta:
+        abstract = True
+
+
+class Grader(CourseModel):
     """
     Grader model (intermediate between Course and User)
     """
@@ -75,7 +91,7 @@ class Grader(models.Model):
         unique_together = (("user", "course"),)
 
 
-class Student(models.Model):
+class Student(CourseModel):
     """
     Student model (intermediate between Course and User)
     """
@@ -103,7 +119,7 @@ class Course(TimeStampedModel):
         """
         Returns a boolean of whether or not user is a Student in this course
         """
-        return self.students.filter(pk=user.pk).exists()
+        return self.students.filter(pk=user.pk).exists() and not self.has_grader(user)
 
     def has_grader(self, user):
         """
@@ -129,7 +145,7 @@ class Course(TimeStampedModel):
         ).count()
 
 
-class Assignment(TimeStampedModel):
+class Assignment(CourseModel):
     """
     Assignment model
     """
@@ -182,7 +198,8 @@ class Assignment(TimeStampedModel):
         """
         Returns a count of submissions for this assignment that are not submitted
         """
-        students_in_course = self.course.students.count()
+        # Graders all have student objects
+        students_in_course = self.course.students.count() - self.course.graders.count()
         return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
     def not_submitted_submissions_count_by_grader(self, grader=None, grader_user=None):

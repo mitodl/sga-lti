@@ -17,9 +17,9 @@ def allowed_roles(allowed_roles_list):
     def decorator(view_func):
         """ Decorator """
         @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
+        def _wrapped_view(request, course_id, *args, **kwargs):
             """ Wrapped function """
-            if request.role in allowed_roles_list:
+            if request.session.course_roles[course_id] in allowed_roles_list:
                 return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()
         return _wrapped_view
