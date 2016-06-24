@@ -27,11 +27,11 @@ def allowed_roles(allowed_roles_list):
     return decorator
 
 
-def get_roll(user, course):
+def get_role(user, course_id):
     """ Returns the roll a user has in a course given the course id """
-    if user.administrator_courses.filter(id=course.id).count():
+    if user.administrator_courses.filter(id=course_id).count():
         return Roles.admin
-    elif user.grader_courses.filter(id=course.id).count():
+    elif user.grader_courses.filter(id=course_id).count():
         return Roles.grader
     else:
         return Roles.student

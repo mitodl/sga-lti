@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.utils.dateparse import parse_datetime
 
 from sga.models import Course, Assignment, Student, Grader
-from sga.backend.authentication import get_roll
+from sga.backend.authentication import get_role
 
 
 class SGAMiddleware(object):
@@ -62,4 +62,4 @@ class SGAMiddleware(object):
             # We only check for roll on the initial LTI request since the user's session
             # in our tool is expected to be short-lived enough to not warrant
             # checking on every request
-            request.session.course_rolls[course.id] = get_roll(request.user, course)
+            request.session.course_rolls[course.id] = get_role(request.user, course.id)

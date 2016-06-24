@@ -10,7 +10,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from sga.backend.authentication import allowed_roles
+from sga.backend.authentication import allowed_roles, get_role
 from sga.backend.constants import (
     Roles,
     GRADER_TO_STUDENT_CONFIRM,
@@ -36,14 +36,16 @@ def index(request):
     """
     if not request.initial_lti_request:
         return render(request, "sga/index.html")
-    return redirect(
-        "view_submission",
-        course_id=request.LTI.get("context_id"),
-        assignment_id=request.LTI.get("resource_link_id")
-    )
+    course_id = request.LTI.get("context_id")
+    assignment_id = request.LTI.get("resource_link_id")
+    user_role = get_role(request.user, course_id)
+    if user_role == Roles.student:
+        return redirect("view-submission-as-student", course_id=course_id, assignment_id=assignment_id)
+    if user_role in [Roles.admin, Roles.grader]:
+        return redirect("view-assigment", course_id=course_id, assignment_id=assignment_id)
+    raise Exception("Bad role %s" % user_role)
 
-
-@allowed_roles([Roles.student])
+@allowed_roles([Roles.student, Roles.grader, Roles.admin])
 def view_submission_as_student(request, course_id, assignment_id):
     """
     View submission (for student)
