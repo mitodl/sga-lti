@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Site Map (DEVELOPMENT ONLY){% endblock %}
+
+{% block content %}
+<div id="container">
+    <h1>SGA-LTI</h1>
+    
+    <hr>
+    
+    <h3>Development Readme</h3>
+    <p>
+        This page works best with the mock data created via create_mock_data.py. If you haven't created these data yet,
+        the following will get you set up.
+    </p>
+    <ol>
+        <li>
+            Drop your local database so we can run a fresh install of mock data. The easiest way is to just delete your
+            default database file (e.g. db.sqlite3).
+        </li>
+        <li>
+            Regardless if whether or not you dropped your local database, run <pre>python manage.py migrate</pre> to
+            create/recreate missing tables and migrate existing data.
+        </li>
+        <li>Once you do that, you can use the links under "Authentication" to log in as the different users.</li>
+        <li>
+            The rest of the accessible pages can be found below, labeled with the user roles allowed to view that page
+            (in parentheses). Certain pages will also have certain actions only accessible to certain roles that won't
+            show up unless you're logged in with a user with that role.
+        </li>
+    </ol>
+    <p>
+        Note: We are still in the process of integrating authentication with LTI as well as developing functionality,
+        backend validation, etc.
+    </p>
+    
+    <hr>
+    
+    <br>
+    
+    <h4>START</h4>
+    <p><b>Authentication</b></p>
+    <ul>
+    {% for user in users %}
+        <li><a href="{# url 'dev_start' username=user.username #}">Log in as {{ user.username }}</a></li>
+    {% endfor %}
+    </ul>
+    
+    <br>
+    
+    <h4>SUBMISSIONS</h4>
+    <p><b>View submission as student (student)</b></p>
+    <ul>
+    {% for assignment in assignments %}
+        <li>
+            <a href="{% url 'view_submission_as_student' course_id=course.id assignment_id=assignment.id %}" target="_blank">
+                {{ assignment.name }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+    <p><b>View submission as staff (grader, admin)</b></p>
+    <ul>
+    {% for assignment in assignments %}
+    {% for student in students %}
+        <li>
+            <a href="{% url 'view_submission_as_staff' course_id=course.id assignment_id=assignment.id student_user_id=student.user.id %}"
+               target="_blank">
+                {{ assignment.name }} for {{ student.user.username }}
+            </a>
+        </li>
+    {% endfor %}
+    {% endfor %}
+    </ul>
+    
+    <br>
+    
+    <h4>LISTS</h4>
+    <p><b>View student list (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_student_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
+            </a>
+        </li>
+    </ul>
+    <p><b>View grader list (admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_grader_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
+            </a>
+        </li>
+    </ul>
+    <p><b>View assignment list (grader, admin)</b></p>
+    <ul>
+        <li>
+            <a href="{% url 'view_assignment_list' course_id=course.id %}" target="_blank">
+                {{ course.edx_id }}
+            </a>
+        </li>
+    </ul>
+    
+    <br>
+    
+    <h4>SINGLE INSTANCES</h4>
+    <p><b>View student (student, grader, admin)</b></p>
+    <ul>
+    {% for student in students %}
+        <li>
+            <a href="{% url 'view_student' course_id=course.id student_user_id=student.user.id %}"
+               target="_blank">
+                {{ student.user.username }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+    <p><b>View grader (grader, admin)</b></p>
+    <ul>
+    {% for grader in graders %}
+        <li>
+            <a href="{% url 'view_grader' course_id=course.id grader_user_id=grader.user.id %}"
+               target="_blank">
+                {{ grader.user.username }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+    <p><b>View assignment (grader, admin)</b></p>
+    <ul>
+    {% for assignment in assignments %}
+        <li>
+            <a href="{% url 'view_assignment' course_id=course.id assignment_id=assignment.id %}" target="_blank">
+                {{ assignment.name }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<br>
+<br>
+{% endblock %}
+
