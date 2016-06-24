@@ -45,6 +45,7 @@ def index(request):
         return redirect("view-assigment", course_id=course_id, assignment_id=assignment_id)
     raise Exception("Bad role %s" % user_role)
 
+
 @allowed_roles([Roles.student, Roles.grader, Roles.admin])
 def view_submission_as_student(request, course_id, assignment_id):
     """
