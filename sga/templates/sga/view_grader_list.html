@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% load math %}
 
 {% block title %}Grader List{% endblock %}
 
@@ -65,7 +64,7 @@
                 <td>{{ grader.max_students }}</td>
                 <td>{{ grader.graded_submissions_count }}</td>
                 <td>{{ grader.not_graded_submissions_count }}</td>
-                <td>{{ grader.max_students|subtract:grader.students.count }}</td>
+                <td>{{ grader.available_student_slots_count }}</td>
             </tr>
         {% endfor %}    
         </tbody>

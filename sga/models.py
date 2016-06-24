@@ -42,6 +42,34 @@ class Grader(models.Model):
     def __str__(self):  # pragma: no cover
         return self.user.get_full_name()
 
+    def graded_submissions_count(self):
+        """
+        Returns a count of submission that are graded by this grader
+        """
+        return Submission.objects.filter(
+            graded_by=self.user,
+            assignment__course=self.course,
+            submitted=True,
+            graded=True
+        ).count()
+
+    def not_graded_submissions_count(self):
+        """
+        Returns a count of submission that are submitted but not graded by this grader
+        """
+        return Submission.objects.filter(
+            graded_by=self.user,
+            assignment__course=self.course,
+            submitted=True,
+            graded=False
+        ).count()
+
+    def available_student_slots_count(self):
+        """
+        Returns a count of the number of students this grader can still accept
+        """
+        return self.max_students - self.students.count()
+
     class Meta():
         unique_together = (("user", "course"),)
 
