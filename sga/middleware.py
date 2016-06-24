@@ -43,8 +43,8 @@ class SGAMiddleware(object):
             due_date = request.POST.get("custom_component_due_date")
             if due_date:
                 due_date = parse_datetime(due_date)
-            defaults = {"course": course, "due_date": due_date,
-                        "name": request.POST.get("custom_component_display_name")}
+            name =request.POST.get("custom_component_display_name", request.LTI["resource_link_id"])
+            defaults = {"course": course, "due_date": due_date, "name": name}
             Assignment.objects.update_or_create(
                 edx_id=request.LTI["resource_link_id"],
                 defaults=defaults
