@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.utils.dateparse import parse_datetime
 
 from sga.models import Course, Assignment, Student, Grader
-from sga.backend.constants import Roles
+from sga.backend.authentication import get_roll
 
 
 class SGAMiddleware(object):
@@ -63,13 +63,3 @@ class SGAMiddleware(object):
             # in our tool is expected to be short-lived enough to not warrant
             # checking on every request
             request.session.course_rolls[course.id] = get_roll(request.user, course)
-
-
-def get_roll(user, course):
-    """ Returns the roll a user has in a course given the course id """
-    if user.administrator_courses.filter(id=course.id).count():
-        return Roles.admin
-    elif user.grader_courses.filter(id=course.id).count():
-        return Roles.grader
-    else:
-        return Roles.student

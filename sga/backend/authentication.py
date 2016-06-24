@@ -3,8 +3,9 @@ Authentication decorators
 """
 
 from functools import wraps
-
 from django.http import HttpResponseForbidden
+
+from sga.backend.constants import Roles
 
 
 def allowed_roles(allowed_roles_list):
@@ -24,3 +25,13 @@ def allowed_roles(allowed_roles_list):
             return HttpResponseForbidden()
         return _wrapped_view
     return decorator
+
+
+def get_roll(user, course):
+    """ Returns the roll a user has in a course given the course id """
+    if user.administrator_courses.filter(id=course.id).count():
+        return Roles.admin
+    elif user.grader_courses.filter(id=course.id).count():
+        return Roles.grader
+    else:
+        return Roles.student
