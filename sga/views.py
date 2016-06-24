@@ -26,7 +26,7 @@ from sga.forms import (
     AssignGraderToStudentForm,
     AssignStudentToGraderForm
 )
-from sga.models import Assignment, Submission, Course, Grader, Student, User
+from sga.models import Assignment, Submission, Course, Grader, Student
 
 
 @csrf_exempt

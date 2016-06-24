@@ -3,13 +3,13 @@ Model definitions
 """
 
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.shortcuts import get_object_or_404
 
 from sga.backend.files import student_submission_file_path, grader_submission_file_path
 from sga.backend.validators import validate_file_extension
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
 
 
 class TimeStampedModel(models.Model):
@@ -39,6 +39,10 @@ class CourseModel(TimeStampedModel):
     """
     @classmethod
     def get_or_404_check_course(cls, course_id, **kwargs):
+        """
+        Runs a get_or_404 on the object class with kwargs. If an object is returned, checks if the object is
+        part of the course with id course_id.
+        """
         obj = get_object_or_404(cls, **kwargs)
         if obj.course_id != course_id:
             raise PermissionDenied()
