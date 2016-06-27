@@ -12,18 +12,6 @@
     <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
     <script>
         $("#student-assignment-list").DataTable();
-        function changeStudentToGrader() {
-            if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
-                return false
-            }
-            window.location.href = "{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}";
-        }
-        function unassignGrader() {
-            if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
-                return false;
-            }
-            window.location.href = "{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}";
-        }
     </script>
 {% endblock %}
 
@@ -116,9 +104,12 @@
         <div class="panel-heading">Actions</div>
         <div class="panel-body">
             <div class="col-sm-6">
-                <button class="btn btn-primary btn-block" onclick="changeStudentToGrader()">
-                    Change Student to Grader
-                </button>
+                <form action="{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}"
+                      method="post" onsubmit="return confirm('{{ STUDENT_TO_GRADER_CONFIRM }}');">
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Change Student to Grader
+                    </button>
+                </form>
             </div>
             <br class="visible-xs">
             <div class="col-sm-6">
@@ -143,9 +134,12 @@
                     {% endif %}
                 </form>
             {% else %}
-                <button class="btn btn-warning btn-block" onclick="unassignGrader()">
-                    Unassign Grader
-                </button>
+                <form action="{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}"
+                      method="post" onsubmit="return confirm('{{ UNASSIGN_GRADER_CONFIRM }}');">
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Unassign Grader
+                    </button>
+                </form>
             {% endif %}
             </div>
         </div>

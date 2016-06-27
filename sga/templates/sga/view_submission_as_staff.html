@@ -35,10 +35,12 @@
             </div>
             {% if role == Roles.admin %}
             <div class="col-sm-6">
-                <a href="{% url 'unsubmit_submission' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
-                   class="btn btn-primary btn-block">
-                    Mark as Not Submitted
-                </a>
+                <form action="{% url 'unsubmit_submission' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
+                      method="post" onsubmit="return confirm('{{ UNSUBMIT_CONFIRM }}');">
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Mark as Not Submitted
+                    </button>
+                </form>
             </div>
             {% endif %}
         </div>

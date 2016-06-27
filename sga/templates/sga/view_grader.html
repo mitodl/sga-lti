@@ -18,18 +18,6 @@
     <script>
         $("#student-list").DataTable();
         $("#grader-assignment-list").DataTable();
-        function changeGraderToStudent() {
-            if (!confirm("{{ GRADER_TO_STUDENT_CONFIRM }}")) {
-                return false
-            }
-            window.location.href = "{% url 'change_grader_to_student' course_id=request.course.id grader_user_id=grader.user.id %}";
-        }
-        function unassignStudent(studentName, url) {
-            if (!confirm(studentName + ":\n\n{{ UNASSIGN_STUDENT_CONFIRM }}")) {
-                return false;
-            }
-            window.location.href = url;
-        }
     </script>
 {% endblock %}
 
@@ -92,10 +80,12 @@
                 <td>{{ student.not_graded_submissions_count }}</td>
                 {% if role == Roles.admin %}
                 <td>
-                    <a href="javascript:void(0)"
-                       onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}')">
-                        Unassign Student
-                    </a>
+                    <form action="{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}"
+                          method="post" onsubmit="return confirm('{{ student }}:\n\n{{ UNASSIGN_STUDENT_CONFIRM }}')">
+                        <button class="btn btn-xs btn-warning" type="submit">
+                            Unassign Student
+                        </button>
+                    </form>
                 </td>
                 {% endif %}
             </tr>
@@ -204,15 +194,12 @@
             <br>
             <div class="row">
                 <div class="col-sm-6">
-                    <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
-                        Change Grader to Student
-                    </button>
-                </div>
-                <br class="visible-xs">
-                <div class="col-sm-6">
-                    <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
-                        Unassign All Students
-                    </button>
+                    <form action="{% url 'change_grader_to_student' course_id=request.course.id grader_user_id=grader.user.id %}"
+                          method="post" onsubmit="return confirm('{{ GRADER_TO_STUDENT_CONFIRM }}');">
+                        <button class="btn btn-primary btn-block" type="submit">
+                            Change Grader to Student
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

@@ -16,6 +16,7 @@ UNASSIGN_GRADER_CONFIRM = ("Are you sure you want to unassign the grader from th
                            "(You can reassign the same grader or a new grader after this action.)")
 UNASSIGN_STUDENT_CONFIRM = ("Are you sure you want to unassign this student from this grader? " +
                             "(You can reassign the same grader or a new grader after this action.)")
+UNSUBMIT_CONFIRM = "Are you sure you want to mark this submission as not submitted?"
 
 VALID_FILE_UPLOAD_EXTENSIONS = [".pdf"]
 

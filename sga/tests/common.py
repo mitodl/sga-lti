@@ -185,7 +185,7 @@ class SGATestCase(TestCase):
             assignment=self.get_test_assignment()
         )[0]
 
-    def do_test_forbidden_view(self, url_path, role):
+    def do_test_forbidden_view(self, url_path, role, method="get"):
         """
         Runs general tests for view functions to ensure the view is forbidden for the role provided
 
@@ -193,7 +193,10 @@ class SGATestCase(TestCase):
         @param role: (st) role to log in as; must be in of [Roles.student, Roles.grader, Roles.admin]
         """
         self.log_in_as(role)
-        response = self.client.get(url_path, follow=True)
+        if method == "get":
+            response = self.client.get(url_path, follow=True)
+        elif method == "post":
+            response = self.client.post(url_path, follow=True)
         self.assertEqual(response.status_code, 403)
         return response
 

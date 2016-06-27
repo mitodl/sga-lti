@@ -61,7 +61,7 @@ class Grader(CourseModel):
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self):
         return self.user.get_full_name()
 
     def graded_submissions_count(self):
@@ -105,7 +105,7 @@ class Student(CourseModel):
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self):
         return self.user.get_full_name()
 
     class Meta():

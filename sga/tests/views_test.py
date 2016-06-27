@@ -38,7 +38,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             "assignment_id": assignment.id
         }
         print(kwargs)
-        response = self.client.get(reverse("unsubmit_submission", kwargs=kwargs), follow=True)
+        response = self.client.post(reverse("unsubmit_submission", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         submission = self.get_test_submission()
         self.assertFalse(submission.graded)
@@ -59,7 +59,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         }
         url = reverse("unsubmit_submission", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
-            self.do_test_forbidden_view(url, role)
+            self.do_test_forbidden_view(url, role, method="post")
             submission = self.get_test_submission()
             self.assertTrue(submission.graded)
             self.assertTrue(submission.submitted)
@@ -108,7 +108,8 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
                     "submission",
                     "assignment",
                     "student_user",
-                    "next_not_graded_submission_url"
+                    "next_not_graded_submission_url",
+                    "UNSUBMIT_CONFIRM"
                 ]
             )
 
@@ -297,7 +298,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         # Verify that this grader is assigned to this student
         self.assertTrue(student in grader.students.all())
         kwargs = {"course_id": self.default_course.id, "student_user_id": student.user.id}
-        response = self.client.get(reverse("unassign_grader", kwargs=kwargs), follow=True)
+        response = self.client.post(reverse("unassign_grader", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         grader = self.get_test_grader()
         student = self.get_test_student()
@@ -314,7 +315,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         kwargs = {"course_id": self.default_course.id, "student_user_id": student.user.id}
         url = reverse("unassign_grader", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
-            self.do_test_forbidden_view(url, role)
+            self.do_test_forbidden_view(url, role, method="post")
 
     def test_unassign_student(self):
         """
@@ -332,7 +333,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             "student_user_id": student.user.id,
             "grader_user_id": grader.user.id
         }
-        response = self.client.get(reverse("unassign_student", kwargs=kwargs), follow=True)
+        response = self.client.post(reverse("unassign_student", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         grader = self.get_test_grader()
         student = self.get_test_student()
@@ -354,7 +355,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         }
         url = reverse("unassign_student", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
-            self.do_test_forbidden_view(url, role)
+            self.do_test_forbidden_view(url, role, method="post")
 
     def test_change_student_to_grader(self):
         """
@@ -367,7 +368,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         self.assertTrue(course.has_student(user))
         self.assertFalse(course.has_grader(user))
         kwargs = {"course_id": self.default_course.id, "student_user_id": user.id}
-        response = self.client.get(reverse("change_student_to_grader", kwargs=kwargs), follow=True)
+        response = self.client.post(reverse("change_student_to_grader", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         # Verify user is no longer a student in course
         self.assertFalse(course.has_student(user))
@@ -384,7 +385,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         }
         url = reverse("change_student_to_grader", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
-            self.do_test_forbidden_view(url, role)
+            self.do_test_forbidden_view(url, role, method="post")
 
     def test_change_grader_to_student(self):
         """
@@ -400,7 +401,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             "course_id": self.default_course.id,
             "grader_user_id": user.id
         }
-        response = self.client.get(reverse("change_grader_to_student", kwargs=kwargs), follow=True)
+        response = self.client.post(reverse("change_grader_to_student", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         # Verify user is no longer a grader in course
         self.assertTrue(course.has_student(user))
@@ -417,7 +418,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         }
         url = reverse("change_grader_to_student", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
-            self.do_test_forbidden_view(url, role)
+            self.do_test_forbidden_view(url, role, method="post")
 
     def test_download_all_submissions_view(self):
         """
