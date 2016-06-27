@@ -36,13 +36,15 @@ def index(request):
     """
     if not request.initial_lti_request:
         return render(request, "sga/index.html")
-    course_id = request.LTI.get("context_id")
-    assignment_id = request.LTI.get("resource_link_id")
-    user_role = get_role(request.user, course_id)
+    course_edx_id = request.LTI.get("context_id")
+    assignment_edx_id = request.LTI.get("resource_link_id")
+    course = Course.objects.get(edx_id=course_edx_id)
+    assignment = Assignment.objects.get(edx_id=assignment_edx_id)
+    user_role = get_role(request.user, course.id)
     if user_role == Roles.student:
-        return redirect("view-submission-as-student", course_id=course_id, assignment_id=assignment_id)
+        return redirect("view_submission_as_student", course_id=course.id, assignment_id=assignment.id)
     if user_role in [Roles.admin, Roles.grader]:
-        return redirect("view-assigment", course_id=course_id, assignment_id=assignment_id)
+        return redirect("view_assignment", course_id=course.id, assignment_id=assignment.id)
     raise Exception("Bad role %s" % user_role)
 
 
@@ -77,7 +79,7 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
     View submission (for staff)
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
-    student = Student.get_or_404_check_course(course_id, user__id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     next_not_graded_submission = Submission.objects.filter(
         assignment=assignment,
@@ -127,7 +129,7 @@ def unsubmit_submission(request, course_id, assignment_id, student_user_id):  # 
     Unsubmits a submission
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
-    student = Student.get_or_404_check_course(course_id, user__id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     submission.submitted = False
     submission.graded = False
@@ -146,7 +148,12 @@ def view_assignment(request, course_id, assignment_id):
     View assignment
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
-    student_users = assignment.course.students.all()
+    if request.role == Roles.admin:
+        student_users = assignment.course.students.all()
+    if request.role == Roles.grader:
+        grader = assignment.course.graders.get(user_id=request.user.id)
+        student_users = grader.students
+    student_users = list(student_users)
     for student_user in student_users:
         submission, _ = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
@@ -246,7 +253,7 @@ def view_student(request, course_id, student_user_id):
     View student
     """
     course = get_object_or_404(Course, id=course_id)
-    student = Student.get_or_404_check_course(course_id, user__id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
     if request.method == "POST":
         assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
         if assign_grader_form.is_valid():
@@ -271,7 +278,7 @@ def unassign_grader(request, course_id, student_user_id):  # pylint: disable=unu
     """
     Unassign a grader from a student
     """
-    student = Student.get_or_404_check_course(course_id, user__id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
     student.update(grader=None)
     return redirect("view_student", course_id=student.course.id, student_user_id=student_user_id)
 
@@ -281,8 +288,8 @@ def unassign_student(request, course_id, grader_user_id, student_user_id):  # py
     """
     Unassign a student from a grader
     """
-    grader = Grader.get_or_404_check_course(course_id, user__id=grader_user_id)
-    student = get_object_or_404(Student, user__id=student_user_id, grader=grader)
+    grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
+    student = get_object_or_404(Student, user_id=student_user_id, grader=grader)
     student.update(grader=None)
     return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
 
@@ -292,7 +299,7 @@ def change_student_to_grader(request, course_id, student_user_id):  # pylint: di
     """
     Change student to grader
     """
-    student = Student.get_or_404_check_course(course_id, user__id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
     grader = Grader.objects.create(
         user=student.user,
         course=student.course
@@ -307,7 +314,7 @@ def view_grader(request, course_id, grader_user_id):
     View grader
     """
     course = get_object_or_404(Course, id=course_id)
-    grader = Grader.get_or_404_check_course(course_id, user__id=grader_user_id)
+    grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
     # Disallow if current user is not admin or this grader
     if request.role == Roles.grader and grader.user != request.user:
         return HttpResponseForbidden()
@@ -342,11 +349,11 @@ def view_grader(request, course_id, grader_user_id):
 
 
 @allowed_roles([Roles.admin])
-def change_grader_to_student(request, course_id, grader_user_id):  # pylint: disable=unused-argument
+def change_grader_to_student(request, course_id, grader_user_id):
     """
     Change grader to student
     """
-    grader = get_object_or_404(Grader, user__id=grader_user_id)
+    grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
     student = Student.objects.create(
         user=grader.user,
         course=grader.course
