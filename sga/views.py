@@ -33,7 +33,7 @@ from sga.models import Assignment, Submission, Course, Grader, Student
 @csrf_exempt
 def index(request):
     """
-    Development index
+    View for redirecting EdX launch to the appropriate page
     """
     if not request.initial_lti_request:
         return render(request, "sga/index.html")
@@ -47,6 +47,14 @@ def index(request):
     if user_role in [Roles.admin, Roles.grader]:
         return redirect("view_assignment", course_id=course.id, assignment_id=assignment.id)
     raise Exception("Bad role %s" % user_role)
+
+
+@allowed_roles([Roles.admin, Roles.grader, Roles.student])  # TODO: Change
+def staff_index(request, course_id):
+    """
+    Staff index
+    """
+    return render(request, "sga/staff_index.html")
 
 
 @allowed_roles([Roles.student, Roles.grader, Roles.admin])
@@ -382,21 +390,25 @@ def unassign_student(request, course_id, grader_user_id, student_user_id):  # py
     return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
 
 
-def dev_start(request, username):  # pragma: no cover
+def dev_start(request):  # pragma: no cover
     """
     For local development only - sets session variables and authenticates user
     """
     if settings.DEVELOPMENT:
-        user = authenticate(username=username, password=" ")
-        login(request, user)
-        SESSION = {
-            "user_id": username,  # Edx user id
-            "resource_link_title": "Assignment Title",  # Assignment title
-            "resource_link_id": "assignment1id",  # Assignment Edx id
-            "context_label": "Course Title",  # Course title
-            "context_id": "courseid",  # Course Edx id
-            "roles": "student",  # User role
-        }
-        for var, val in SESSION.items():
-            request.session[var] = val
+        # user = authenticate(username=username, password=" ")
+        # login(request, user)
+        # SESSION = {
+        #     "user_id": username,  # Edx user id
+        #     "resource_link_title": "Assignment Title",  # Assignment title
+        #     "resource_link_id": "assignment1id",  # Assignment Edx id
+        #     "context_label": "Course Title",  # Course title
+        #     "context_id": "courseid",  # Course Edx id
+        #     "roles": "student",  # User role
+        # }
+        # for var, val in SESSION.items():
+        #     request.session[var] = val
+        request.role = Roles.admin
+        request.course = Course.objects.get(id=1)
+        request.session["course_roles"]["1"] = Roles.admin
+        request.session.save()
     return redirect("sga_index")

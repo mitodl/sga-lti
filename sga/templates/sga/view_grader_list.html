@@ -23,6 +23,13 @@
     </script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li class="active">Grader List</li>
+    </ol>
+{% endblock %}
+
 {% block content %}
     <h3>Grader List</h3>
     <hr>
@@ -44,8 +51,10 @@
             <input type="radio">Has Not Graded Submissions
         </label>
     </div>
+    
     <br>
     <br>
+    
     <table id="grader-list" class="table table-striped table-hover">
         <thead>
             <th>Name</th>
@@ -60,7 +69,7 @@
             <tr>
                 <td>
                     <a href="{% url 'view_grader' course_id=request.course.id grader_user_id=grader.user.id %}">
-                        { grader }}
+                        {{ grader }}
                     </a>
                 </td>
                 <td>{{ grader.students.count }}</td>

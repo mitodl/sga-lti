@@ -21,14 +21,15 @@ from sga.views import (
     download_all_submissions,
     download_not_graded_submissions,
     unassign_grader,
-    unassign_student
-)
+    unassign_student,
+    staff_index)
 from sga_lti import settings
 
 
 urlpatterns = [
     url(r"^$", index, name="sga_index"),
-    url(r"^dev-start/(?P<username>[a-zA-Z0-9-_]{0,50})$", dev_start, name="dev_start"),
+    url(r"^home/(?P<course_id>\d+)$", staff_index, name="staff_index"),
+    url(r"^dev-start$", dev_start, name="dev_start"),
     url(r"^view-student-list/(?P<course_id>\d+)$", view_student_list, name="view_student_list"),
     url(r"^view-grader-list/(?P<course_id>\d+)$", view_grader_list, name="view_grader_list"),
     url(r"^view-assignment-list/(?P<course_id>\d+)$", view_assignment_list, name="view_assignment_list"),

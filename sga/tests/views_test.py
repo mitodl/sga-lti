@@ -66,7 +66,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
 
     def test_view_submission_as_student(self):
         """
-        Verify view submission page is as expected
+        Verify view submission page (as student) is as expected
         """
         assignment = self.get_test_assignment()
         kwargs = {
@@ -112,6 +112,23 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
                     "UNSUBMIT_CONFIRM"
                 ]
             )
+
+    def test_view_submission_as_staff_staff_only(self):
+        """
+        Verify view submission page (as staff) is only accessible to staff
+        """
+        assignment = self.get_test_assignment()
+        student_user = self.get_test_student_user()
+        kwargs = {
+            "course_id": self.default_course.id,
+            "assignment_id": assignment.id,
+            "student_user_id": student_user.id
+        }
+        url = reverse("view_submission_as_staff", kwargs=kwargs)
+        self.do_test_forbidden_view(
+            url,
+            Roles.student
+        )
 
     def test_view_assignment(self):
         """

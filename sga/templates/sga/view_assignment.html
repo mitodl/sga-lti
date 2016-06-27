@@ -15,6 +15,14 @@
     </script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_assignment_list' course_id=request.course.id %}">Assignment List</a></li>
+        <li class="active">Assignment</li>
+    </ol>
+{% endblock %}
+
 {% block content %}
     <h3>Assignment: {{ assignment.name }}</h3>
     <hr>

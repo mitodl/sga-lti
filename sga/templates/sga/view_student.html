@@ -15,6 +15,14 @@
     </script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_student_list' course_id=request.course.id %}">Student List</a></li>
+        <li class="active">Student</li>
+    </ol>
+{% endblock %}
+
 {% block content %}
     <h3>Student: {{ student }}</h3>
     
@@ -106,6 +114,7 @@
             <div class="col-sm-6">
                 <form action="{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}"
                       method="post" onsubmit="return confirm('{{ STUDENT_TO_GRADER_CONFIRM }}');">
+                    {% csrf_token %}
                     <button class="btn btn-primary btn-block" type="submit">
                         Change Student to Grader
                     </button>
@@ -136,6 +145,7 @@
             {% else %}
                 <form action="{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}"
                       method="post" onsubmit="return confirm('{{ UNASSIGN_GRADER_CONFIRM }}');">
+                    {% csrf_token %}
                     <button class="btn btn-primary btn-block" type="submit">
                         Unassign Grader
                     </button>
