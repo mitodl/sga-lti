@@ -233,10 +233,8 @@ def view_student(request, course_id, student_user_id):
     course = get_object_or_404(Course, id=course_id)
     student = get_object_or_404(Student, user__id=student_user_id)
     if request.method == "POST":
-        print("yeah")
         assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
         if assign_grader_form.is_valid():
-            print("huh...")
             assign_grader_form.save()
     else:
         assign_grader_form = AssignGraderToStudentForm(instance=student)
@@ -359,7 +357,7 @@ def view_grader_list(request, course_id):
     })
 
 
-def dev_start(request, username):
+def dev_start(request, username):  # pragma: no cover
     """
     For local development only - sets session variables and authenticates user
     """
