@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from mock import MagicMock
 
 from sga.middleware import SGAMiddleware
-from sga.tests.common import SGATestCase
+from sga.tests.common import SGATestCase, DEFAULT_TEST_COURSE_ID, DEFAULT_ASSIGNMENT_EDX_ID, DEFAULT_USER_USERNAME
 
 
 class MiddlewareTest(SGATestCase):
@@ -20,9 +20,9 @@ class MiddlewareTest(SGATestCase):
         """
         request = MagicMock()
         request.LTI = {
-            "context_id": "test_course",
-            "resource_link_id": "test_assignment",
-            "user_id": "test_user_id",
+            "context_id": DEFAULT_TEST_COURSE_ID,
+            "resource_link_id": DEFAULT_ASSIGNMENT_EDX_ID,
+            "user_id": DEFAULT_USER_USERNAME,
         }
         request.method = "POST"
         request.POST = {
@@ -49,6 +49,9 @@ class MiddlewareTest(SGATestCase):
         middleware = SGAMiddleware()
         middleware.process_request(request)
         self.assertTrue(request.initial_lti_request)
+        course = self.get_test_course()
+        course_id_str = str(course.id)
+        self.assertIsNotNone(request.session["course_roles"].get(course_id_str))
         self.assertTrue(self.get_test_course().has_student(self.get_test_user()))
         self.assertFalse(self.get_test_course().has_grader(self.get_test_user()))
         self.assertFalse(self.get_test_course().has_admin(self.get_test_user()))
