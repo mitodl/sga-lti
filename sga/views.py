@@ -60,7 +60,7 @@ def view_submission_as_student(request, course_id, assignment_id):
             submission.submitted = True
             submission.submitted_at = datetime.utcnow()
             submission.save()
-            redirect("view_submission_as_student", assignment_id=assignment_id)
+            redirect("view_submission_as_student", course_id=course_id, assignment_id=assignment_id)
     else:
         submission_form = StudentAssignmentSubmissionForm(instance=submission)
     return render(request, "sga/view_submission_as_student.html", context={
@@ -85,10 +85,12 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
         graded_at=None
     ).exclude(pk=submission.pk).first()
     if next_not_graded_submission:
-        next_not_graded_submission_url = reverse("view_submission_as_staff", kwargs={
+        kwargs = {
+            "course_id": course_id,
             "assignment_id": assignment_id,
             "student_user_id": next_not_graded_submission.student.id
-        })
+        }
+        next_not_graded_submission_url = reverse("view_submission_as_staff", kwargs=kwargs)
     else:
         next_not_graded_submission_url = None
     if request.method == "POST":
@@ -99,7 +101,12 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
             submission.graded_by = request.user
             submission.graded = True
             submission.save()
-            redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student.user.id)
+            redirect(
+                "view_submission_as_staff",
+                course_id=course_id,
+                assignment_id=assignment_id,
+                student_user_id=student.user.id
+            )
         else:
             # Clear changes made to submission instance since form is invalid (form field values are untouched)
             submission = Submission.objects.get(pk=submission.pk)
@@ -125,7 +132,12 @@ def unsubmit_submission(request, course_id, assignment_id, student_user_id):  # 
     submission.submitted = False
     submission.graded = False
     submission.save()
-    return redirect("view_submission_as_staff", assignment_id=assignment_id, student_user_id=student_user_id)
+    return redirect(
+        "view_submission_as_staff",
+        course_id=course_id,
+        assignment_id=assignment_id,
+        student_user_id=student_user_id
+    )
 
 
 @allowed_roles([Roles.grader, Roles.admin])

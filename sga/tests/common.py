@@ -42,6 +42,7 @@ class SGATestCase(TestCase):
         """
         Initializes session parameters (assumes test course)
         """
+        # Set up session
         # LTI params
         lti_params = {
             "context_id": DEFAULT_TEST_COURSE_ID,
@@ -50,11 +51,11 @@ class SGATestCase(TestCase):
         }
         session = self.client.session
         session["LTI_LAUNCH"] = lti_params
-        # Role params
         course = self.get_test_course()
-        session.course_roles = {}
-        session.course_roles[str(course.id)] = get_role(user, course.id)
+        session["course_roles"] = {}
+        session["course_roles"][str(course.id)] = get_role(user, course.id)
         session.save()
+        self.client.session.load()
 
     def log_in_as(self, role):
         """

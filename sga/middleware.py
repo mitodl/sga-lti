@@ -19,8 +19,8 @@ class SGAMiddleware(object):
         """
         if not hasattr(request, "LTI"):
             raise ImproperlyConfigured("LTI middleware not installed")
-        if not hasattr(request.session, "course_roles"):
-            request.session.course_roles = {}
+        if "course_roles" not in request.session:
+            request.session["course_roles"] = {}
 
         initial_lti_request = (request.method == "POST" and
                                request.POST.get("lti_message_type") == "basic-lti-launch-request")
@@ -63,4 +63,4 @@ class SGAMiddleware(object):
             # is expected to be short-lived enough to not warrant checking on every request.
             # We also need to cast str on course.id because the url parameters are passed as string
             # to the decorator and views.
-            request.session.course_roles[str(course.id)] = get_role(request.user, course.id)
+            request.session["course_roles"][str(course.id)] = get_role(request.user, course.id)

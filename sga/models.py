@@ -44,7 +44,8 @@ class CourseModel(TimeStampedModel):
         part of the course with id course_id.
         """
         obj = get_object_or_404(cls, **kwargs)
-        if obj.course_id != course_id:
+        # Cast to string because course_id is passed as str from view
+        if str(obj.course_id) != str(course_id):
             raise PermissionDenied()
         return obj
 
