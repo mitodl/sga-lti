@@ -323,7 +323,7 @@ def change_grader_to_student(request, course_id, grader_user_id):  # pylint: dis
     Change grader to student
     """
     grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
-    student, _ = Student.objects.create_or_update(
+    student, _ = Student.objects.update_or_create(
         course_id=course_id,
         user_id=grader_user_id,
         defaults={"deleted": False}
