@@ -4,7 +4,6 @@ View definitions
 
 from datetime import datetime
 from django.conf import settings
-from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
@@ -49,12 +48,12 @@ def index(request):
     raise Exception("Bad role %s" % user_role)
 
 
-@allowed_roles([Roles.admin, Roles.grader, Roles.student])  # TODO: Change
+@allowed_roles([Roles.admin, Roles.grader])
 def staff_index(request, course_id):
     """
     Staff index
     """
-    return render(request, "sga/staff_index.html")
+    return render(request, "sga/staff_index.html", context={"course_id": course_id})
 
 
 @allowed_roles([Roles.student, Roles.grader, Roles.admin])
@@ -395,18 +394,6 @@ def dev_start(request):  # pragma: no cover
     For local development only - sets session variables and authenticates user
     """
     if settings.DEVELOPMENT:
-        # user = authenticate(username=username, password=" ")
-        # login(request, user)
-        # SESSION = {
-        #     "user_id": username,  # Edx user id
-        #     "resource_link_title": "Assignment Title",  # Assignment title
-        #     "resource_link_id": "assignment1id",  # Assignment Edx id
-        #     "context_label": "Course Title",  # Course title
-        #     "context_id": "courseid",  # Course Edx id
-        #     "roles": "student",  # User role
-        # }
-        # for var, val in SESSION.items():
-        #     request.session[var] = val
         request.role = Roles.admin
         request.course = Course.objects.get(id=1)
         request.session["course_roles"]["1"] = Roles.admin
