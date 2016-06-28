@@ -3,10 +3,20 @@ Backend logic for file uploads and downloads
 """
 
 import os
+import re
 from io import BytesIO
 from zipfile import ZipFile
 
 from django.http import HttpResponse
+
+from sga.backend.constants import INVALID_S3_CHARACTERS_REGEX
+
+
+def convert_illegal_S3_chars(path, replace_with="_"):
+    """
+    Converts illegal S3 characters to replace_with
+    """
+    return re.sub(INVALID_S3_CHARACTERS_REGEX, replace_with, path)
 
 
 def serve_zip_file(filepaths, zipname="zipfile"):
@@ -29,23 +39,23 @@ def student_submission_file_path(instance, filename):
     """
     Returns the upload destination path (including filename) for a student submission
     """
-    return "student-uploads/{course_id}/{last_name}_{first_name}-{assignment_name}{extension}".format(
+    path = "{course_id}/student-uploads/{username}-{assignment_name}{extension}".format(
         course_id=instance.assignment.course.edx_id,
-        last_name=instance.student.last_name,
-        first_name=instance.student.first_name,
+        username=instance.student.username,
         assignment_name=instance.assignment.name,
-        extension=os.path.splitext(filename)[-1]
+        extension=os.path.splitext(filename)[1]
     )
+    return convert_illegal_S3_chars(path)
 
 
 def grader_submission_file_path(instance, filename):
     """
     Returns the upload destination path (including filename) for a grader submission
     """
-    return "grader-uploads/{course_id}/{last_name}_{first_name}-{assignment_name}{extension}".format(
+    path = "{course_id}/grader-uploads/{username}-{assignment_name}{extension}".format(
         course_id=instance.assignment.course.edx_id,
-        last_name=instance.student.last_name,
-        first_name=instance.student.first_name,
+        username=instance.student.username,
         assignment_name=instance.assignment.name,
-        extension=os.path.splitext(filename)[-1]
+        extension=os.path.splitext(filename)[1]
     )
+    return convert_illegal_S3_chars(path)

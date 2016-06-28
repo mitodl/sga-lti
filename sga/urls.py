@@ -2,7 +2,6 @@
 URL definitions
 """
 from django.conf.urls import url
-from django.conf.urls.static import static
 
 from sga.views import (
     index,
@@ -23,7 +22,6 @@ from sga.views import (
     unassign_grader,
     unassign_student,
     staff_index)
-from sga_lti import settings
 
 
 urlpatterns = [
@@ -54,6 +52,3 @@ urlpatterns = [
     url(r"^download-not-graded-submissions/(?P<course_id>\d+)/(?P<assignment_id>\d+)$",
         download_not_graded_submissions, name="download_not_graded_submissions"),
 ]
-
-if settings.DEVELOPMENT:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

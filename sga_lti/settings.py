@@ -278,9 +278,18 @@ HEALTH_CHECK = ['POSTGRES']
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
 
-# Local file storage (for development)
-PROJECT_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'uploaded')
-MEDIA_URL = '/uploaded/'
+# django-storages configurations
+AWS_S3_SECURE_URLS = True  # use https instead of http
+AWS_QUERYSTRING_AUTH = False  # don't add complex authentication-related query parameters for requests
+AWS_STORAGE_BUCKET_NAME = get_var('AWS_STORAGE_BUCKET_NAME', '')
+AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = get_var('AWS_SECRET_ACCESS_KEY', '')
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
-DEVELOPMENT = get_var("DEVELOPMENT", False)
+# Media storage
+MEDIAFILES_LOCATION = get_var('MEDIAFILES_LOCATION', '')  # Set this to use base folder in bucket
+MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
+DEFAULT_FILE_STORAGE = 'sga.custom_storages.MediaStorage'
+
+# Development flag
+DEVELOPMENT = get_var('DEVELOPMENT', False)
