@@ -130,7 +130,7 @@ class Course(TimeStampedModel):
         """
         Returns a boolean of whether or not user is a Student in this course
         """
-        return self.students.filter(pk=user.pk, deleted=False).exists()
+        return self.students.filter(pk=user.pk, student__deleted=False).exists()
 
     def has_grader(self, user):
         """
@@ -210,7 +210,7 @@ class Assignment(CourseModel):
         Returns a count of submissions for this assignment that are not submitted
         """
         # Graders all have student objects
-        students_in_course = self.course.students.filter(deleted=False).count()
+        students_in_course = self.course.students.filter(student__deleted=False).count()
         return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
     def not_submitted_submissions_count_by_grader(self, grader=None, grader_user=None):
