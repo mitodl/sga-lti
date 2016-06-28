@@ -5,6 +5,7 @@
 
 {% block breadcrumbs %}
     <ol class="breadcrumb">
+        {% if "view-student" in request.META.HTTP_REFERER %}
         <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
         <li><a href="{% url 'view_student_list' course_id=request.course.id %}">Student List</a></li>
         <li>
@@ -12,6 +13,15 @@
                 Student
             </a>
         </li>
+        {% else %}
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_assignment_list' course_id=request.course.id %}">Assignment List</a></li>
+        <li>
+            <a href="{% url 'view_assignment' course_id=request.course.id assignment_id=assignment.id %}">
+                Assignment
+            </a>
+        </li>
+        {% endif %}
         <li class="active">Submission (Staff View)</li>
     </ol>
 {% endblock %}

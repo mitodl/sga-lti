@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-
 {% block title %}Staff Home Page{% endblock %}
 
 {% block breadcrumbs %}
@@ -26,11 +25,13 @@
                 View Assignment List
             </a>
         </li>
+        {% if request.role == Roles.admin %}
         <li>
             <a href="{% url 'view_grader_list' course_id=course_id %}">
                 View Grader List
             </a>
         </li>
+        {% endif %}
     </ul>
 {% endblock %}
 

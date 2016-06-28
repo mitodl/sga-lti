@@ -70,8 +70,7 @@ class AssignStudentToGraderForm(forms.ModelForm):
         self.fields["students"].queryset = Student.objects.filter(
             grader=None
         ).order_by(
-            "user__first_name",
-            "user__last_name"
+            "user__username"
         )
 
     def save(self, grader=None):
@@ -103,8 +102,7 @@ class AssignGraderToStudentForm(forms.ModelForm):
         ).filter(
             max_students__gt=F("students__count")
         ).order_by(
-            "user__first_name",
-            "user__last_name"
+            "user__username"
         )
 
     class Meta:

@@ -106,7 +106,7 @@ class Student(CourseModel):
     course = models.ForeignKey("Course")
 
     def __str__(self):
-        return self.user.get_full_name()
+        return self.user.username
 
     class Meta():
         unique_together = (("user", "course"),)
