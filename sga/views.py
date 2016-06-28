@@ -154,10 +154,10 @@ def view_student_list(request, course_id):
     """
     course = get_object_or_404(Course, id=course_id)
     if request.role == Roles.grader:
-        students = Student.objects.filter(course=course, grader__user=request.user)
+        students = Student.objects.filter(course=course, grader__user=request.user, deleted=False)
         grader_user = request.user
     if request.role == Roles.admin:
-        students = Student.objects.filter(course=course)
+        students = Student.objects.filter(course=course, deleted=False)
         grader_user = None
     for student in students:
         student.not_graded_submissions_count = course.not_graded_submissions_count_by_student(student)
@@ -245,7 +245,7 @@ def view_grader(request, course_id, grader_user_id):
                 assign_student_form.save(grader)
     # Get other data for page
     graded_submissions = grader.user.graded_submissions.all()
-    students = grader.students.all()
+    students = grader.students.filter(deleted=False)
     for student in students:
         student.not_graded_submissions_count = course.not_graded_submissions_count_by_student(student)
     # Render page
@@ -268,10 +268,10 @@ def view_assignment(request, course_id, assignment_id):
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
     if request.role == Roles.admin:
-        student_users = assignment.course.students.all()
+        student_users = assignment.course.students.filter(deleted=False)
     if request.role == Roles.grader:
         grader = Grader.objects.get(user_id=request.user.id, course_id=course_id)
-        student_users = grader.students.all()
+        student_users = grader.students.filter(deleted=False)
     for student_user in student_users:
         submission, _ = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
@@ -291,7 +291,7 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
     if request.role == Roles.grader:
         grader = Grader.objects.get(user=request.user, course=assignment.course)
-        student_users = [s.user for s in grader.students.all()]
+        student_users = [s.user for s in grader.students.filter(deleted=False)]
         submissions = Submission.objects.filter(assignment=assignment,
                                                 student__in=student_users).exclude(student_document="")
     if request.role == Roles.admin:
@@ -318,14 +318,15 @@ def download_not_graded_submissions(request, course_id, assignment_id):
 
 @allowed_roles([Roles.admin])
 @require_http_methods(["POST"])
-def change_grader_to_student(request, course_id, grader_user_id):  # pylint: disable=unused-argument
+def change_grader_to_student(request, course_id, grader_user_id):
     """
     Change grader to student
     """
     grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
-    student = Student.objects.create(
-        user=grader.user,
-        course=grader.course
+    student, _ = Student.objects.create_or_update(
+        course_id=course_id,
+        user_id=grader_user_id,
+        defaults={"deleted": False}
     )
     grader.delete()
     return redirect("view_student", course_id=student.course.id, student_user_id=student.user.id)
@@ -333,7 +334,7 @@ def change_grader_to_student(request, course_id, grader_user_id):  # pylint: dis
 
 @allowed_roles([Roles.admin])
 @require_http_methods(["POST"])
-def change_student_to_grader(request, course_id, student_user_id):  # pylint: disable=unused-argument
+def change_student_to_grader(request, course_id, student_user_id):
     """
     Change student to grader
     """
@@ -342,13 +343,13 @@ def change_student_to_grader(request, course_id, student_user_id):  # pylint: di
         user=student.user,
         course=student.course
     )
-    student.update(grader=None)
+    student.update(grader=None, deleted=True)
     return redirect("view_grader", course_id=grader.course.id, grader_user_id=grader.user.id)
 
 
 @allowed_roles([Roles.admin])
 @require_http_methods(["POST"])
-def unsubmit_submission(request, course_id, assignment_id, student_user_id):  # pylint: disable=unused-argument
+def unsubmit_submission(request, course_id, assignment_id, student_user_id):
     """
     Unsubmits a submission
     """

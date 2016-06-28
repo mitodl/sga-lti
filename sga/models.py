@@ -64,6 +64,10 @@ class Grader(CourseModel):
     def __str__(self):
         return self.user.get_full_name()
 
+    def get_number_of_students(self):
+        """ Gets the number of students assigned to the grader """
+        return self.students.filter(deleted=False).count()
+
     def graded_submissions_count(self):
         """
         Returns a count of submission that are graded by this grader
@@ -79,7 +83,7 @@ class Grader(CourseModel):
         """
         Returns a count of submission that are submitted but not graded by this grader
         """
-        student_users = [s.user for s in self.students.all()]
+        student_users = [s.user for s in self.students.filter(deleted=False)]
         return Submission.objects.filter(
             student__in=student_users,
             assignment__course=self.course,
@@ -91,7 +95,7 @@ class Grader(CourseModel):
         """
         Returns a count of the number of students this grader can still accept
         """
-        return self.max_students - self.students.count()
+        return self.max_students - self.students.filter(deleted=False).count()
 
     class Meta():
         unique_together = (("user", "course"),)
@@ -104,6 +108,7 @@ class Student(CourseModel):
     grader = models.ForeignKey(Grader, null=True, related_name="students", on_delete=models.SET_NULL)
     user = models.ForeignKey(User)
     course = models.ForeignKey("Course")
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -125,7 +130,7 @@ class Course(TimeStampedModel):
         """
         Returns a boolean of whether or not user is a Student in this course
         """
-        return self.students.filter(pk=user.pk).exists() and not self.has_grader(user)
+        return self.students.filter(pk=user.pk, deleted=False).exists()
 
     def has_grader(self, user):
         """
@@ -192,7 +197,7 @@ class Assignment(CourseModel):
         """
         if not grader:
             grader = Grader.objects.get(user=grader_user, course=self.course)
-        student_users = [s.user for s in grader.students.all()]
+        student_users = [s.user for s in grader.students.filter(deleted=False)]
         return Submission.objects.filter(
             student__in=student_users,
             assignment=self,
@@ -205,7 +210,7 @@ class Assignment(CourseModel):
         Returns a count of submissions for this assignment that are not submitted
         """
         # Graders all have student objects
-        students_in_course = self.course.students.count() - self.course.graders.count()
+        students_in_course = self.course.students.filter(deleted=False).count()
         return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
     def not_submitted_submissions_count_by_grader(self, grader=None, grader_user=None):
@@ -214,7 +219,7 @@ class Assignment(CourseModel):
         """
         if not grader:
             grader = Grader.objects.get(user=grader_user, course=self.course)
-        return (grader.students.count()
+        return (grader.get_number_of_students()
                 - self.graded_submissions_count_by_grader(grader_user=grader.user)
                 - self.not_graded_submissions_count_by_grader(grader=grader))
 

@@ -15,13 +15,13 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
     Test that the views work as expected
     """
 
-    # def test_index_view(self):
-    #     """ Verify the index view is as expected """
-    #     self.do_test_successful_view(
-    #         reverse("sga_index"),
-    #         None,
-    #         template="sga/index.html"
-    #     )
+    def test_index_view(self):
+        """ Verify the index view is as expected """
+        self.do_test_successful_view(
+            reverse("sga_index"),
+            None,
+            template="sga/index.html"
+        )
 
     def test_unsubmit_submission(self):
         """
