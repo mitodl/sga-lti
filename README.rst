@@ -39,14 +39,11 @@ Environment/Local Variables
 The following variables need to be created in environment or in local
 settings ("sga-lti.yml"):
 
-```python
-# Media files (for uploaded files)
-AWS_STORAGE_BUCKET_NAME  # S3 bucket name
-AWS_ACCESS_KEY_ID:  # S3 access key id credential
-AWS_SECRET_ACCESS_KEY:  # S3 secret access key credential
-MEDIAFILES_LOCATION:  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
-```
-
+    # Media files (for uploaded files)
+    AWS_STORAGE_BUCKET_NAME  # S3 bucket name
+    AWS_ACCESS_KEY_ID:  # S3 access key id credential
+    AWS_SECRET_ACCESS_KEY:  # S3 secret access key credential
+    MEDIAFILES_LOCATION:  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
 
 Adding an application
 =====================
