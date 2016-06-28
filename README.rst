@@ -38,6 +38,7 @@ Environment/Local Variables
 
 The following variables need to be created in environment or in local
 settings ("sga-lti.yml"):
+::
 
     # Media files (for uploaded files)
     AWS_STORAGE_BUCKET_NAME  # S3 bucket name
