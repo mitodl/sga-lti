@@ -56,7 +56,7 @@ def staff_index(request, course_id):
     return render(request, "sga/staff_index.html", context={"course_id": course_id})
 
 
-@allowed_roles([Roles.student, Roles.grader, Roles.admin])
+@allowed_roles([Roles.student])
 def view_submission_as_student(request, course_id, assignment_id):
     """
     View submission (for student)
@@ -87,7 +87,7 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
     View submission (for staff)
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
-    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id, deleted=False)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     next_not_graded_submission = Submission.objects.filter(
         assignment=assignment,
@@ -201,7 +201,7 @@ def view_student(request, course_id, student_user_id):
     View student
     """
     course = get_object_or_404(Course, id=course_id)
-    student = Student.get_or_404_check_course(course_id, user_id=student_user_id)
+    student = Student.get_or_404_check_course(course_id, user_id=student_user_id, deleted=False)
     if request.method == "POST":
         assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
         if assign_grader_form.is_valid():
@@ -290,7 +290,12 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
     # Filter out submissions - we can chain QuerySets because they are lazy
-    submissions = Submission.objects.filter(assignment=assignment).exclude(student_document="")
+    submissions = Submission.objects.filter(
+        assignment=assignment,
+        student__student__deleted=False
+    ).exclude(
+        student_document=""
+    )
     if request.role == Roles.grader:
         grader = Grader.objects.get(user=request.user, course=assignment.course)
         student_users = [s.user for s in grader.students.filter(deleted=False)]

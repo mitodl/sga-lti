@@ -21,6 +21,7 @@ UNSUBMIT_CONFIRM = "Are you sure you want to mark this submission as not submitt
 VALID_FILE_UPLOAD_EXTENSIONS = [".pdf"]
 INVALID_S3_CHARACTERS_REGEX = r"[^a-zA-Z0-9!\-_.*'()]"
 
+
 class Roles():
     """
     Role definitions

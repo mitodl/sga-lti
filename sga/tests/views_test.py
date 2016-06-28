@@ -81,6 +81,22 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             context_keys=["submission_form", "submission", "assignment"]
         )
 
+    def test_view_submission_as_student_student_only(self):
+        """
+        Verify view submission page (as student) is only accessible to the student
+        """
+        assignment = self.get_test_assignment()
+        kwargs = {
+            "course_id": self.default_course.id,
+            "assignment_id": assignment.id
+        }
+        url = reverse("view_submission_as_student", kwargs=kwargs)
+        for role in [Roles.admin, Roles.grader]:
+            self.do_test_forbidden_view(
+                url,
+                role
+            )
+
     def test_view_submission_as_staff(self):
         """
         Verify view submission page is as expected
@@ -437,7 +453,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         for role in [Roles.grader, Roles.student]:
             self.do_test_forbidden_view(url, role, method="post")
 
-    def test_download_all_submissions_view(self):
+    def test_download_all_submissions(self):
         """
         Verify download_all_submissions returns a .zip file
         """
@@ -450,10 +466,10 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             log_in_func()
             response = self.client.get(reverse("download_all_submissions", kwargs=kwargs), follow=True)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.get("Content-Disposition"), "attachment; filename=all_submissions.zip")
+            self.assertTrue(response.get("Content-Disposition").startswith("attachment; filename="))
             self.assertIsNone(ZipFile(BytesIO(response.content), "r").testzip())
 
-    def test_download_all_submissions_view_staff_only(self):
+    def test_download_all_submissions_staff_only(self):
         """
         Verify download_all_submissions is not accessible for students
         """
@@ -466,7 +482,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         url = reverse("download_all_submissions", kwargs=kwargs)
         self.do_test_forbidden_view(url, Roles.student)
 
-    def test_download_not_graded_submissions_view(self):
+    def test_download_not_graded_submissions(self):
         """
         Verify download_not_graded_submissions returns a .zip file
         """
@@ -479,10 +495,10 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             log_in_func()
             response = self.client.get(reverse("download_not_graded_submissions", kwargs=kwargs), follow=True)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.get("Content-Disposition"), "attachment; filename=not_graded_submissions.zip")
+            self.assertTrue(response.get("Content-Disposition").startswith("attachment; filename="))
             self.assertIsNone(ZipFile(BytesIO(response.content), "r").testzip())
 
-    def test_download_not_graded_submissions_view_staff_only(self):
+    def test_download_not_graded_submissions_staff_only(self):
         """
         Verify download_not_graded_submissionss is not accessible for students
         """

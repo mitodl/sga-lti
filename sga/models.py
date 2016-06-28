@@ -74,6 +74,7 @@ class Grader(CourseModel):
         """
         return Submission.objects.filter(
             graded_by=self.user,
+            student__student__deleted=False,
             assignment__course=self.course,
             submitted=True,
             graded=True
@@ -148,6 +149,8 @@ class Course(TimeStampedModel):
         """
         Returns a count of submissions by this student that are submitted but not graded
         """
+        if student.deleted:
+            return "N/A"
         return Submission.objects.filter(
             assignment__course=self,
             student=student.user,
@@ -170,7 +173,7 @@ class Assignment(CourseModel):
         """
         Returns a count of submissions for this assignment that are graded
         """
-        return self.submissions.filter(submitted=True, graded=True).count()
+        return self.submissions.filter(submitted=True, graded=True, student__student__deleted=False).count()
 
     def graded_submissions_count_by_grader(self, grader=None, grader_user=None):
         """
@@ -180,6 +183,7 @@ class Assignment(CourseModel):
             grader_user = grader.user
         return Submission.objects.filter(
             graded_by=grader_user,
+            student__student__deleted=False,
             assignment=self,
             submitted=True,
             graded=True
@@ -189,7 +193,7 @@ class Assignment(CourseModel):
         """
         Returns a count of submissions for this assignment that are submitted but not graded
         """
-        return self.submissions.filter(submitted=True, graded=False).count()
+        return self.submissions.filter(submitted=True, graded=False, student__student__deleted=False).count()
 
     def not_graded_submissions_count_by_grader(self, grader=None, grader_user=None):
         """
