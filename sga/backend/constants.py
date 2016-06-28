@@ -19,7 +19,7 @@ UNASSIGN_STUDENT_CONFIRM = ("Are you sure you want to unassign this student from
 UNSUBMIT_CONFIRM = "Are you sure you want to mark this submission as not submitted?"
 
 VALID_FILE_UPLOAD_EXTENSIONS = [".pdf"]
-INVALID_S3_CHARACTERS_REGEX = r"[^a-zA-Z0-9!\-_.*'()]"
+INVALID_S3_CHARACTERS_REGEX = r"[^a-zA-Z0-9!\-_.*'()/]"
 
 
 class Roles():
