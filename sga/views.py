@@ -294,7 +294,7 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
         assignment=assignment,
         student__student__deleted=False
     ).exclude(
-        student_document=""
+        student_document=None
     )
     if request.role == Roles.grader:
         grader = Grader.objects.get(user=request.user, course=assignment.course)
@@ -302,9 +302,8 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
         submissions = submissions.filter(student__in=student_users)
     if not_graded_only:
         submissions = submissions.exclude(graded=True)
-    filepaths = [s.student_document.path for s in submissions]
     full_zipname = "{course_id} - {zipname}".format(course_id=course_id, zipname=zipname)
-    return serve_zip_file(filepaths, full_zipname)
+    return serve_zip_file(submissions, full_zipname)
 
 
 @allowed_roles([Roles.grader, Roles.admin])

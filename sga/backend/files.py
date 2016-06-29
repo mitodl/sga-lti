@@ -34,9 +34,10 @@ def submissions_zip_generator(submissions):
     bytes_io = BytesIO()
     with ZipFile(bytes_io, mode="w", compression=ZIP_DEFLATED, allowZip64=True) as zip_file:
         for submission in submissions:
-            zip_file.writestr(submission.student_document, submission.student_document.read())
+            zip_file.writestr(submission.student_document.name, submission.student_document.read())
             yield bytes_io.getvalue()
-            bytes_io.empty()
+            bytes_io.truncate(0)
+            bytes_io.seek(0)
     yield bytes_io.getvalue()
 
 
