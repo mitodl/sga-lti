@@ -13,6 +13,8 @@ class SGAMiddleware(object):
     """
     Middleware for processing incoming LTI requests
     """
+    ADMIN_ROLES = ["Administrator", "Instructor"]
+
     def process_request(self, request):  # pylint: disable=no-self-use
         """
         Processes incoming LTI requests
@@ -49,7 +51,7 @@ class SGAMiddleware(object):
                 edx_id=request.LTI["resource_link_id"],
                 defaults=defaults
             )
-            if "Instructor" in request.LTI.get("roles", []):
+            if any([r for r in self.ADMIN_ROLES if r in request.LTI.get("roles", [])]):
                 course.administrators.add(request.user)
                 Grader.objects.filter(user=request.user, course=course).delete()
                 Student.objects.filter(user=request.user, course=course).delete()

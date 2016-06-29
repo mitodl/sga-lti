@@ -13,3 +13,5 @@ static3==0.5.1
 newrelic==2.54.0.41
 django-forms-bootstrap==3.0.1
 git+https://github.com/zagaran/django-auth-lti.git@v1.2.7#egg=django-auth-lti==1.2.7
+boto==2.41.0
+django-storages==1.4.1

@@ -47,9 +47,9 @@
                 <dd>{{ grader.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
                 <br>
                 <dt>Accepting Students:</dt>
-                <dd>{% if grader.students.count < grader.max_students %}Yes{% else %}No{% endif %}</dd>
+                <dd>{% if grader.get_number_of_students < grader.max_students %}Yes{% else %}No{% endif %}</dd>
                 <dt>Number of Students:</dt>
-                <dd>{{ grader.students.count }}</dd>
+                <dd>{{ grader.get_number_of_students }}</dd>
                 <dt>Max Students:</dt>
                 <dd>{{ grader.max_students }}</dd>
                 <br>
@@ -96,7 +96,7 @@
                 </td>
                 {% endif %}
             </tr>
-        {% endfor %}    
+        {% endfor %}
         </tbody>
     </table>
     
