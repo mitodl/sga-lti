@@ -3,6 +3,29 @@
 
 {% block title %}View Submission{% endblock %}
 
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        {% if "view-student" in request.META.HTTP_REFERER %}
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_student_list' course_id=request.course.id %}">Student List</a></li>
+        <li>
+            <a href="{% url 'view_student' course_id=request.course.id student_user_id=student_user.id  %}">
+                Student
+            </a>
+        </li>
+        {% else %}
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_assignment_list' course_id=request.course.id %}">Assignment List</a></li>
+        <li>
+            <a href="{% url 'view_assignment' course_id=request.course.id assignment_id=assignment.id %}">
+                Assignment
+            </a>
+        </li>
+        {% endif %}
+        <li class="active">Submission (Staff View)</li>
+    </ol>
+{% endblock %}
+
 {% block content %}
     <h1>Assignment: {{ assignment.name }}</h1>
     <h3>Student: {{ student_user.get_full_name }}</h3>
@@ -35,10 +58,13 @@
             </div>
             {% if role == Roles.admin %}
             <div class="col-sm-6">
-                <a href="{% url 'unsubmit_submission' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
-                   class="btn btn-primary btn-block">
-                    Mark as Not Submitted
-                </a>
+                <form action="{% url 'unsubmit_submission' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
+                      method="post" onsubmit="return confirm('{{ UNSUBMIT_CONFIRM }}');">
+                    {% csrf_token %}
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Mark as Not Submitted
+                    </button>
+                </form>
             </div>
             {% endif %}
         </div>

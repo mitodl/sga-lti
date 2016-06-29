@@ -18,19 +18,15 @@
     <script>
         $("#student-list").DataTable();
         $("#grader-assignment-list").DataTable();
-        function changeGraderToStudent() {
-            if (!confirm("{{ GRADER_TO_STUDENT_CONFIRM }}")) {
-                return false
-            }
-            window.location.href = "{% url 'change_grader_to_student' course_id=request.course.id grader_user_id=grader.user.id %}";
-        }
-        function unassignStudent(studentName, url) {
-            if (!confirm(studentName + ":\n\n{{ UNASSIGN_STUDENT_CONFIRM }}")) {
-                return false;
-            }
-            window.location.href = url;
-        }
     </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_grader_list' course_id=request.course.id %}">Grader List</a></li>
+        <li class="active">Grader</li>
+    </ol>
 {% endblock %}
 
 {% block content %}
@@ -42,12 +38,10 @@
         <div class="panel-heading">Student Info</div>
         <div class="panel-body">
             <dl class="dl-horizontal">
-                <dt>First Name:</dt>
-                <dd>{{ grader.user.first_name }}</dd>
-                <dt>Last Name:</dt>
-                <dd>{{ grader.user.last_name }}</dd>
                 <dt>Username:</dt>
                 <dd>{{ grader.user.username }}</dd>
+                <dt>Email:</dt>
+                <dd>{{ grader.user.email }}</dd>
                 <br>
                 <dt>Date Joined:</dt>
                 <dd>{{ grader.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
@@ -92,10 +86,13 @@
                 <td>{{ student.not_graded_submissions_count }}</td>
                 {% if role == Roles.admin %}
                 <td>
-                    <a href="javascript:void(0)"
-                       onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}')">
-                        Unassign Student
-                    </a>
+                    <form action="{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}"
+                          method="post" onsubmit="return confirm('{{ student }}:\n\n{{ UNASSIGN_STUDENT_CONFIRM }}')">
+                        {% csrf_token %}
+                        <button class="btn btn-xs btn-warning" type="submit">
+                            Unassign Student
+                        </button>
+                    </form>
                 </td>
                 {% endif %}
             </tr>
@@ -204,20 +201,16 @@
             <br>
             <div class="row">
                 <div class="col-sm-6">
-                    <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
-                        Change Grader to Student
-                    </button>
-                </div>
-                <br class="visible-xs">
-                <div class="col-sm-6">
-                    <button class="btn btn-primary btn-block" onclick="changeGraderToStudent()">
-                        Unassign All Students
-                    </button>
+                    <form action="{% url 'change_grader_to_student' course_id=request.course.id grader_user_id=grader.user.id %}"
+                          method="post" onsubmit="return confirm('{{ GRADER_TO_STUDENT_CONFIRM }}');">
+                        {% csrf_token %}
+                        <button class="btn btn-primary btn-block" type="submit">
+                            Change Grader to Student
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
-    <br>
-    <br>
 {% endblock %}

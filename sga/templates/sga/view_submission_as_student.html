@@ -3,6 +3,21 @@
 
 {% block title %}View Submission{% endblock %}
 
+{% block breadcrumbs %}
+{% if request.role != Roles.student %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_student_list' course_id=request.course.id %}">Student List</a></li>
+        <li>
+            <a href="{% url 'view_student' course_id=request.course.id student_user_id=student_user.id  %}">
+                Student
+            </a>
+        </li>
+        <li class="active">Submission (Student View)</li>
+    </ol>
+{% endif %}
+{% endblock %}
+
 {% block content %}
     <h1>Assignment: {{ assignment.name }}</h1>
     <hr>

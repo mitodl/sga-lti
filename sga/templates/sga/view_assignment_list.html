@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block title %}Student List{% endblock %}
+{% block title %}Assignment List{% endblock %}
 
 {% block head %}
     <link href="{% static 'css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
@@ -14,6 +14,13 @@
     <script>
         var table = $("#assignment-list").DataTable();
     </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li class="active">Assignment List</li>
+    </ol>
 {% endblock %}
 
 {% block content %}
@@ -38,8 +45,10 @@
             <input type="radio">Has Graded Assignments
         </label>
     </div>
+    
     <br>
     <br>
+    
     <table id="assignment-list" class="table table-striped table-hover">
         <thead>
             <th>Assignment Name</th>

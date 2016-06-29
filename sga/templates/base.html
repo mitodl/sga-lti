@@ -10,9 +10,15 @@
     </head>
     <body>
         <div class="container">
-            <h4 class="pull-right"><b>Logged In As:</b> {{ request.user.username }}</h4>
-            <h4 class="pull-right"><b>Course:</b> {{ request.course.id }}</h4>
+            <div class="text-right">
+                <h4><b>Logged In As:</b> {{ request.user.username }}</h4>
+                <h4><b>Course:</b> {{ request.course.edx_id }}</h4>
+                <h4><b>Role:</b> {{ request.role|title }}</h4>
+            </div>
+            {% block breadcrumbs %}{% endblock %}
             {% block content %}{% endblock %}
+            <br>
+            <br>
         </div>
         <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
         <script src="{% static 'js/bootstrap.min.js' %}"></script>

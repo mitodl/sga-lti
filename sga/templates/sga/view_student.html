@@ -12,19 +12,15 @@
     <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
     <script>
         $("#student-assignment-list").DataTable();
-        function changeStudentToGrader() {
-            if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
-                return false
-            }
-            window.location.href = "{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}";
-        }
-        function unassignGrader() {
-            if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
-                return false;
-            }
-            window.location.href = "{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}";
-        }
     </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'staff_index' course_id=request.course.id %}">Home</a></li>
+        <li><a href="{% url 'view_student_list' course_id=request.course.id %}">Student List</a></li>
+        <li class="active">Student</li>
+    </ol>
 {% endblock %}
 
 {% block content %}
@@ -36,12 +32,10 @@
         <div class="panel-heading">Student Info</div>
         <div class="panel-body">
             <dl class="dl-horizontal">
-                <dt>First Name:</dt>
-                <dd>{{ student.user.first_name }}</dd>
-                <dt>Last Name:</dt>
-                <dd>{{ student.user.last_name }}</dd>
                 <dt>Username:</dt>
                 <dd>{{ student.user.username }}</dd>
+                <dt>Email:</dt>
+                <dd>{{ student.user.email }}</dd>
                 <br>
                 <dt>Date Joined:</dt>
                 <dd>{{ student.user.date_joined|date:SGA_DATETIME_FORMAT }}</dd>
@@ -116,9 +110,13 @@
         <div class="panel-heading">Actions</div>
         <div class="panel-body">
             <div class="col-sm-6">
-                <button class="btn btn-primary btn-block" onclick="changeStudentToGrader()">
-                    Change Student to Grader
-                </button>
+                <form action="{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}"
+                      method="post" onsubmit="return confirm('{{ STUDENT_TO_GRADER_CONFIRM }}');">
+                    {% csrf_token %}
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Change Student to Grader
+                    </button>
+                </form>
             </div>
             <br class="visible-xs">
             <div class="col-sm-6">
@@ -143,9 +141,13 @@
                     {% endif %}
                 </form>
             {% else %}
-                <button class="btn btn-warning btn-block" onclick="unassignGrader()">
-                    Unassign Grader
-                </button>
+                <form action="{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}"
+                      method="post" onsubmit="return confirm('{{ UNASSIGN_GRADER_CONFIRM }}');">
+                    {% csrf_token %}
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Unassign Grader
+                    </button>
+                </form>
             {% endif %}
             </div>
         </div>
