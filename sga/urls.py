@@ -22,13 +22,15 @@ from sga.views import (
     unassign_grader,
     unassign_student,
     staff_index,
-    not_graded_block_error_page
+    not_graded_block_error_page,
+    studio_message_page
 )
 
 
 urlpatterns = [
     url(r"^$", index, name="sga_index"),
     url(r"^not-graded-block$", not_graded_block_error_page, name="not_graded_block_error_page"),
+    url(r"^studio$", studio_message_page, name="studio_message_page"),
     url(r"^home/(?P<course_id>\d+)$", staff_index, name="staff_index"),
     url(r"^dev-start$", dev_start, name="dev_start"),
     url(r"^view-student-list/(?P<course_id>\d+)$", view_student_list, name="view_student_list"),

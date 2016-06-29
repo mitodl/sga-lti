@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from sga.backend.authentication import allowed_roles, get_role
+from sga.backend.authentication import allowed_roles
 from sga.backend.constants import (
     Roles,
     GRADER_TO_STUDENT_CONFIRM,
@@ -32,28 +32,23 @@ from sga.models import Assignment, Submission, Course, Grader, Student
 @csrf_exempt
 def index(request):
     """
-    View for redirecting EdX launch to the appropriate page
+    View for SGA-LTI installation instructions
     """
-    if not request.initial_lti_request:
-        return render(request, "sga/index.html")
-    course_edx_id = request.LTI.get("context_id")
-    assignment_edx_id = request.LTI.get("resource_link_id")
-    course = Course.objects.get(edx_id=course_edx_id)
-    assignment = Assignment.objects.get(edx_id=assignment_edx_id)
-    user_role = get_role(request.user, course.id)
-    if user_role == Roles.student:
-        return redirect("view_submission_as_student", course_id=course.id, assignment_id=assignment.id)
-    if user_role in [Roles.admin, Roles.grader]:
-        return redirect("view_assignment", course_id=course.id, assignment_id=assignment.id)
-    raise Exception("Bad role %s" % user_role)
+    return render(request, "sga/index.html")
 
 
-@csrf_exempt
 def not_graded_block_error_page(request):
     """
     View for error message if tool is embedded in a not graded block
     """
     return render(request, "sga/not_graded_block_error_page.html")
+
+
+def studio_message_page(request):
+    """
+    View for error message if tool is embedded in a not graded block
+    """
+    return render(request, "sga/studio_message_page.html")
 
 
 @allowed_roles([Roles.admin, Roles.grader])

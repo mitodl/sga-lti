@@ -6,6 +6,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
 
+from sga.backend.constants import STUDIO_USER_USERNAME, Roles
 from sga.models import Course, Assignment, Student, Grader
 from sga.backend.authentication import get_role
 
@@ -40,6 +41,8 @@ class SGAMiddleware(object):
                 raise SuspiciousOperation("No resource_link_id in LTI parameters")
             if not request.LTI.get("lis_outcome_service_url"):
                 return redirect("not_graded_block_error_page")
+            if request.user.username == STUDIO_USER_USERNAME:
+                return redirect("studio_message_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
             # request.LTI["lis_outcome_service_url"]
@@ -49,7 +52,7 @@ class SGAMiddleware(object):
                 due_date = parse_datetime(due_date)
             name = request.POST.get("custom_component_display_name", request.LTI["resource_link_id"])
             defaults = {"course": course, "due_date": due_date, "name": name}
-            Assignment.objects.update_or_create(
+            assignment, _ = Assignment.objects.update_or_create(
                 edx_id=request.LTI["resource_link_id"],
                 defaults=defaults
             )
@@ -67,4 +70,18 @@ class SGAMiddleware(object):
             # is expected to be short-lived enough to not warrant checking on every request.
             # We also need to cast str on course.id because the url parameters are passed as string
             # to the decorator and views.
-            request.session["course_roles"][str(course.id)] = get_role(request.user, course.id)
+            user_role = get_role(request.user, course.id)
+            request.session["course_roles"][str(course.id)] = user_role
+            # Redirect edX launch to the appropriate page
+            return self.redirect_edx_launch(user_role, course, assignment)
+
+    @staticmethod
+    def redirect_edx_launch(user_role, course, assignment):
+        """
+        Redirects edX launch to the appropriate page
+        """
+        if user_role == Roles.student:
+            return redirect("view_submission_as_student", course_id=course.id, assignment_id=assignment.id)
+        if user_role in [Roles.admin, Roles.grader]:
+            return redirect("view_assignment", course_id=course.id, assignment_id=assignment.id)
+        raise Exception("Bad role %s" % user_role)
