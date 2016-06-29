@@ -48,6 +48,14 @@ def index(request):
     raise Exception("Bad role %s" % user_role)
 
 
+@csrf_exempt
+def ungraded_block_error_page(request):
+    """
+    View for error message if tool is embedded in ungraded block
+    """
+    return render(request, "sga/ungraded_block_error_page.html")
+
+
 @allowed_roles([Roles.admin, Roles.grader])
 def staff_index(request, course_id):
     """

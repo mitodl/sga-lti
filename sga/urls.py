@@ -21,11 +21,14 @@ from sga.views import (
     download_not_graded_submissions,
     unassign_grader,
     unassign_student,
-    staff_index)
+    staff_index,
+    ungraded_block_error_page
+)
 
 
 urlpatterns = [
     url(r"^$", index, name="sga_index"),
+    url(r"^ungraded-block$", ungraded_block_error_page, name="ungraded_block_error_page"),
     url(r"^home/(?P<course_id>\d+)$", staff_index, name="staff_index"),
     url(r"^dev-start$", dev_start, name="dev_start"),
     url(r"^view-student-list/(?P<course_id>\d+)$", view_student_list, name="view_student_list"),
