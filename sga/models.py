@@ -3,8 +3,10 @@ Model definitions
 """
 
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.shortcuts import get_object_or_404
 
 from sga.backend.files import student_submission_file_path, grader_submission_file_path
 from sga.backend.validators import validate_file_extension
@@ -31,7 +33,27 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
-class Grader(models.Model):
+class CourseModel(TimeStampedModel):
+    """
+    Base model for models relating to the course to allow authentication checks
+    """
+    @classmethod
+    def get_or_404_check_course(cls, course_id, **kwargs):
+        """
+        Runs a get_or_404 on the object class with kwargs. If an object is returned, checks if the object is
+        part of the course with id course_id.
+        """
+        obj = get_object_or_404(cls, **kwargs)
+        # Cast to string because course_id is passed as str from view
+        if str(obj.course_id) != str(course_id):
+            raise PermissionDenied()
+        return obj
+
+    class Meta:
+        abstract = True
+
+
+class Grader(CourseModel):
     """
     Grader model (intermediate between Course and User)
     """
@@ -57,8 +79,9 @@ class Grader(models.Model):
         """
         Returns a count of submission that are submitted but not graded by this grader
         """
+        student_users = [s.user for s in self.students.all()]
         return Submission.objects.filter(
-            graded_by=self.user,
+            student__in=student_users,
             assignment__course=self.course,
             submitted=True,
             graded=False
@@ -74,7 +97,7 @@ class Grader(models.Model):
         unique_together = (("user", "course"),)
 
 
-class Student(models.Model):
+class Student(CourseModel):
     """
     Student model (intermediate between Course and User)
     """
@@ -102,7 +125,7 @@ class Course(TimeStampedModel):
         """
         Returns a boolean of whether or not user is a Student in this course
         """
-        return self.students.filter(pk=user.pk).exists()
+        return self.students.filter(pk=user.pk).exists() and not self.has_grader(user)
 
     def has_grader(self, user):
         """
@@ -128,7 +151,7 @@ class Course(TimeStampedModel):
         ).count()
 
 
-class Assignment(TimeStampedModel):
+class Assignment(CourseModel):
     """
     Assignment model
     """
@@ -181,7 +204,8 @@ class Assignment(TimeStampedModel):
         """
         Returns a count of submissions for this assignment that are not submitted
         """
-        students_in_course = self.course.students.count()
+        # Graders all have student objects
+        students_in_course = self.course.students.count() - self.course.graders.count()
         return students_in_course - self.graded_submissions_count() - self.not_graded_submissions_count()
 
     def not_submitted_submissions_count_by_grader(self, grader=None, grader_user=None):

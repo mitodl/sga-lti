@@ -16,19 +16,18 @@
             if (!confirm("{{ STUDENT_TO_GRADER_CONFIRM }}")) {
                 return false
             }
-            window.location.href = "{% url 'change_student_to_grader' student_user_id=student.user.id %}";
+            window.location.href = "{% url 'change_student_to_grader' course_id=request.course.id student_user_id=student.user.id %}";
         }
         function unassignGrader() {
             if (!confirm("{{ UNASSIGN_GRADER_CONFIRM }}")) {
                 return false;
             }
-            window.location.href = "{% url 'unassign_grader' student_user_id=student.user.id %}";
+            window.location.href = "{% url 'unassign_grader' course_id=request.course.id student_user_id=student.user.id %}";
         }
     </script>
 {% endblock %}
 
 {% block content %}
-    <h1>Course: {{ course.edx_id }}</h1>
     <h3>Student: {{ student }}</h3>
     
     <hr>
@@ -50,7 +49,7 @@
                 <dt>Assigned Grader:</dt>
                 <dd>
                 {% if student.grader %}
-                    <a href="{% url 'view_grader' course_id=course.id grader_user_id=student.grader.user.id %}" target="_blank">
+                    <a href="{% url 'view_grader' course_id=request.course.id grader_user_id=student.grader.user.id %}" target="_blank">
                         {{ student.grader }}
                     </a>
                 {% else %}
@@ -79,7 +78,7 @@
         {% for assignment in assignments %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment' assignment_id=assignment.id %}">
+                    <a href="{% url 'view_assignment' course_id=request.course.id assignment_id=assignment.id %}">
                         {{ assignment.name }}
                     </a>
                 </td>
@@ -100,7 +99,7 @@
                 <td>(Pending)</td>
                 {% endif %}
                 <td>
-                    <a href="{% url 'view_submission_as_staff' assignment_id=assignment.id student_user_id=student.user.id %}">
+                    <a href="{% url 'view_submission_as_staff' course_id=request.course.id assignment_id=assignment.id student_user_id=student.user.id %}">
                         View Submission
                     </a>
                 </td>

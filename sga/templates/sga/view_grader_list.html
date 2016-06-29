@@ -24,7 +24,6 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Course: {{ course.edx_id }}</h1>
     <h3>Grader List</h3>
     <hr>
     <h4>Filters</h4>
@@ -59,7 +58,11 @@
         <tbody>
         {% for grader in graders %}
             <tr>
-                <td>{{ grader }}</td>
+                <td>
+                    <a href="{% url 'view_grader' course_id=request.course.id grader_user_id=grader.user.id %}">
+                        { grader }}
+                    </a>
+                </td>
                 <td>{{ grader.students.count }}</td>
                 <td>{{ grader.max_students }}</td>
                 <td>{{ grader.graded_submissions_count }}</td>

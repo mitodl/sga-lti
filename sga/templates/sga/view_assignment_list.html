@@ -17,7 +17,6 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Course: {{ course.edx_id }}</h1>
     {% if grader_user %}
     <h3>Assignment List (Grader: {{ grader_user.get_full_name }})</h3>
     {% else %}
@@ -52,7 +51,7 @@
         {% for assignment in assignments %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment' assignment_id=assignment.edx_id %}">
+                    <a href="{% url 'view_assignment' course_id=request.course.id assignment_id=assignment.id %}">
                         {{ assignment.name }}
                     </a>
                 </td>

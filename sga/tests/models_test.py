@@ -23,6 +23,31 @@ class TestModels(SGATestCase):
         course = Course.objects.get(id=course.id)
         self.assertLess(initial_updated_on, course.updated_on)
 
+    def test_grader_graded_submissions_count(self):
+        """
+        Tests the .graded_submissions_count() method on Grader
+        """
+        grader = self.get_test_grader()
+        submission = self.get_test_submission()
+        self.assertEqual(grader.graded_submissions_count(), 0)
+        submission.update(submitted=True, graded=True, graded_by=grader.user)
+        self.assertEqual(grader.graded_submissions_count(), 1)
+
+    def test_grader_not_graded_submissions_count(self):
+        """
+        Tests the .not_graded_submissions_count() method on Grader
+        """
+        grader = self.get_test_grader()
+        student = self.get_test_student()
+        student.grader = grader
+        student.save()
+        self.assertEqual(grader.not_graded_submissions_count(), 0)
+        submission = self.get_test_submission()  # Uses get_test_student() to set student
+        submission.update(submitted=True)
+        self.assertEqual(grader.not_graded_submissions_count(), 1)
+        submission.update(graded=True, graded_by=grader.user)
+        self.assertEqual(grader.not_graded_submissions_count(), 0)
+
     def test_course_has_student(self):
         """
         Tests the .has_student() method on Course

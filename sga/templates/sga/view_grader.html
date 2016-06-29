@@ -22,7 +22,7 @@
             if (!confirm("{{ GRADER_TO_STUDENT_CONFIRM }}")) {
                 return false
             }
-            window.location.href = "{% url 'change_grader_to_student' grader_user_id=grader.user.id %}";
+            window.location.href = "{% url 'change_grader_to_student' course_id=request.course.id grader_user_id=grader.user.id %}";
         }
         function unassignStudent(studentName, url) {
             if (!confirm(studentName + ":\n\n{{ UNASSIGN_STUDENT_CONFIRM }}")) {
@@ -34,7 +34,6 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Course: {{ course.edx_id }}</h1>
     <h3>Grader: {{ grader }}</h3>
     
     <hr>
@@ -85,7 +84,7 @@
         {% for student in students %}
             <tr>
                 <td>
-                    <a href="{% url 'view_student' course_id=course.id student_user_id=student.user.id %}">
+                    <a href="{% url 'view_student' course_id=request.course.id student_user_id=student.user.id %}">
                         {{ student }}
                     </a>
                 </td>
@@ -94,7 +93,7 @@
                 {% if role == Roles.admin %}
                 <td>
                     <a href="javascript:void(0)"
-                       onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' grader_user_id=grader.user.id student_user_id=student.user.id %}')">
+                       onclick="unassignStudent('{{ student }}', '{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}')">
                         Unassign Student
                     </a>
                 </td>
@@ -122,12 +121,12 @@
         {% for submission in graded_submissions %}
             <tr>
                 <td>
-                    <a href="{% url 'view_assignment' assignment_id=submission.assignment.id %}">
+                    <a href="{% url 'view_assignment' course_id=request.course.id assignment_id=submission.assignment.id %}">
                         {{ submission.assignment.name }}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url 'view_student' course_id=course.id student_user_id=submission.student.id %}">
+                    <a href="{% url 'view_student' course_id=request.course.id student_user_id=submission.student.id %}">
                         {{ submission.student.get_full_name }}
                     </a>
                 </td>
@@ -136,7 +135,7 @@
                 </td>
                 <td data-sort="{{ submission.grade }}">{{ submission.grade_display }}</td>
                 <td>
-                    <a href="{% url 'view_submission_as_staff' assignment_id=submission.assignment.id student_user_id=submission.student.id %}">
+                    <a href="{% url 'view_submission_as_staff' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=submission.student.id %}">
                         View Submission
                     </a>
                 </td>

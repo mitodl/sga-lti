@@ -8,7 +8,7 @@
     <hr>
     {% include "common/submission_status.html" %}
     {% if not submission.submitted %}
-    <form action="{% url 'view_submission_as_student' assignment_id=assignment.id %}" class="form-horizontal"
+    <form action="{% url 'view_submission_as_student' course_id=request.course.id assignment_id=assignment.id %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
