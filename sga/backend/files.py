@@ -7,10 +7,32 @@ import re
 from io import BytesIO
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from django.http import HttpResponse
+from django.http.response import StreamingHttpResponse
 
 from sga.backend.constants import INVALID_S3_CHARACTERS_REGEX
-from django.http.response import StreamingHttpResponse
+
+
+class StreamingBytesIO(BytesIO):
+    """
+    Implementation of BytesIO that allows us to keep track of the stream's virtual position
+    while simultaneously emptying the stream as we go.
+    """
+    _position = 0
+
+    def empty(self):
+        """
+        Clears the BytesIO object while retaining the current virtual position
+        """
+        self._position = self.tell()
+        self.truncate(0)
+        self.seek(0)
+
+    def tell(self):
+        """
+        Returns the current stream's virtual position (where the stream would be if it had
+        been running contiguously and self.empty() is not called)
+        """
+        return self._position + super().tell()
 
 
 def convert_illegal_S3_chars(path, replace_with="_"):
@@ -31,13 +53,13 @@ def serve_zip_file(submissions, zipname="zipfile"):
 
 def submissions_zip_generator(submissions):
     """ Generator to create the streaming response from the submissions """
-    bytes_io = BytesIO()
+    bytes_io = StreamingBytesIO()
     with ZipFile(bytes_io, mode="w", compression=ZIP_DEFLATED, allowZip64=True) as zip_file:
         for submission in submissions:
-            zip_file.writestr(submission.student_document.name, submission.student_document.read())
+            filename = os.path.basename(submission.student_document.name)
+            zip_file.writestr(filename, submission.student_document.read())
             yield bytes_io.getvalue()
-            bytes_io.truncate(0)
-            bytes_io.seek(0)
+            bytes_io.empty()
     yield bytes_io.getvalue()
 
 

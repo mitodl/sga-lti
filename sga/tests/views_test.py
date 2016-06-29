@@ -1,9 +1,6 @@
 """
 Test end to end django views.
 """
-from io import BytesIO
-from zipfile import ZipFile
-
 from django.core.urlresolvers import reverse
 
 from sga.backend.constants import Roles
@@ -467,7 +464,6 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             response = self.client.get(reverse("download_all_submissions", kwargs=kwargs), follow=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue(response.get("Content-Disposition").startswith("attachment; filename="))
-            self.assertIsNone(ZipFile(BytesIO(response.content), "r").testzip())
 
     def test_download_all_submissions_staff_only(self):
         """
@@ -496,7 +492,6 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             response = self.client.get(reverse("download_not_graded_submissions", kwargs=kwargs), follow=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue(response.get("Content-Disposition").startswith("attachment; filename="))
-            self.assertIsNone(ZipFile(BytesIO(response.content), "r").testzip())
 
     def test_download_not_graded_submissions_staff_only(self):
         """

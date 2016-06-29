@@ -302,7 +302,8 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
         submissions = submissions.filter(student__in=student_users)
     if not_graded_only:
         submissions = submissions.exclude(graded=True)
-    full_zipname = "{course_id} - {zipname}".format(course_id=course_id, zipname=zipname)
+    course = Course.objects.get(id=course_id)
+    full_zipname = "{course_edx_id} - {zipname}".format(course_edx_id=course.edx_id, zipname=zipname)
     return serve_zip_file(submissions, full_zipname)
 
 
