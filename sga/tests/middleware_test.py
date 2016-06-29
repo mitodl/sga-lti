@@ -3,10 +3,12 @@ Tests for the SGAMiddleware
 """
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
+from django.core.urlresolvers import reverse
 from mock import MagicMock
 
+from sga.backend.constants import Roles
 from sga.middleware import SGAMiddleware
-from sga.tests.common import SGATestCase, DEFAULT_TEST_COURSE_ID, DEFAULT_ASSIGNMENT_EDX_ID, DEFAULT_USER_USERNAME
+from sga.tests.common import SGATestCase, DEFAULT_LTI_PARAMS
 
 
 class MiddlewareTest(SGATestCase):
@@ -19,11 +21,7 @@ class MiddlewareTest(SGATestCase):
         Sets up a mock request object
         """
         request = MagicMock()
-        request.LTI = {
-            "context_id": DEFAULT_TEST_COURSE_ID,
-            "resource_link_id": DEFAULT_ASSIGNMENT_EDX_ID,
-            "user_id": DEFAULT_USER_USERNAME,
-        }
+        request.LTI = dict(DEFAULT_LTI_PARAMS)
         request.method = "POST"
         request.POST = {
             "lti_message_type": "basic-lti-launch-request",
@@ -90,6 +88,22 @@ class MiddlewareTest(SGATestCase):
             "No context_id in LTI parameters",
             middleware.process_request,
             request
+        )
+
+    def test_not_graded_block_redirect(self):
+        """
+        Test that the middleware redirects if it's embedded in a not graded block
+        """
+        # Must change the default lti_params and POST request to spoof initial_lti_request
+        lti_params = DEFAULT_LTI_PARAMS
+        lti_params.pop("lis_outcome_service_url")
+        self.do_test_successful_view(
+            reverse("sga_index"),
+            Roles.none,
+            template="sga/not_graded_block_error_page.html",
+            lti_params=lti_params,
+            method="post",
+            post_params={"lti_message_type": "basic-lti-launch-request"}
         )
 
     def test_admin_LTI_request(self):

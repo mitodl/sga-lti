@@ -16,8 +16,16 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         """ Verify the index view is as expected """
         self.do_test_successful_view(
             reverse("sga_index"),
-            None,
+            Roles.none,
             template="sga/index.html"
+        )
+
+    def test_not_graded_block_error_page_view(self):
+        """ Verify the not_graded_block_error_page view is as expected """
+        self.do_test_successful_view(
+            reverse("not_graded_block_error_page"),
+            Roles.none,
+            template="sga/not_graded_block_error_page.html"
         )
 
     def test_unsubmit_submission(self):

@@ -16,6 +16,13 @@ DEFAULT_ADMIN_USERNAME = "test_admin"
 DEFAULT_USER_USERNAME = "test_user_id"
 DEFAULT_ASSIGNMENT_EDX_ID = "test_assignment"
 DEFAULT_TEST_COURSE_ID = "test_course"
+DEFAULT_LIS_OUTCOME_SERVICE_URL = "lis_outcome_service_url"
+DEFAULT_LTI_PARAMS = {
+    "context_id": DEFAULT_TEST_COURSE_ID,
+    "resource_link_id": DEFAULT_ASSIGNMENT_EDX_ID,
+    "user_id": DEFAULT_USER_USERNAME,
+    "lis_outcome_service_url": DEFAULT_LIS_OUTCOME_SERVICE_URL
+}
 
 
 class SGATestCase(TestCase):
@@ -38,17 +45,16 @@ class SGATestCase(TestCase):
     ###
     # Helper functions
     ###
-    def setup_session_params(self, user):
+    def set_up_session_params(self, user, lti_params=None):
         """
         Initializes session parameters (assumes test course)
         """
         # Set up session
         # LTI params
-        lti_params = {
-            "context_id": DEFAULT_TEST_COURSE_ID,
-            "resource_link_id": DEFAULT_ASSIGNMENT_EDX_ID,
-            "user_id": DEFAULT_USER_USERNAME,
-        }
+        if lti_params:
+            lti_params = lti_params
+        else:
+            lti_params = DEFAULT_LTI_PARAMS
         session = self.client.session
         session["LTI_LAUNCH"] = lti_params
         course = self.get_test_course()
@@ -57,52 +63,52 @@ class SGATestCase(TestCase):
         session.save()
         self.client.session.load()
 
-    def log_in_as(self, role):
+    def log_in_as(self, role, lti_params=None):
         """
         Logs in as the role provided
         @param role: (str) role
         """
         if role == Roles.student:
-            self.log_in_as_student()
+            self.log_in_as_student(lti_params=lti_params)
         elif role == Roles.grader:
-            self.log_in_as_grader()
+            self.log_in_as_grader(lti_params=lti_params)
         elif role == Roles.admin:
-            self.log_in_as_admin()
+            self.log_in_as_admin(lti_params=lti_params)
         else:
             # Assume anonymous, but logged in, user
-            self.log_in_as_non_role_user()
+            self.log_in_as_non_role_user(lti_params=lti_params)
 
-    def log_in_as_admin(self):
+    def log_in_as_admin(self, lti_params=None):
         """
         Logs in as an admin in the test course
         """
         admin_user = self.get_test_admin_user()
         self.client.force_login(admin_user)
-        self.setup_session_params(admin_user)
+        self.set_up_session_params(admin_user, lti_params=lti_params)
 
-    def log_in_as_grader(self):
+    def log_in_as_grader(self, lti_params=None):
         """
         Logs in as a grader in the test course
         """
         grader_user = self.get_test_grader_user()
         self.client.force_login(grader_user)
-        self.setup_session_params(grader_user)
+        self.set_up_session_params(grader_user, lti_params=lti_params)
 
-    def log_in_as_student(self):
+    def log_in_as_student(self, lti_params=None):
         """
         Logs in as a grader in the test course
         """
         student_user = self.get_test_student_user()
         self.client.force_login(student_user)
-        self.setup_session_params(student_user)
+        self.set_up_session_params(student_user, lti_params=lti_params)
 
-    def log_in_as_non_role_user(self):
+    def log_in_as_non_role_user(self, lti_params=None):
         """
         Logs in as user with no role
         """
         user = self.get_test_user()
         self.client.force_login(user)
-        self.setup_session_params(user)
+        self.set_up_session_params(user, lti_params=lti_params)
 
     def get_test_course(self):  # pylint: disable=no-self-use
         """
@@ -200,7 +206,8 @@ class SGATestCase(TestCase):
         self.assertEqual(response.status_code, 403)
         return response
 
-    def do_test_successful_view(self, url_path, role, template=None, contains=None, context_keys=None):
+    def do_test_successful_view(self, url_path, role, template=None, contains=None,
+                                context_keys=None, lti_params=None, method="get", post_params=None):
         # pylint: disable-msg=too-many-arguments
         """
         Runs general tests for view functions to ensure 200 status code, template used, context variables
@@ -210,9 +217,18 @@ class SGATestCase(TestCase):
         @param template: (optional[str]) template path
         @param context_keys: (optional[list]) keys expected to be in context
         @param contains: (optional[str]) str expected to occur in html of view
+        @param lti_params: (optional[dict]) lti_params to set in request during login
+        @param method: (optional[str]) method for http request
+        @param post_params: (optional[dict]) data to be passed in post request; requires method="post"
         """
-        self.log_in_as(role)
-        response = self.client.get(url_path, follow=True)
+        if lti_params:
+            self.log_in_as(role, lti_params=lti_params)
+        else:
+            self.log_in_as(role)
+        if method == "get":
+            response = self.client.get(url_path, follow=True)
+        elif method == "post":
+            response = self.client.post(url_path, data=post_params, follow=True)
         self.assertEqual(response.status_code, 200)
         if template:
             self.assertTemplateUsed(response, template)

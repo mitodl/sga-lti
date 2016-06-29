@@ -3,6 +3,7 @@ Custom middleware
 """
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
+from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
 
 from sga.models import Course, Assignment, Student, Grader
@@ -37,7 +38,8 @@ class SGAMiddleware(object):
             if not request.LTI.get("resource_link_id"):
                 # Raise a 400 error
                 raise SuspiciousOperation("No resource_link_id in LTI parameters")
-
+            if not request.LTI.get("lis_outcome_service_url"):
+                return redirect("not_graded_block_error_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
             # request.LTI["lis_outcome_service_url"]
