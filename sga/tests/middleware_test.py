@@ -90,9 +90,9 @@ class MiddlewareTest(SGATestCase):
             request
         )
 
-    def test_ungraded_block_redirect(self):
+    def test_not_graded_block_redirect(self):
         """
-        Test that the middleware redirects if it's embedded in an ungraded block
+        Test that the middleware redirects if it's embedded in a not graded block
         """
         # Must change the default lti_params and POST request to spoof initial_lti_request
         lti_params = DEFAULT_LTI_PARAMS
@@ -100,7 +100,7 @@ class MiddlewareTest(SGATestCase):
         self.do_test_successful_view(
             reverse("sga_index"),
             Roles.none,
-            template="sga/ungraded_block_error_page.html",
+            template="sga/not_graded_block_error_page.html",
             lti_params=lti_params,
             method="post",
             post_params={"lti_message_type": "basic-lti-launch-request"}

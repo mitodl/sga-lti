@@ -39,7 +39,7 @@ class SGAMiddleware(object):
                 # Raise a 400 error
                 raise SuspiciousOperation("No resource_link_id in LTI parameters")
             if not request.LTI.get("lis_outcome_service_url"):
-                return redirect("ungraded_block_error_page")
+                return redirect("not_graded_block_error_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
             # request.LTI["lis_outcome_service_url"]

@@ -49,11 +49,11 @@ def index(request):
 
 
 @csrf_exempt
-def ungraded_block_error_page(request):
+def not_graded_block_error_page(request):
     """
-    View for error message if tool is embedded in ungraded block
+    View for error message if tool is embedded in a not graded block
     """
-    return render(request, "sga/ungraded_block_error_page.html")
+    return render(request, "sga/not_graded_block_error_page.html")
 
 
 @allowed_roles([Roles.admin, Roles.grader])
