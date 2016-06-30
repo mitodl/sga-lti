@@ -568,6 +568,8 @@ class TestViews(SGATestCase):
         pprint("_________________")
         pprint(form.fields["students"].dict())
         pprint("_________________")
+        pprint(student.user_id)
+        pprint("_________________")
         self.assertTrue(form.is_valid(), form.errors)
         kwargs = {
             "course_id": course.id,
