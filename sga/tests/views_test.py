@@ -11,6 +11,7 @@ from sga.forms import (
     GraderAssignmentSubmissionForm,
     StudentAssignmentSubmissionForm,
     AssignStudentToGraderForm)
+from sga.models import Student
 from sga.tests.common import SGATestCase
 
 
@@ -549,6 +550,36 @@ class TestViews(SGATestCase):
         self.assertNotEqual(student.grader, grader)
         form_data = {"students": student.user_id}
         form = AssignStudentToGraderForm(data=form_data, instance=grader)
+        students = Student.objects.filter(
+            grader=None,
+            course=course,
+            deleted=False
+        ).order_by(
+            "user__username"
+        )
+        print("_________________")
+        print(students)
+        print("_________________")
+        try:
+            print(form.students)
+        except:
+            pass
+        print("_________________")
+        try:
+            print(form.students.queryset)
+        except:
+            pass
+        print("_________________")
+        try:
+            print(form.fields)
+        except:
+            pass
+        print("_________________")
+        try:
+            print(form.fields.__dict__)
+        except:
+            pass
+        print("_________________")
         self.assertTrue(form.is_valid(), form.errors)
         kwargs = {
             "course_id": course.id,
