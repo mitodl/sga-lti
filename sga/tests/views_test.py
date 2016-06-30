@@ -14,8 +14,8 @@ from sga.forms import (
     AssignGraderToStudentForm,
     GraderMaxStudentsForm,
     GraderAssignmentSubmissionForm,
-    StudentAssignmentSubmissionForm
-)
+    StudentAssignmentSubmissionForm,
+    AssignStudentToGraderForm)
 from sga.tests.common import SGATestCase
 
 
@@ -561,11 +561,14 @@ class TestViews(SGATestCase):
         self.assertGreater(grader.available_student_slots_count(), 0)
         # Grader should not be assigned to student
         self.assertNotEqual(student.grader, grader)
-        form_data = {"students": student.user_id, "assign_student_submit": True}
+        form_data = {"students": student.user_id}
+        form = AssignStudentToGraderForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
         }
+        form_data.update({"assign_student_submit": True})
         self.log_in_as_admin()
         response = self.client.post(reverse("view_grader", kwargs=kwargs), data=form_data)
         # Grader should now be assigned
@@ -585,11 +588,14 @@ class TestViews(SGATestCase):
         self.assertGreater(grader.available_student_slots_count(), 0)
         # Grader should not be assigned to student
         self.assertNotEqual(student.grader, grader)
-        form_data = {"students": student.user_id, "assign_student_submit": True}
+        form_data = {"students": student.user_id}
+        form = AssignStudentToGraderForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
         }
+        form_data.update({"assign_student_submit": True})
         url = reverse("view_grader", kwargs=kwargs)
         # As grader
         self.log_in_as_grader()

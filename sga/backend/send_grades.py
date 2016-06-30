@@ -5,9 +5,10 @@ Most of this module is a python 3 port of pylti (github.com/mitodl/sga-lti)
 and should be moved back into that library.
 """
 import uuid
+from xml.etree import ElementTree as etree
+
 import oauth2
 from django.conf import settings
-from xml.etree import ElementTree as etree
 
 
 class SendGradeFailure(Exception):
