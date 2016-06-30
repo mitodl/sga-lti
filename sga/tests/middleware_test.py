@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.core.urlresolvers import reverse
 from mock import MagicMock
 
-from sga.backend.constants import Roles
+from sga.backend.constants import STUDIO_USER_USERNAME
 from sga.middleware import SGAMiddleware
 from sga.tests.common import SGATestCase, DEFAULT_LTI_PARAMS
 
@@ -95,16 +95,22 @@ class MiddlewareTest(SGATestCase):
         Test that the middleware redirects if it's embedded in a not graded block
         """
         # Must change the default lti_params and POST request to spoof initial_lti_request
-        lti_params = DEFAULT_LTI_PARAMS
+        lti_params = dict(DEFAULT_LTI_PARAMS)  # Make a copy so we don't change the original dict
         lti_params.pop("lis_outcome_service_url")
-        self.do_test_successful_view(
-            reverse("sga_index"),
-            Roles.none,
-            template="sga/not_graded_block_error_page.html",
-            lti_params=lti_params,
-            method="post",
-            post_params={"lti_message_type": "basic-lti-launch-request"}
-        )
+        self.log_in_as_admin(lti_params=lti_params)
+        response = self.client.post(reverse("sga_index"), data={"lti_message_type": "basic-lti-launch-request"})
+        self.assertRedirects(response, reverse("not_graded_block_error_page"))
+
+    def test_studio_redirect(self):
+        """
+        Test that the middleware redirects if it's launched from studio
+        """
+        # Must change the default lti_params and POST request to spoof initial_lti_request
+        user = self.get_test_user(username=STUDIO_USER_USERNAME)
+        self.client.force_login(user)
+        self.set_up_session_params(user)
+        response = self.client.post(reverse("sga_index"), data={"lti_message_type": "basic-lti-launch-request"})
+        self.assertRedirects(response, reverse("studio_message_page"))
 
     def test_admin_LTI_request(self):
         """

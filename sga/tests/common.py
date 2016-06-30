@@ -61,7 +61,6 @@ class SGATestCase(TestCase):
         session["course_roles"] = {}
         session["course_roles"][str(course.id)] = get_role(user, course.id)
         session.save()
-        self.client.session.load()
 
     def log_in_as(self, role, lti_params=None):
         """
@@ -128,11 +127,11 @@ class SGATestCase(TestCase):
             course=self.get_test_course()
         )[0]
 
-    def get_test_user(self):  # pylint: disable=no-self-use
+    def get_test_user(self, username=DEFAULT_USER_USERNAME):  # pylint: disable=no-self-use
         """
         Creates or retrieves test user (with no role). Returns the User object.
         """
-        return self.user_model.objects.get_or_create(username=DEFAULT_USER_USERNAME)[0]
+        return self.user_model.objects.get_or_create(username=username)[0]
 
     def get_test_student(self, username=DEFAULT_STUDENT_USERNAME):
         """
