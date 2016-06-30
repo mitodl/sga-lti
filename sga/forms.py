@@ -74,6 +74,13 @@ class AssignStudentToGraderForm(forms.ModelForm):
             "user__username"
         )
 
+    def is_valid(self):
+        """
+        Overrides the default is_valid for custom validation
+        """
+        print(self.cleaned_data["students"])
+        raise Exception()
+
     def save(self, grader=None):
         """
         Save student-grader foreign key relationship

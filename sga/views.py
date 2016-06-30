@@ -3,7 +3,6 @@ View definitions
 """
 
 from datetime import datetime
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
@@ -91,8 +90,11 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
     """
     View submission (for staff)
     """
-    assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
     student = Student.get_or_404_check_course(course_id, user_id=student_user_id, deleted=False)
+    # Disallow if current user is not admin or this grader
+    if request.role == Roles.grader and student.grader is not None and student.grader.user != request.user:
+        return HttpResponseForbidden()
+    assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
     submission, _ = Submission.objects.get_or_create(student=student.user, assignment=assignment)
     next_not_graded_submission = Submission.objects.filter(
         assignment=assignment,
@@ -401,15 +403,3 @@ def unassign_student(request, course_id, grader_user_id, student_user_id):  # py
     student = get_object_or_404(Student, user_id=student_user_id, grader=grader)
     student.update(grader=None)
     return redirect("view_grader", course_id=course_id, grader_user_id=grader_user_id)
-
-
-def dev_start(request):  # pragma: no cover
-    """
-    For local development only - sets session variables and authenticates user
-    """
-    if settings.DEVELOPMENT:
-        request.role = Roles.admin
-        request.course = Course.objects.get(id=1)
-        request.session["course_roles"]["1"] = Roles.admin
-        request.session.save()
-    return redirect("sga_index")
