@@ -10,7 +10,7 @@ from sga.backend.validators import validate_file_extension
 from sga.tests.common import SGATestCase
 
 
-class TestViews(SGATestCase):
+class TestBackend(SGATestCase):
     """
     Test that the backend functions work as expected
     """

@@ -201,13 +201,13 @@ class SGATestCase(TestCase):
         self.log_in_as(role)
         if method == "get":
             response = self.client.get(url_path, follow=True)
-        elif method == "post":
+        else:
+            # Assumes only "get" and "post"
             response = self.client.post(url_path, follow=True)
         self.assertEqual(response.status_code, 403)
         return response
 
-    def do_test_successful_view(self, url_path, role, template=None, contains=None,
-                                context_keys=None, method="get", post_params=None):
+    def do_test_successful_view(self, url_path, role, template=None, context_keys=None):
         # pylint: disable-msg=too-many-arguments
         """
         Runs general tests for view functions to ensure 200 status code, template used, context variables
@@ -216,32 +216,16 @@ class SGATestCase(TestCase):
         @param role: (str) role to log in as; must be in of [Roles.student, Roles.grader, Roles.admin]
         @param template: (optional[str]) template path
         @param context_keys: (optional[list]) keys expected to be in context
-        @param contains: (optional[str]) str expected to occur in html of view
-        @param method: (optional[str]) method for http request
-        @param post_params: (optional[dict]) data to be passed in post request; requires method="post"
         """
         self.log_in_as(role)
-        if method == "get":
-            response = self.client.get(url_path, follow=True)
-        elif method == "post":
-            response = self.client.post(url_path, data=post_params, follow=True)
+        response = self.client.get(url_path, follow=True)
         self.assertEqual(response.status_code, 200)
         if template:
             self.assertTemplateUsed(response, template)
         if context_keys:
             for key in context_keys:
                 self.assertTrue(key in response.context, msg="{key} not in context".format(key=key))
-        if contains:
-            self.assertContains(response, contains)
         return response
-
-    def submit_document(self, student_user):
-        """
-        Creates and submits a student_document to the Submission linked to self.get_test_assignment() and student_user
-        """
-        submission, _ = Submission.objects.get_or_create(assignment=self.get_test_assignment(), student=student_user)
-        submission.student_document = self.get_test_file()
-        submission.save()
 
     @staticmethod
     def get_test_file(filename="file.pdf", content_type="application/pdf"):

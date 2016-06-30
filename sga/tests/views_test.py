@@ -22,7 +22,7 @@ from sga.tests.common import SGATestCase
 TEST_FILE_LOCATION = os.path.join(settings.BASE_DIR, "temp_files")
 
 
-@override_settings(  # pylint: disable=too-many-public-methods
+@override_settings(
     DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
     MEDIA_ROOT=TEST_FILE_LOCATION
 )
@@ -30,6 +30,7 @@ class TestViews(SGATestCase):
     """
     Test that the views work as expected
     """
+    # pylint: disable=too-many-public-methods
 
     def tearDown(self):
         shutil.rmtree(TEST_FILE_LOCATION, ignore_errors=True)
