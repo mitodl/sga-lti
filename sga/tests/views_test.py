@@ -1,7 +1,13 @@
 """
 Test end to end django views.
 """
+import os
+import shutil
+
+from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
+from mock import patch, MagicMock
 
 from sga.backend.constants import Roles
 from sga.forms import (
@@ -13,14 +19,20 @@ from sga.forms import (
 from sga.tests.common import SGATestCase
 
 
-# Several of the tests below WILL upload files to S3. Set the following constant to True to run these tests.
-RUN_FILE_UPLOAD_TESTS = False
+TEST_FILE_LOCATION = os.path.join(settings.BASE_DIR, "temp_files")
 
 
-class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
+@override_settings(  # pylint: disable=too-many-public-methods
+    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
+    MEDIA_ROOT=TEST_FILE_LOCATION
+)
+class TestViews(SGATestCase):
     """
     Test that the views work as expected
     """
+
+    def tearDown(self):
+        shutil.rmtree(TEST_FILE_LOCATION, ignore_errors=True)
 
     def test_index_view(self):
         """
@@ -150,21 +162,18 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
     def test_submit_student_assignment(self):
         """
         Verify successful student submission via view_submission_as_student
-        WARNING: Running this test WILL upload a file to S3.
         """
-        if not RUN_FILE_UPLOAD_TESTS:
-            return
         self.log_in_as_student()
         submission = self.get_test_submission()
         self.assertIsNone(submission.student_document.name)
         self.assertIsNone(submission.description)
         self.assertFalse(submission.submitted)
-        file = self.get_test_file()
+        test_file = self.get_test_file()
         form_data = {
             "description": "file description"
         }
         form_files = {
-            "student_document": file
+            "student_document": test_file
         }
         form = StudentAssignmentSubmissionForm(data=form_data, files=form_files, instance=submission)
         self.assertTrue(form.is_valid())
@@ -213,26 +222,24 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
                 ]
             )
 
+    @patch("sga.views.send_grade", MagicMock(return_value=None))
     def test_submit_grader_document(self):
         """
         Verify successful grader submission via view_submission_as_staff
-        WARNING: Running this test WILL upload a file to S3.
         """
-        if not RUN_FILE_UPLOAD_TESTS:
-            return
         self.log_in_as_grader()
         submission = self.get_test_submission()
         student_user = self.get_test_student_user()
         self.assertIsNone(submission.grader_document.name)
         self.assertIsNone(submission.feedback)
         self.assertFalse(submission.graded)
-        file = self.get_test_file()
+        test_file = self.get_test_file()
         form_data = {
             "feedback": "file feedback",
             "grade": 75
         }
         form_files = {
-            "grader_document": file
+            "grader_document": test_file
         }
         form = GraderAssignmentSubmissionForm(data=form_data, files=form_files, instance=submission)
         self.assertTrue(form.is_valid())

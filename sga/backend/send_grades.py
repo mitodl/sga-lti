@@ -5,19 +5,24 @@ Most of this module is a python 3 port of pylti (github.com/mitodl/sga-lti)
 and should be moved back into that library.
 """
 import uuid
-from xml import etree
-
 import oauth2
 from django.conf import settings
+from xml.etree import ElementTree as etree
+
+
+class SendGradeFailure(Exception):
+    """ Exception class for failures sending grades to edX"""
 
 
 def send_grade(consumer_key, edx_url, result_id, grade):
     """ Sends a grade to edX """
     body = generate_request_xml(str(uuid.uuid1()), "replaceResult", result_id, grade)
+    if consumer_key not in settings.LTI_OAUTH_CREDENTIALS:
+        raise SendGradeFailure("Invalid consumer_key %s" % consumer_key)
     secret = settings.LTI_OAUTH_CREDENTIALS[consumer_key]
     response, content = _post_patched_request(consumer_key, secret, body, edx_url, "POST", "application/xml")
-    print(response)
-    print(content)
+    if "<imsx_codeMajor>success</imsx_codeMajor>" not in content:
+        raise SendGradeFailure("Send grades to edX returned %s" % response.status)
 
 
 def _post_patched_request(lti_key, secret, body, url, method, content_type):  # pylint: disable=too-many-arguments
