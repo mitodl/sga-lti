@@ -69,7 +69,8 @@ class AssignStudentToGraderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["students"].queryset = Student.objects.filter(
             grader=None,
-            course=self.instance.course
+            course=self.instance.course,
+            deleted=False
         ).order_by(
             "user__username"
         )

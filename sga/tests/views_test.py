@@ -549,7 +549,7 @@ class TestViews(SGATestCase):
         self.assertNotEqual(student.grader, grader)
         form_data = {"students": student.user_id}
         form = AssignStudentToGraderForm(data=form_data, instance=grader)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
@@ -576,7 +576,7 @@ class TestViews(SGATestCase):
         self.assertNotEqual(student.grader, grader)
         form_data = {"students": student.user_id}
         form = AssignStudentToGraderForm(data=form_data, instance=grader)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
