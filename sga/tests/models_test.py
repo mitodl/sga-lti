@@ -1,6 +1,7 @@
 """
 Test end to end django models.
 """
+from datetime import datetime
 from time import sleep
 
 from django.core.exceptions import PermissionDenied
@@ -234,6 +235,19 @@ class TestModels(SGATestCase):
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader), 0)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader_user=grader.user), 0)
         self.assertEqual(assignment.not_submitted_submissions_count_by_grader(grader=grader_2), 0)
+
+    def test_assignment_is_past_due_date(self):
+        """
+        Tests the .is_past_due_date() method on Assignment
+        """
+        DATETIME_EARLIER = datetime(2016, 6, 15, 11, 59, 59)
+        DATETIME_MIDDLE = datetime(2016, 6, 15, 12, 0, 0)
+        DATETIME_LATER = datetime(2016, 6, 15, 12, 0, 1)
+        assignment = self.get_test_assignment()
+        assignment.due_date = DATETIME_MIDDLE
+        assignment.save()
+        self.assertFalse(assignment.is_past_due_date(now=DATETIME_EARLIER))
+        self.assertTrue(assignment.is_past_due_date(now=DATETIME_LATER))
 
     def test_submission_grade_display(self):
         """

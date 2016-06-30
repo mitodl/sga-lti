@@ -1,7 +1,9 @@
 """
 Model definitions
 """
+from datetime import datetime
 
+import pytz
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -226,6 +228,14 @@ class Assignment(CourseModel):
         return (grader.get_number_of_students()
                 - self.graded_submissions_count_by_grader(grader_user=grader.user)
                 - self.not_graded_submissions_count_by_grader(grader=grader))
+
+    def is_past_due_date(self, now=datetime.utcnow().replace(tzinfo=pytz.UTC)):
+        """
+        Returns a boolean of whether or not the assignment is past its due date
+        """
+        if not self.due_date:
+            return None
+        return now >= self.due_date
 
 
 class Submission(TimeStampedModel):
