@@ -557,29 +557,17 @@ class TestViews(SGATestCase):
         ).order_by(
             "user__username"
         )
-        print("_________________")
-        print(students)
-        print("_________________")
-        try:
-            print(form.students)
-        except:
-            pass
-        print("_________________")
-        try:
-            print(form.students.queryset)
-        except:
-            pass
-        print("_________________")
-        try:
-            print(form.fields)
-        except:
-            pass
-        print("_________________")
-        try:
-            print(form.fields.__dict__)
-        except:
-            pass
-        print("_________________")
+        from pprint import pprint
+        pprint("_________________")
+        pprint(students)
+        pprint("_________________")
+        pprint(form.fields["students"].queryset)
+        pprint("_________________")
+        for c in form.fields["students"].choices:
+            print(c)
+        pprint("_________________")
+        pprint(form.fields["students"].dict())
+        pprint("_________________")
         self.assertTrue(form.is_valid(), form.errors)
         kwargs = {
             "course_id": course.id,
