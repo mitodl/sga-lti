@@ -11,7 +11,6 @@ from sga.forms import (
     GraderAssignmentSubmissionForm,
     StudentAssignmentSubmissionForm,
     AssignStudentToGraderForm)
-from sga.models import Student
 from sga.tests.common import SGATestCase
 
 
@@ -548,27 +547,26 @@ class TestViews(SGATestCase):
         self.assertGreater(grader.available_student_slots_count(), 0)
         # Grader should not be assigned to student
         self.assertNotEqual(student.grader, grader)
-        form_data = {"students": student.user_id}
+        # First have to initialize form to retrieve the choices the form provides. There's an issue
+        # with Travis builds where self.get_test_student() apparently returns a different object
+        # than the form's queryset, even though the only object that should exist in the test
+        # database is the object from self.get_test_student()
+        form = AssignStudentToGraderForm(instance=grader)
+        # We only want one student_user_id, but we have to iterate because form.fields["students"].choices
+        # is a ModelChoiceIterator, so we must iterate
+        for choice in form.fields["students"].choices:
+            student_user_id = choice[0]  # (user_id, label)
+            if student_user_id:
+                break
+        # Now we set form_data using the student_user_id we got from above. If there were no choices and
+        # we get a referenced before assignment error, it's probably not a test logic issue and it should
+        # rightfully break
+        print(student_user_id)
+        for choice in form.fields["students"].choices:
+            print(choice)
+        form_data = {"students": student_user_id}
         form = AssignStudentToGraderForm(data=form_data, instance=grader)
-        students = Student.objects.filter(
-            grader=None,
-            course=course,
-            deleted=False
-        ).order_by(
-            "user__username"
-        )
-        from pprint import pprint
-        pprint("_________________")
-        pprint(students)
-        pprint("_________________")
-        pprint(form.fields["students"].queryset)
-        pprint("_________________")
-        for c in form.fields["students"].choices:
-            print(c)
-        pprint("_________________")
-        pprint(student.user_id)
-        pprint("_________________")
-        self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(form.is_valid())
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
@@ -593,9 +591,15 @@ class TestViews(SGATestCase):
         self.assertGreater(grader.available_student_slots_count(), 0)
         # Grader should not be assigned to student
         self.assertNotEqual(student.grader, grader)
-        form_data = {"students": student.user_id}
+        # See comment from test_assign_student() about why the next 4 lines are necessary with Travis
+        form = AssignStudentToGraderForm(instance=grader)
+        for choice in form.fields["students"].choices:
+            student_user_id = choice[0]  # (user_id, label)
+            if student_user_id:
+                break
+        form_data = {"students": student_user_id}
         form = AssignStudentToGraderForm(data=form_data, instance=grader)
-        self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(form.is_valid())
         kwargs = {
             "course_id": course.id,
             "grader_user_id": grader.user_id
