@@ -52,11 +52,12 @@ def studio_message_page(request):
 
 
 @allowed_roles([Roles.admin, Roles.grader])
-def staff_index(request, course_id):
+def staff_index(request, course_id):  # pylint: disable=unused-argument
     """
     Staff index
     """
-    return render(request, "sga/staff_index.html", context={"course_id": course_id})
+    # course_id sets request.course in allowed_roles()
+    return render(request, "sga/staff_index.html")
 
 
 @allowed_roles([Roles.student])
@@ -205,7 +206,7 @@ def view_student(request, course_id, student_user_id):
     """
     course = get_object_or_404(Course, id=course_id)
     student = Student.get_or_404_check_course(course_id, user_id=student_user_id, deleted=False)
-    if request.method == "POST":
+    if request.method == "POST" and request.role == Roles.admin:
         assign_grader_form = AssignGraderToStudentForm(request.POST, instance=student)
         if assign_grader_form.is_valid():
             assign_grader_form.save()
@@ -237,7 +238,7 @@ def view_grader(request, course_id, grader_user_id):
     # Load forms and handle form submission
     max_students_form = GraderMaxStudentsForm(instance=grader)
     assign_student_form = AssignStudentToGraderForm(instance=grader)
-    if request.method == "POST":
+    if request.method == "POST" and request.role == Roles.admin:
         if "max_students_submit" in request.POST:
             max_students_form = GraderMaxStudentsForm(request.POST, instance=grader)
             if max_students_form.is_valid():
@@ -297,7 +298,7 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
         assignment=assignment,
         student__student__deleted=False
     ).exclude(
-        student_document=None
+        student_document=""
     )
     if request.role == Roles.grader:
         grader = Grader.objects.get(user=request.user, course=assignment.course)
@@ -395,7 +396,7 @@ def unassign_student(request, course_id, grader_user_id, student_user_id):  # py
     grader = Grader.get_or_404_check_course(course_id, user_id=grader_user_id)
     student = get_object_or_404(Student, user_id=student_user_id, grader=grader)
     student.update(grader=None)
-    return redirect("view_grader", course_id=student.course.id, grader_user_id=grader_user_id)
+    return redirect("view_grader", course_id=course_id, grader_user_id=grader_user_id)
 
 
 def dev_start(request):  # pragma: no cover

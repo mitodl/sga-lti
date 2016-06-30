@@ -12,12 +12,10 @@ def create_mock_data():
     Function for creating mock data
     """
     admin_user = User.objects.create(
-        first_name="Admin",
-        last_name="User",
         username="admin"
     )
     course = Course.objects.create(
-        edx_id="courseid"
+        edx_id="course-v1:MITx+B101+2015_T3"
     )
     course.administrators.add(admin_user)
     grader_user_1 = User.objects.create(

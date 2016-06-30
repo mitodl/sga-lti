@@ -68,7 +68,8 @@ class AssignStudentToGraderForm(forms.ModelForm):
         """
         super().__init__(*args, **kwargs)
         self.fields["students"].queryset = Student.objects.filter(
-            grader=None
+            grader=None,
+            course=self.instance.course
         ).order_by(
             "user__username"
         )
@@ -100,7 +101,8 @@ class AssignGraderToStudentForm(forms.ModelForm):
         self.fields["grader"].queryset = self.fields["grader"].queryset.annotate(
             Count("students")
         ).filter(
-            max_students__gt=F("students__count")
+            max_students__gt=F("students__count"),
+            course=self.instance.course
         ).order_by(
             "user__username"
         )
