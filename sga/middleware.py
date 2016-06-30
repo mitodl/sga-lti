@@ -45,7 +45,9 @@ class SGAMiddleware(object):
                 return redirect("studio_message_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
-            # request.LTI["lis_outcome_service_url"]
+            # TODO: request.LTI["lis_outcome_service_url"]
+            # TODO: request.POST["lis_result_sourcedid"]
+            # TODO: request.POST["oauth_consumer_key"]
             course, _ = Course.objects.get_or_create(edx_id=request.LTI["context_id"])
             due_date = request.POST.get("custom_component_due_date")
             if due_date:
