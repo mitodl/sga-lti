@@ -19,6 +19,7 @@ from sga.backend.constants import (
     UNASSIGN_STUDENT_CONFIRM,
     UNSUBMIT_CONFIRM)
 from sga.backend.files import serve_zip_file
+from sga.backend.send_grades import send_grade
 from sga.forms import (
     StudentAssignmentSubmissionForm,
     GraderAssignmentSubmissionForm,
@@ -110,11 +111,14 @@ def view_submission_as_staff(request, course_id, assignment_id, student_user_id)
     if request.method == "POST":
         submission_form = GraderAssignmentSubmissionForm(request.POST, request.FILES, instance=submission)
         if submission_form.is_valid():
+            # Update database object
             submission_form.save()
             submission.graded_at = datetime.utcnow()
             submission.graded_by = request.user
             submission.graded = True
             submission.save()
+            # Send grade back to edX
+            send_grade(submission.consumer_key, submission.edx_url, submission.result_id, submission.edx_grade())
             redirect(
                 "view_submission_as_staff",
                 course_id=course_id,

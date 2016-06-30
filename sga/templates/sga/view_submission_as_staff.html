@@ -28,7 +28,7 @@
 
 {% block content %}
     <h1>Assignment: {{ assignment.name }}</h1>
-    <h3>Student: {{ student_user.get_full_name }}</h3>
+    <h3>Student: {{ student_user.username }}</h3>
     <hr>
     
     {% include "common/submission_status.html" %}

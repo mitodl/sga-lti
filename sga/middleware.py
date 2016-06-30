@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
 
 from sga.backend.constants import STUDIO_USER_USERNAME, Roles
-from sga.models import Course, Assignment, Student, Grader
+from sga.models import Course, Assignment, Student, Grader, Submission
 from sga.backend.authentication import get_role
 
 
@@ -45,10 +45,9 @@ class SGAMiddleware(object):
                 return redirect("studio_message_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
-            # TODO: request.LTI["lis_outcome_service_url"]
-            # TODO: request.POST["lis_result_sourcedid"]
-            # TODO: request.POST["oauth_consumer_key"]
+            # Course
             course, _ = Course.objects.get_or_create(edx_id=request.LTI["context_id"])
+            # Assignment
             due_date = request.POST.get("custom_component_due_date")
             if due_date:
                 due_date = parse_datetime(due_date)
@@ -64,10 +63,18 @@ class SGAMiddleware(object):
                 Student.objects.filter(user=request.user, course=course).delete()
             else:
                 course.administrators.remove(request.user)
-                # Ensure the student object exists; graders also should have a
-                # student object, since they are promoted from students and
-                # if they are ever demoted, their student data should still exist
+                # Ensure the student object exists; graders also should have a student object, since
+                # they are promoted from students and if they are ever demoted, their student data
+                # should still exist
                 Student.objects.get_or_create(course=course, user=request.user)
+                # If this user is a student, we need to generate a Submission object and store
+                # grade submission information
+                submission, _ = Submission.objects.get_or_create(student=request.user, assignment=assignment)
+                submission.edx_url = request.LTI["lis_outcome_service_url"]
+                submission.result_id = request.POST.get("lis_result_sourcedid")
+                submission.consumer_key = request.POST.get("oauth_consumer_key")
+                submission.save()
+
             # We only check for role on the initial LTI request since the user's session in our tool
             # is expected to be short-lived enough to not warrant checking on every request.
             # We also need to cast str on course.id because the url parameters are passed as string

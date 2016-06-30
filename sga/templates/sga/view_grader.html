@@ -124,7 +124,7 @@
                 </td>
                 <td>
                     <a href="{% url 'view_student' course_id=request.course.id student_user_id=submission.student.id %}">
-                        {{ submission.student.get_full_name }}
+                        {{ submission.student.username }}
                     </a>
                 </td>
                 <td data-sort="{{ submission.graded_at|date:EPOCH_FORMAT }}">

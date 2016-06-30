@@ -62,7 +62,7 @@ class Grader(CourseModel):
     course = models.ForeignKey("Course")
 
     def __str__(self):
-        return self.user.get_full_name()
+        return self.user.username
 
     def get_number_of_students(self):
         """ Gets the number of students assigned to the grader """
@@ -233,27 +233,31 @@ class Submission(TimeStampedModel):
     Submission model
     """
     assignment = models.ForeignKey(Assignment, related_name="submissions")
-    student = models.ForeignKey(User, related_name="submitted_submissions")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="submitted_submissions")
     graded_by = models.ForeignKey(User, null=True, related_name="graded_submissions")
-
-    description = models.TextField(null=True)
-    feedback = models.TextField(null=True)
-    grade = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], null=True)  # 0-100
-    submitted_at = models.DateTimeField(null=True)  # UTC
-    graded_at = models.DateTimeField(null=True)  # UTC
-    submitted = models.BooleanField(default=False)
-    graded = models.BooleanField(default=False)
 
     student_document = models.FileField(
         upload_to=student_submission_file_path,
         null=True,
         validators=[validate_file_extension]
     )
+    description = models.TextField(null=True)
+    submitted_at = models.DateTimeField(null=True)  # UTC
+    submitted = models.BooleanField(default=False)
+
     grader_document = models.FileField(
         upload_to=grader_submission_file_path,
         null=True,
         validators=[validate_file_extension]
     )
+    feedback = models.TextField(null=True)
+    grade = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], null=True)  # 0-100
+    graded_at = models.DateTimeField(null=True)  # UTC
+    graded = models.BooleanField(default=False)
+
+    edx_url = models.CharField(max_length=256, null=True)  # lis_outcome_service_url
+    result_id = models.CharField(max_length=256, null=True)  # lis_result_sourcedid
+    consumer_key = models.CharField(max_length=256, null=True)  # oauth_consumer_key
 
     def grade_display(self):
         """
@@ -263,6 +267,12 @@ class Submission(TimeStampedModel):
             return "{grade}/100 ({percent}%)".format(grade=self.grade, percent=self.grade)
         else:
             return "(Not Graded)"
+
+    def edx_grade(self):
+        """
+        Returns grade converted to edX format (0.00 - 1.00)
+        """
+        return self.grade / 100
 
     class Meta:
         unique_together = (("assignment", "student"),)

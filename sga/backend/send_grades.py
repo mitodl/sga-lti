@@ -4,11 +4,11 @@ This module handles sending grades back to edX
 Most of this module is a python 3 port of pylti (github.com/mitodl/sga-lti)
 and should be moved back into that library.
 """
-
 import uuid
+from xml import etree
+
 import oauth2
 from django.conf import settings
-from xml.etree import ElementTree as etree
 
 
 def send_grade(consumer_key, edx_url, result_id, grade):
@@ -20,7 +20,7 @@ def send_grade(consumer_key, edx_url, result_id, grade):
     print(content)
 
 
-def _post_patched_request(lti_key, secret, body, url, method, content_type):
+def _post_patched_request(lti_key, secret, body, url, method, content_type):  # pylint: disable=too-many-arguments
     """
     Authorization header needs to be capitalized for some LTI clients
     this function ensures that header is capitalized
