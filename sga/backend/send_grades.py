@@ -17,9 +17,9 @@ class SendGradeFailure(Exception):
 
 def send_grade(consumer_key, edx_url, result_id, grade):
     """ Sends a grade to edX """
-    body = generate_request_xml(str(uuid.uuid1()), "replaceResult", result_id, grade)
     if consumer_key not in settings.LTI_OAUTH_CREDENTIALS:
         raise SendGradeFailure("Invalid consumer_key %s" % consumer_key)
+    body = generate_request_xml(str(uuid.uuid1()), "replaceResult", result_id, grade)
     secret = settings.LTI_OAUTH_CREDENTIALS[consumer_key]
     response, content = _post_patched_request(consumer_key, secret, body, edx_url, "POST", "application/xml")
     if "<imsx_codeMajor>success</imsx_codeMajor>" not in content:

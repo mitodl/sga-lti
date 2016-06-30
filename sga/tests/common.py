@@ -1,8 +1,12 @@
 """
 Has parent test class for test cases
 """
+import os
+import shutil
+
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 
@@ -26,14 +30,18 @@ DEFAULT_LTI_PARAMS = {
 }
 
 
+TEST_FILE_LOCATION = os.path.join(settings.BASE_DIR, "temp_files")
+
+
+@override_settings(
+    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
+    MEDIA_ROOT=TEST_FILE_LOCATION
+)
 class SGATestCase(TestCase):
     """
     Parent test class for test cases
     """
 
-    ###
-    # Setup
-    ###
     def setUp(self):
         """
         Common test setup
@@ -42,6 +50,9 @@ class SGATestCase(TestCase):
         self.client = Client()
         self.user_model = get_user_model()
         self.default_course = self.get_test_course()
+
+    def tearDown(self):
+        shutil.rmtree(TEST_FILE_LOCATION, ignore_errors=True)
 
     ###
     # Helper functions

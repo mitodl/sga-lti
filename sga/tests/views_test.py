@@ -1,12 +1,7 @@
 """
 Test end to end django views.
 """
-import os
-import shutil
-
-from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
 from mock import patch, MagicMock
 
 from sga.backend.constants import Roles
@@ -19,21 +14,11 @@ from sga.forms import (
 from sga.tests.common import SGATestCase
 
 
-TEST_FILE_LOCATION = os.path.join(settings.BASE_DIR, "temp_files")
-
-
-@override_settings(
-    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
-    MEDIA_ROOT=TEST_FILE_LOCATION
-)
 class TestViews(SGATestCase):
     """
     Test that the views work as expected
     """
     # pylint: disable=too-many-public-methods
-
-    def tearDown(self):
-        shutil.rmtree(TEST_FILE_LOCATION, ignore_errors=True)
 
     def test_index_view(self):
         """
