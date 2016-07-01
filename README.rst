@@ -47,10 +47,10 @@ settings ("sga-lti.yml"):
     MEDIAFILES_LOCATION  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
     LTI_OAUTH_CREDENTIALS  # A dictionary of lti oauth key/secret pairs
 
-
 Servers additionally need the parameters:
 ::
 
+    SECRET_KEY  # The Django secret key
     ALLOWED_HOSTS  # A list containing the name of the server
     DATABASE_URL  # The url to connect to the database
 
@@ -81,6 +81,7 @@ Sample server configuration:
     AWS_ACCESS_KEY_ID         AKXXXXXXXXXXXX
     AWS_SECRET_ACCESS_KEY     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     MEDIAFILES_LOCATION       /sga_files
+    SECRET_KEY                super_secret_key
 
 
 When installing this tool in LTI, the launch url is simply the root url of the tool.
