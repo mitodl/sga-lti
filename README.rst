@@ -93,6 +93,7 @@ http://edx.readthedocs.io/projects/edx-partner-course-staff/en/latest/exercises_
 You can add this tool to a graded unit by going to edX studio for that unit.
 Under "Add New Component", click "Advanced", and pick "LTI Consumer".  Edit
 the newly created LTI consumer.  Fill in the following settings:
+
 * Display Name: the name of the assignment that will be passed to SGA-LTI
 * LTI ID: [your LTI passport id that you configured in course settings]
 * LTI URL: [the root url of the tool] (so if the tool is deployed at example.com, the launch URL is `https://example.com`)
