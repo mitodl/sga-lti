@@ -84,9 +84,24 @@ Sample server configuration:
     SECRET_KEY                super_secret_key
 
 
-When installing this tool in LTI, the launch url is simply the root url of the tool.
-So if the tool is deployed at example.com, the launch URL is `example.com`.
+Installing as an LTI tool
+=====================
 
+To add this to a course, first follow the edX instructions for adding LTI passport configuration:
+http://edx.readthedocs.io/projects/edx-partner-course-staff/en/latest/exercises_tools/lti_component.html.
+
+You can add this tool to a graded unit by going to edX studio for that unit.
+Under "Add New Component", click "Advanced", and pick "LTI Consumer".  Edit
+the newly created LTI consumer.  Fill in the following settings:
+* Display Name: the name of the assignment that will be passed to SGA-LTI
+* LTI ID: [your LTI passport id that you configured in course settings]
+* LTI URL: [the root url of the tool] (so if the tool is deployed at example.com, the launch URL is `https://example.com`)
+* LTI Launch Target: Inline
+* Scored: True
+* Request user's username: True
+* Request user's email: True
+
+NOTE: This tool is only designed to be installed in graded units of an edX course.
 
 Adding an application
 =====================

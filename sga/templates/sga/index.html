@@ -4,6 +4,14 @@
 
 {% block content %}
     <h3>This is the Staff-Graded Assignments LTI Tool.</h3>
-    <h4>Install this in your edX course using the following URL as the launch url.</h4>
-    <pre>{{ request.build_absolute_uri }}</pre>
+    <h4>Install this in a graded unit in your edX course using the following LTI settings:</h4>
+    <pre>
+        Display Name: [the name of the assignment]
+        LTI ID: [your lti passport id]
+        LTI URL: {{ request.build_absolute_uri }}
+        LTI Launch Target: Inline
+        Scored: True
+        Request user's username: True
+        Request user's email: True</pre>
+
 {% endblock %}
