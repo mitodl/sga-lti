@@ -5,14 +5,15 @@ from io import BytesIO
 from zipfile import is_zipfile
 
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.test import override_settings
 from mock import MagicMock, patch
 
 from sga.backend.authentication import get_role
-from sga.backend.constants import VALID_FILE_UPLOAD_EXTENSIONS, Roles
+from sga.backend.constants import Roles
 from sga.backend.files import convert_illegal_S3_chars, submissions_zip_generator
 from sga.backend.send_grades import send_grade, SendGradeFailure
-from sga.backend.validators import validate_file_extension
+from sga.backend.validators import validate_file_extension, validate_file_size
 from sga.tests.common import SGATestCase
 
 
@@ -26,12 +27,23 @@ class TestBackend(SGATestCase):
         Verify that validators.validate_file_extension() works correctly
         """
         INVALID_FILE_UPLOAD_EXTENSIONS = [".ppt", ".txt", ".docx", ".jpg"]
-        for ext in VALID_FILE_UPLOAD_EXTENSIONS:
-            file = self.get_test_file("file{ext}".format(ext=ext))
-            self.assertTrue(validate_file_extension, file)
+        for ext in settings.VALID_FILE_UPLOAD_EXTENSIONS:
+            file_obj = self.get_test_file("file{ext}".format(ext=ext))
+            # Call to ensure it doesn't raise an exception
+            validate_file_extension(file_obj)
         for ext in INVALID_FILE_UPLOAD_EXTENSIONS:
-            file = self.get_test_file("file{ext}".format(ext=ext))
-            self.assertRaises(ValidationError, validate_file_extension, file)
+            file_obj = self.get_test_file("file{ext}".format(ext=ext))
+            self.assertRaises(ValidationError, validate_file_extension, file_obj)
+
+    def test_validate_file_size(self):
+        """
+        Verify that validators.validate_file_extension() works correctly
+        """
+        file_obj = MagicMock(file=MagicMock(size=100))
+        # Call to ensure it doesn't raise an exception
+        validate_file_size(file_obj)
+        file_obj = MagicMock(file=MagicMock(size=10 * 1024 * 1024))
+        self.assertRaises(ValidationError, validate_file_size, file_obj)
 
     def test_get_role(self):
         """

@@ -10,6 +10,7 @@ import tempfile
 from django.conf import settings
 from django.core import mail
 from django.test import TestCase
+from dj_static import Cling
 import mock
 import semantic_version
 import yaml
@@ -144,3 +145,8 @@ class TestSettings(TestCase):
         Verify that we have a semantic compatible version.
         """
         semantic_version.Version(settings.VERSION)
+
+    def test_wsgi_file(self):
+        """ Ensure that the wsgi file is importable """
+        from sga_lti.wsgi import application
+        self.assertTrue(isinstance(application, Cling))

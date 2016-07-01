@@ -11,7 +11,7 @@ from django.db import models
 from django.shortcuts import get_object_or_404
 
 from sga.backend.files import student_submission_file_path, grader_submission_file_path
-from sga.backend.validators import validate_file_extension
+from sga.backend.validators import validate_file_extension, validate_file_size
 
 
 class TimeStampedModel(models.Model):
@@ -249,7 +249,7 @@ class Submission(TimeStampedModel):
     student_document = models.FileField(
         upload_to=student_submission_file_path,
         null=True,
-        validators=[validate_file_extension]
+        validators=[validate_file_extension, validate_file_size]
     )
     description = models.TextField(null=True)
     submitted_at = models.DateTimeField(null=True)  # UTC
@@ -258,7 +258,7 @@ class Submission(TimeStampedModel):
     grader_document = models.FileField(
         upload_to=grader_submission_file_path,
         null=True,
-        validators=[validate_file_extension]
+        validators=[validate_file_extension, validate_file_size]
     )
     feedback = models.TextField(null=True)
     grade = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], null=True)  # 0-100

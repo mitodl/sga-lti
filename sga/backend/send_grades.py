@@ -22,6 +22,8 @@ def send_grade(consumer_key, edx_url, result_id, grade):
     body = generate_request_xml(str(uuid.uuid1()), "replaceResult", result_id, grade)
     secret = settings.LTI_OAUTH_CREDENTIALS[consumer_key]
     response, content = _post_patched_request(consumer_key, secret, body, edx_url, "POST", "application/xml")
+    if isinstance(content, bytes):
+        content = content.decode("utf8")
     if "<imsx_codeMajor>success</imsx_codeMajor>" not in content:
         raise SendGradeFailure("Send grades to edX returned %s" % response.status)
 

@@ -292,3 +292,6 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 # Development flag
 DEVELOPMENT = get_var('DEVELOPMENT', False)
+
+MAX_FILE_SIZE_MB = get_var("MAX_FILE_SIZE_MB", 5)
+VALID_FILE_UPLOAD_EXTENSIONS = get_var("VALID_FILE_UPLOAD_EXTENSIONS", [".pdf"])
