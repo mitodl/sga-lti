@@ -42,9 +42,50 @@ settings ("sga-lti.yml"):
 
     # Media files (for uploaded files)
     AWS_STORAGE_BUCKET_NAME  # S3 bucket name
-    AWS_ACCESS_KEY_ID:  # S3 access key id credential
-    AWS_SECRET_ACCESS_KEY:  # S3 secret access key credential
-    MEDIAFILES_LOCATION:  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
+    AWS_ACCESS_KEY_ID  # S3 access key id credential
+    AWS_SECRET_ACCESS_KEY  # S3 secret access key credential
+    MEDIAFILES_LOCATION  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
+    LTI_OAUTH_CREDENTIALS  # A dictionary of lti oauth key/secret pairs
+
+
+Servers additionally need the parameters:
+::
+
+    ALLOWED_HOSTS  # A list containing the name of the server
+    DATABASE_URL  # The url to connect to the database
+
+
+Sample sga-lti.yml for local development:
+::
+
+    DEBUG: True
+    SGA_LTI_SECURE_SSL_REDIRECT: False
+    SGA_LTI_DB_DISABLE_SSL: True
+    SGA_LTI_LOG_LEVEL: INFO
+    DJANGO_LOG_LEVEL: INFO
+    LTI_OAUTH_CREDENTIALS:
+        client-key: client-secret
+    AWS_STORAGE_BUCKET_NAME: XXXXXXXXXX
+    AWS_ACCESS_KEY_ID: AKXXXXXXXXXXXX
+    AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    MEDIAFILES_LOCATION: /testing
+
+
+Sample server configuration:
+::
+
+    ALLOWED_HOSTS             ["example.com"]
+    DATABASE_URL              postgres://xxx:yyy@hostname:port/zzz
+    LTI_OAUTH_CREDENTIALS     {"client-key": "client-secret"}
+    AWS_STORAGE_BUCKET_NAME   s3_bucket
+    AWS_ACCESS_KEY_ID         AKXXXXXXXXXXXX
+    AWS_SECRET_ACCESS_KEY     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    MEDIAFILES_LOCATION       /sga_files
+
+
+When installing this tool in LTI, the launch url is simply the root url of the tool.
+So if the tool is deployed at example.com, the launch URL is `example.com`.
+
 
 Adding an application
 =====================
