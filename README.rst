@@ -97,6 +97,7 @@ the newly created LTI consumer.  Fill in the following settings:
 * Display Name: the name of the assignment that will be passed to SGA-LTI
 * LTI ID: [your LTI passport id that you configured in course settings]
 * LTI URL: [the root url of the tool] (so if the tool is deployed at example.com, the launch URL is `https://example.com`)
+* Custom Parameters: leave as default, []
 * LTI Launch Target: Inline
 * Scored: True
 * Request user's username: True
