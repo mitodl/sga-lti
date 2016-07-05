@@ -3,6 +3,7 @@ Tests for the SGAMiddleware
 """
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.core.urlresolvers import reverse
+from django_auth_lti.backends import LTIAuthBackend
 from mock import MagicMock
 
 from sga.backend.constants import STUDIO_USER_USERNAME
@@ -62,12 +63,22 @@ class MiddlewareTest(SGATestCase):
         request = self.get_test_request()
         request.lti_authentication_successful = False
         middleware = SGAMiddleware()
-        self.assertRaisesMessage(
-            SuspiciousOperation,
-            "Bad LTI credentials",
-            middleware.process_request,
-            request
-        )
+        http_response = middleware.process_request(request)
+        self.assertEqual(http_response.status_code, 400)
+        self.assertEqual(http_response.content.decode("utf8"), middleware.UNSUCCESSFUL_LTI_AUTHENTICATION_MESSAGE)
+
+    def test_request_username_false(self):
+        """
+        Test that the middleware does not allow requests through if the "Request user's username"
+        setting is set to False on the edX tool.
+        """
+        request = self.get_test_request()
+        username = "{prefix}username".format(prefix=LTIAuthBackend.unknown_user_prefix)
+        request.user = self.get_test_user(username=username)
+        middleware = SGAMiddleware()
+        http_response = middleware.process_request(request)
+        self.assertEqual(http_response.status_code, 400)
+        self.assertEqual(http_response.content.decode("utf8"), middleware.REQUEST_USERNAME_FALSE_MESSAGE)
 
     def test_improper_lti_configuration(self):
         """

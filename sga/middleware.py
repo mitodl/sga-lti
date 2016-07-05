@@ -1,11 +1,11 @@
 """
 Custom middleware
 """
-
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
+from django_auth_lti.backends import LTIAuthBackend
 
 from sga.backend.constants import STUDIO_USER_USERNAME, Roles
 from sga.models import Course, Assignment, Student, Grader, Submission
@@ -17,30 +17,38 @@ class SGAMiddleware(object):
     Middleware for processing incoming LTI requests
     """
     ADMIN_ROLES = ["Administrator", "Instructor"]
+    LTI_MIDDLEWARE_NOT_INSTALLED_MESSAGE = "LTI middleware not installed"
+    UNSUCCESSFUL_LTI_AUTHENTICATION_MESSAGE = "Bad or missing LTI credentials"
+    NO_CONTEXT_ID_MESSAGE = "No context_id in LTI parameters"
+    NO_RESOURCE_LINK_ID_MESSAGE = "No resource_link_id in LTI parameters"
+    REQUEST_USERNAME_FALSE_MESSAGE = "\"Request user's username\" must be set to True on this assignment."
 
     def process_request(self, request):  # pylint: disable=no-self-use
         """
         Processes incoming LTI requests
         """
         if not hasattr(request, "LTI"):
-            raise ImproperlyConfigured("LTI middleware not installed")
+            raise ImproperlyConfigured(self.LTI_MIDDLEWARE_NOT_INSTALLED_MESSAGE)
         if "course_roles" not in request.session:
             request.session["course_roles"] = {}
 
         if request.lti_initial_request:
             if not request.lti_authentication_successful:
                 # Raise 400; user is using bad LTI credentials
-                return HttpResponseBadRequest("Bad or missing LTI credentials")
+                return HttpResponseBadRequest(self.UNSUCCESSFUL_LTI_AUTHENTICATION_MESSAGE)
             if not request.LTI.get("context_id"):
                 # Raise a 400 error
-                raise SuspiciousOperation("No context_id in LTI parameters")
+                raise SuspiciousOperation(self.NO_CONTEXT_ID_MESSAGE)
             if not request.LTI.get("resource_link_id"):
                 # Raise a 400 error
-                raise SuspiciousOperation("No resource_link_id in LTI parameters")
+                raise SuspiciousOperation(self.NO_RESOURCE_LINK_ID_MESSAGE)
             if not request.LTI.get("lis_outcome_service_url"):
                 return redirect("not_graded_block_error_page")
             if request.user.username == STUDIO_USER_USERNAME:
                 return redirect("studio_message_page")
+            if request.user.username.startswith(LTIAuthBackend.unknown_user_prefix):
+                request.user.delete()
+                return HttpResponseBadRequest(self.REQUEST_USERNAME_FALSE_MESSAGE)
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
             # Course
