@@ -1,7 +1,9 @@
 """
 Injects context into all views
 """
+from datetime import datetime
 
+import pytz
 from sga.backend.constants import SGA_DATETIME_FORMAT, EPOCH_FORMAT, Roles
 
 
@@ -25,5 +27,6 @@ def datetime_formats(request):  # pylint: disable=unused-argument
     """
     return {
         "SGA_DATETIME_FORMAT": SGA_DATETIME_FORMAT,
-        "EPOCH_FORMAT": EPOCH_FORMAT
+        "EPOCH_FORMAT": EPOCH_FORMAT,
+        "CURRENT_TIME": datetime.utcnow().replace(tzinfo=pytz.UTC)
     }

@@ -86,7 +86,7 @@
                 <td>{{ student.not_graded_submissions_count }}</td>
                 {% if role == Roles.admin %}
                 <td>
-                    <form action="{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user.id student_user_id=student.user.id %}"
+                    <form action="{% url 'unassign_student' course_id=request.course.id grader_user_id=grader.user_id student_user_id=student.user_id %}"
                           method="post" onsubmit="return confirm('{{ student }}:\n\n{{ UNASSIGN_STUDENT_CONFIRM }}')">
                         {% csrf_token %}
                         <button class="btn btn-xs btn-warning" type="submit">
@@ -124,7 +124,7 @@
                 </td>
                 <td>
                     <a href="{% url 'view_student' course_id=request.course.id student_user_id=submission.student.id %}">
-                        {{ submission.student.get_full_name }}
+                        {{ submission.student.username }}
                     </a>
                 </td>
                 <td data-sort="{{ submission.graded_at|date:EPOCH_FORMAT }}">
@@ -176,7 +176,7 @@
                 </div>
                 <br class="visible-xs">
                 <div class="col-sm-6">
-                    <form action="" method="post">{% csrf_token %}
+                    <form action="{% url 'view_grader' course_id=request.course.id grader_user_id=grader.user_id %}" method="post">{% csrf_token %}
                         <div id="div_id_{{ assign_student_form.students.name }}" class="input-group
                              {% if assign_student_form.students.errors %}has-error{% endif %}">
                             <select name="{{ assign_student_form.students.name }}"

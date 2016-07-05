@@ -23,11 +23,15 @@
     <hr>
     {% include "common/submission_status.html" %}
     {% if not submission.submitted %}
+    {% if assignment.is_past_due_date %}
+    <p class="alert alert-info text-center"><b>Sorry, this assignment's due date has passed.</b></p>
+    {% else %}
     <form action="{% url 'view_submission_as_student' course_id=request.course.id assignment_id=assignment.id %}" class="form-horizontal"
           method="post" enctype="multipart/form-data">{% csrf_token %}
         {{ submission_form|as_bootstrap_horizontal:"col-sm-3" }}
         <button class="btn btn-success pull-right" type="submit">Submit</button>
     </form>
+    {% endif %}
     {% endif %}
 {% endblock %}
 

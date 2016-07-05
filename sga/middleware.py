@@ -3,11 +3,12 @@ Custom middleware
 """
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
 
 from sga.backend.constants import STUDIO_USER_USERNAME, Roles
-from sga.models import Course, Assignment, Student, Grader
+from sga.models import Course, Assignment, Student, Grader, Submission
 from sga.backend.authentication import get_role
 
 
@@ -26,13 +27,10 @@ class SGAMiddleware(object):
         if "course_roles" not in request.session:
             request.session["course_roles"] = {}
 
-        initial_lti_request = (request.method == "POST" and
-                               request.POST.get("lti_message_type") == "basic-lti-launch-request")
-        request.initial_lti_request = initial_lti_request
-        if initial_lti_request:
-            if not request.user.is_authenticated():
+        if request.lti_initial_request:
+            if not request.lti_authentication_successful:
                 # Raise 400; user is using bad LTI credentials
-                raise SuspiciousOperation("Bad LTI credentials")
+                return HttpResponseBadRequest("Bad or missing LTI credentials")
             if not request.LTI.get("context_id"):
                 # Raise a 400 error
                 raise SuspiciousOperation("No context_id in LTI parameters")
@@ -45,8 +43,9 @@ class SGAMiddleware(object):
                 return redirect("studio_message_page")
             # On the initial request, we have potentially gotten new information
             # from edX; update the database accordingly
-            # request.LTI["lis_outcome_service_url"]
+            # Course
             course, _ = Course.objects.get_or_create(edx_id=request.LTI["context_id"])
+            # Assignment
             due_date = request.POST.get("custom_component_due_date")
             if due_date:
                 due_date = parse_datetime(due_date)
@@ -62,10 +61,18 @@ class SGAMiddleware(object):
                 Student.objects.filter(user=request.user, course=course).delete()
             else:
                 course.administrators.remove(request.user)
-                # Ensure the student object exists; graders also should have a
-                # student object, since they are promoted from students and
-                # if they are ever demoted, their student data should still exist
+                # Ensure the student object exists; graders also should have a student object, since
+                # they are promoted from students and if they are ever demoted, their student data
+                # should still exist
                 Student.objects.get_or_create(course=course, user=request.user)
+                # If this user is a student, we need to generate a Submission object and store
+                # grade submission information
+                submission, _ = Submission.objects.get_or_create(student=request.user, assignment=assignment)
+                submission.edx_url = request.LTI["lis_outcome_service_url"]
+                submission.result_id = request.POST.get("lis_result_sourcedid")
+                submission.consumer_key = request.POST.get("oauth_consumer_key")
+                submission.save()
+
             # We only check for role on the initial LTI request since the user's session in our tool
             # is expected to be short-lived enough to not warrant checking on every request.
             # We also need to cast str on course.id because the url parameters are passed as string

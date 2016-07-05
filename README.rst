@@ -42,9 +42,67 @@ settings ("sga-lti.yml"):
 
     # Media files (for uploaded files)
     AWS_STORAGE_BUCKET_NAME  # S3 bucket name
-    AWS_ACCESS_KEY_ID:  # S3 access key id credential
-    AWS_SECRET_ACCESS_KEY:  # S3 secret access key credential
-    MEDIAFILES_LOCATION:  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
+    AWS_ACCESS_KEY_ID  # S3 access key id credential
+    AWS_SECRET_ACCESS_KEY  # S3 secret access key credential
+    MEDIAFILES_LOCATION  # Optional S3 subfolder within AWS_STORAGE_BUCKET_NAME
+    LTI_OAUTH_CREDENTIALS  # A dictionary of lti oauth key/secret pairs
+
+Servers additionally need the parameters:
+::
+
+    SECRET_KEY  # The Django secret key
+    ALLOWED_HOSTS  # A list containing the name of the server
+    DATABASE_URL  # The url to connect to the database
+
+
+Sample sga-lti.yml for local development:
+::
+
+    DEBUG: True
+    SGA_LTI_SECURE_SSL_REDIRECT: False
+    SGA_LTI_DB_DISABLE_SSL: True
+    SGA_LTI_LOG_LEVEL: INFO
+    DJANGO_LOG_LEVEL: INFO
+    LTI_OAUTH_CREDENTIALS:
+        client-key: client-secret
+    AWS_STORAGE_BUCKET_NAME: XXXXXXXXXX
+    AWS_ACCESS_KEY_ID: AKXXXXXXXXXXXX
+    AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    MEDIAFILES_LOCATION: /testing
+
+
+Sample server configuration:
+::
+
+    ALLOWED_HOSTS             ["example.com"]
+    DATABASE_URL              postgres://xxx:yyy@hostname:port/zzz
+    LTI_OAUTH_CREDENTIALS     {"client-key": "client-secret"}
+    AWS_STORAGE_BUCKET_NAME   s3_bucket
+    AWS_ACCESS_KEY_ID         AKXXXXXXXXXXXX
+    AWS_SECRET_ACCESS_KEY     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    MEDIAFILES_LOCATION       /sga_files
+    SECRET_KEY                super_secret_key
+
+
+Installing as an LTI tool
+=====================
+
+To add this to a course, first follow the edX instructions for adding LTI passport configuration:
+http://edx.readthedocs.io/projects/edx-partner-course-staff/en/latest/exercises_tools/lti_component.html.
+
+You can add this tool to a graded unit by going to edX studio for that unit.
+Under "Add New Component", click "Advanced", and pick "LTI Consumer".  Edit
+the newly created LTI consumer.  Fill in the following settings:
+
+* Display Name: the name of the assignment that will be passed to SGA-LTI
+* LTI ID: [your LTI passport id that you configured in course settings]
+* LTI URL: [the root url of the tool] (so if the tool is deployed at example.com, the launch URL is `https://example.com`)
+* LTI Launch Target: Inline
+* Scored: True
+* Request user's username: True
+* Request user's email: True
+
+NOTE: This tool is only designed to be installed in graded units of an edX course.
 
 Adding an application
 =====================

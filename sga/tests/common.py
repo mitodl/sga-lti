@@ -1,7 +1,12 @@
 """
 Has parent test class for test cases
 """
-from django.test import TestCase
+import os
+import shutil
+
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 
@@ -25,14 +30,18 @@ DEFAULT_LTI_PARAMS = {
 }
 
 
+TEST_FILE_LOCATION = os.path.join(settings.BASE_DIR, "temp_files")
+
+
+@override_settings(
+    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
+    MEDIA_ROOT=TEST_FILE_LOCATION
+)
 class SGATestCase(TestCase):
     """
     Parent test class for test cases
     """
 
-    ###
-    # Setup
-    ###
     def setUp(self):
         """
         Common test setup
@@ -41,6 +50,9 @@ class SGATestCase(TestCase):
         self.client = Client()
         self.user_model = get_user_model()
         self.default_course = self.get_test_course()
+
+    def tearDown(self):
+        shutil.rmtree(TEST_FILE_LOCATION, ignore_errors=True)
 
     ###
     # Helper functions
@@ -200,13 +212,13 @@ class SGATestCase(TestCase):
         self.log_in_as(role)
         if method == "get":
             response = self.client.get(url_path, follow=True)
-        elif method == "post":
+        else:
+            # Assumes only "get" and "post"
             response = self.client.post(url_path, follow=True)
         self.assertEqual(response.status_code, 403)
         return response
 
-    def do_test_successful_view(self, url_path, role, template=None, contains=None,
-                                context_keys=None, lti_params=None, method="get", post_params=None):
+    def do_test_successful_view(self, url_path, role, template=None, context_keys=None):
         # pylint: disable-msg=too-many-arguments
         """
         Runs general tests for view functions to ensure 200 status code, template used, context variables
@@ -215,25 +227,24 @@ class SGATestCase(TestCase):
         @param role: (str) role to log in as; must be in of [Roles.student, Roles.grader, Roles.admin]
         @param template: (optional[str]) template path
         @param context_keys: (optional[list]) keys expected to be in context
-        @param contains: (optional[str]) str expected to occur in html of view
-        @param lti_params: (optional[dict]) lti_params to set in request during login
-        @param method: (optional[str]) method for http request
-        @param post_params: (optional[dict]) data to be passed in post request; requires method="post"
         """
-        if lti_params:
-            self.log_in_as(role, lti_params=lti_params)
-        else:
-            self.log_in_as(role)
-        if method == "get":
-            response = self.client.get(url_path, follow=True)
-        elif method == "post":
-            response = self.client.post(url_path, data=post_params, follow=True)
+        self.log_in_as(role)
+        response = self.client.get(url_path, follow=True)
         self.assertEqual(response.status_code, 200)
         if template:
             self.assertTemplateUsed(response, template)
         if context_keys:
             for key in context_keys:
                 self.assertTrue(key in response.context, msg="{key} not in context".format(key=key))
-        if contains:
-            self.assertContains(response, contains)
         return response
+
+    @staticmethod
+    def get_test_file(filename="file.pdf", content_type="application/pdf"):
+        """
+        Returns a SimpleUploadedFile for testing file uploads
+        """
+        return SimpleUploadedFile(
+            filename,
+            bytearray("file contents", encoding="utf8"),
+            content_type=content_type
+        )

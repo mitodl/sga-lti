@@ -2,15 +2,23 @@
 Test end to end django views.
 """
 from django.core.urlresolvers import reverse
+from mock import patch, MagicMock
 
 from sga.backend.constants import Roles
+from sga.forms import (
+    AssignGraderToStudentForm,
+    GraderMaxStudentsForm,
+    GraderAssignmentSubmissionForm,
+    StudentAssignmentSubmissionForm,
+    AssignStudentToGraderForm)
 from sga.tests.common import SGATestCase
 
 
-class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
+class TestViews(SGATestCase):
     """
     Test that the views work as expected
     """
+    # pylint: disable=too-many-public-methods
 
     def test_index_view(self):
         """
@@ -42,6 +50,28 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             template="sga/studio_message_page.html"
         )
 
+    def test_staff_index_view(self):
+        """
+        Verify the staff_index view is as expected
+        """
+        course = self.get_test_course()
+        for role in [Roles.admin, Roles.grader]:
+            self.do_test_successful_view(
+                reverse("staff_index", kwargs={"course_id": course.id}),
+                role,
+                template="sga/staff_index.html"
+            )
+
+    def test_staff_index_view_staff_only(self):
+        """
+        Verify the staff_index view is not allowed for students
+        """
+        course = self.get_test_course()
+        self.do_test_forbidden_view(
+            reverse("staff_index", kwargs={"course_id": course.id}),
+            Roles.student
+        )
+
     def test_unsubmit_submission(self):
         """
         Verify that unset_submission returns 200 and updates the submission object
@@ -56,7 +86,6 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             "student_user_id": student_user.id,
             "assignment_id": assignment.id
         }
-        print(kwargs)
         response = self.client.post(reverse("unsubmit_submission", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         submission = self.get_test_submission()
@@ -116,6 +145,37 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
                 role
             )
 
+    def test_submit_student_assignment(self):
+        """
+        Verify successful student submission via view_submission_as_student
+        """
+        self.log_in_as_student()
+        submission = self.get_test_submission()
+        self.assertIsNone(submission.student_document.name)
+        self.assertIsNone(submission.description)
+        self.assertFalse(submission.submitted)
+        test_file = self.get_test_file()
+        form_data = {
+            "description": "file description"
+        }
+        form_files = {
+            "student_document": test_file
+        }
+        form = StudentAssignmentSubmissionForm(data=form_data, files=form_files, instance=submission)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": submission.assignment.course_id,
+            "assignment_id": submission.assignment_id
+        }
+        form_data.update(form_files)
+        response = self.client.post(reverse("view_submission_as_student", kwargs=kwargs), data=form_data)
+        submission = self.get_test_submission()
+        # Submission should now be submitted
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(submission.student_document.name)
+        self.assertIsNotNone(submission.description)
+        self.assertTrue(submission.submitted)
+
     def test_view_submission_as_staff(self):
         """
         Verify view submission page is as expected
@@ -147,6 +207,41 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
                     "UNSUBMIT_CONFIRM"
                 ]
             )
+
+    @patch("sga.views.send_grade", MagicMock(return_value=None))
+    def test_submit_grader_document(self):
+        """
+        Verify successful grader submission via view_submission_as_staff
+        """
+        self.log_in_as_grader()
+        submission = self.get_test_submission()
+        student_user = self.get_test_student_user()
+        self.assertIsNone(submission.grader_document.name)
+        self.assertIsNone(submission.feedback)
+        self.assertFalse(submission.graded)
+        test_file = self.get_test_file()
+        form_data = {
+            "feedback": "file feedback",
+            "grade": 75
+        }
+        form_files = {
+            "grader_document": test_file
+        }
+        form = GraderAssignmentSubmissionForm(data=form_data, files=form_files, instance=submission)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": submission.assignment.course_id,
+            "assignment_id": submission.assignment_id,
+            "student_user_id": student_user.id
+        }
+        form_data.update(form_files)
+        response = self.client.post(reverse("view_submission_as_staff", kwargs=kwargs), data=form_data)
+        submission = self.get_test_submission()
+        # Submission should now be submitted
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(submission.grader_document.name)
+        self.assertIsNotNone(submission.feedback)
+        self.assertTrue(submission.graded)
 
     def test_view_submission_as_staff_staff_only(self):
         """
@@ -290,6 +385,56 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
             ]
         )
 
+    def test_assign_grader(self):
+        """
+        Verify that AssignGraderToStudentForm correctly assigns a grader to a student
+        (POST to view_student)
+        """
+        self.log_in_as_admin()
+        grader = self.get_test_grader()
+        student = self.get_test_student()
+        course = self.get_test_course()
+        # Grader should have available slots
+        self.assertGreater(grader.available_student_slots_count(), 0)
+        # Grader should not be assigned to student
+        self.assertNotEqual(student.grader, grader)
+        form_data = {"grader": grader.id}
+        form = AssignGraderToStudentForm(data=form_data, instance=student)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": course.id,
+            "student_user_id": student.user_id
+        }
+        response = self.client.post(reverse("view_student", kwargs=kwargs), data=form_data)
+        student = self.get_test_student()
+        # Grader should now be assigned
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(student.grader, grader)
+
+    def test_assign_grader_admin_only(self):
+        """
+        Verify assigning grader via view_student is only allowed for admins
+        """
+        grader = self.get_test_grader()
+        student = self.get_test_student()
+        course = self.get_test_course()
+        # Grader should have available slots
+        self.assertGreater(grader.available_student_slots_count(), 0)
+        # Grader should not be assigned to student
+        self.assertNotEqual(student.grader, grader)
+        form_data = {"grader": grader.id}
+        form = AssignGraderToStudentForm(data=form_data, instance=student)
+        self.assertTrue(form.is_valid())
+        url = reverse("view_student", kwargs={"course_id": course.id, "student_user_id": student.user_id})
+        # Roles.grader and Roles.student is allowed on the page, but shouldn't be able to assign graders
+        for log_in_func in [self.log_in_as_grader, self.log_in_as_student]:
+            log_in_func()
+            response = self.client.post(url, data=form_data)
+            student = self.get_test_student()
+            # Grader should still not be assigned
+            self.assertEqual(response.status_code, 200)
+            self.assertNotEqual(student.grader, grader)
+
     def test_view_grader(self):
         """
         Verify view grader page is as expected
@@ -302,7 +447,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         student.save()
         kwargs = {
             "course_id": course.id,
-            "grader_user_id": grader.user.id
+            "grader_user_id": grader.user_id
         }
         url = reverse("view_grader", kwargs=kwargs)
         for role in [Roles.grader, Roles.admin]:
@@ -332,11 +477,142 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         course = self.get_test_course()
         kwargs = {
             "course_id": course.id,
-            "grader_user_id": grader_2.user.id
+            "grader_user_id": grader_2.user_id
         }
         url = reverse("view_grader", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
             self.do_test_forbidden_view(url, role)
+
+    def test_change_grader_max_students(self):
+        """
+        Verify that GraderMaxStudentsForm correctly changes a graders max number of students
+        (POST to view_grader)
+        """
+        NEW_MAX_STUDENTS = 123
+        self.log_in_as_admin()
+        grader = self.get_test_grader()
+        course = self.get_test_course()
+        current_max_students = grader.max_students
+        # Current max_students should be different than our new number
+        self.assertNotEqual(current_max_students, NEW_MAX_STUDENTS)
+        form_data = {"max_students": NEW_MAX_STUDENTS}
+        form = GraderMaxStudentsForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": course.id,
+            "grader_user_id": grader.user_id
+        }
+        form_data.update({"max_students_submit": True})
+        response = self.client.post(reverse("view_grader", kwargs=kwargs), data=form_data)
+        # Grader should now have NEW_MAX_STUDENTS number of max_students
+        grader = self.get_test_grader()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(grader.max_students, NEW_MAX_STUDENTS)
+
+    def test_change_grader_max_students_admin_only(self):
+        """
+        Verify changing grader max_students via view_student is only allowed for admins
+        """
+        NEW_MAX_STUDENTS = 123
+        self.log_in_as_grader()
+        grader = self.get_test_grader()
+        course = self.get_test_course()
+        current_max_students = grader.max_students
+        # Current max_students should be different than our new number
+        self.assertNotEqual(current_max_students, NEW_MAX_STUDENTS)
+        form_data = {"max_students": NEW_MAX_STUDENTS}
+        form = GraderMaxStudentsForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": course.id,
+            "grader_user_id": grader.user_id
+        }
+        form_data.update({"max_students_submit": True})
+        response = self.client.post(reverse("view_grader", kwargs=kwargs), data=form_data)
+        # Grader should not have changed to NEW_MAX_STUDENTS number of max_students
+        grader = self.get_test_grader()
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(grader.max_students, NEW_MAX_STUDENTS)
+        self.assertEqual(grader.max_students, current_max_students)
+
+    def test_assign_student(self):
+        """
+        Verify that AssignStudentToGraderForm correctly assigns a student to a grader
+        (POST to view_grader)
+        """
+        student = self.get_test_student()
+        grader = self.get_test_grader()
+        course = self.get_test_course()
+        # Grader should have available slots
+        self.assertGreater(grader.available_student_slots_count(), 0)
+        # Grader should not be assigned to student
+        self.assertNotEqual(student.grader, grader)
+        # First have to initialize form to retrieve the choices the form provides. There's an issue
+        # with Travis builds where self.get_test_student() apparently returns a different object
+        # than the form's queryset, even though the only object that should exist in the test
+        # database is the object from self.get_test_student()
+        form = AssignStudentToGraderForm(instance=grader)
+        # We only want one student_user_id, but we have to iterate because form.fields["students"].choices
+        # is a ModelChoiceIterator, so we must iterate
+        for choice in form.fields["students"].choices:
+            student_user_id = choice[0]  # (user_id, label)
+            if student_user_id:
+                break
+        # Now we set form_data using the student_user_id we got from above. If there were no choices and
+        # we get a referenced before assignment error, it's probably not a test logic issue and it should
+        # rightfully break
+        print(student_user_id)
+        for choice in form.fields["students"].choices:
+            print(choice)
+        form_data = {"students": student_user_id}
+        form = AssignStudentToGraderForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": course.id,
+            "grader_user_id": grader.user_id
+        }
+        form_data.update({"assign_student_submit": True})
+        self.log_in_as_admin()
+        response = self.client.post(reverse("view_grader", kwargs=kwargs), data=form_data)
+        # Grader should now be assigned
+        self.assertEqual(response.status_code, 200)
+        student = self.get_test_student()
+        self.assertEqual(student.grader, grader)
+
+    def test_assign_student_admin_only(self):
+        """
+        Verify that AssignStudentToGraderForm correctly assigns a student to a grader
+        (POST to view_grader)
+        """
+        student = self.get_test_student()
+        grader = self.get_test_grader()
+        course = self.get_test_course()
+        # Grader should have available slots
+        self.assertGreater(grader.available_student_slots_count(), 0)
+        # Grader should not be assigned to student
+        self.assertNotEqual(student.grader, grader)
+        # See comment from test_assign_student() about why the next 4 lines are necessary with Travis
+        form = AssignStudentToGraderForm(instance=grader)
+        for choice in form.fields["students"].choices:
+            student_user_id = choice[0]  # (user_id, label)
+            if student_user_id:
+                break
+        form_data = {"students": student_user_id}
+        form = AssignStudentToGraderForm(data=form_data, instance=grader)
+        self.assertTrue(form.is_valid())
+        kwargs = {
+            "course_id": course.id,
+            "grader_user_id": grader.user_id
+        }
+        form_data.update({"assign_student_submit": True})
+        url = reverse("view_grader", kwargs=kwargs)
+        # As grader
+        self.log_in_as_grader()
+        response = self.client.post(url, data=form_data)
+        # Grader should still not be assigned
+        self.assertEqual(response.status_code, 200)
+        student = self.get_test_student()
+        self.assertNotEqual(student.grader, grader)
 
     def test_unassign_grader(self):
         """
@@ -349,7 +625,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         student.save()
         # Verify that this grader is assigned to this student
         self.assertTrue(student in grader.students.all())
-        kwargs = {"course_id": self.default_course.id, "student_user_id": student.user.id}
+        kwargs = {"course_id": self.default_course.id, "student_user_id": student.user_id}
         response = self.client.post(reverse("unassign_grader", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
         grader = self.get_test_grader()
@@ -364,7 +640,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         Verify unassign_grader view is only accessible for admins
         """
         student = self.get_test_student()
-        kwargs = {"course_id": self.default_course.id, "student_user_id": student.user.id}
+        kwargs = {"course_id": self.default_course.id, "student_user_id": student.user_id}
         url = reverse("unassign_grader", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
             self.do_test_forbidden_view(url, role, method="post")
@@ -382,8 +658,8 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         self.assertTrue(student in grader.students.all())
         kwargs = {
             "course_id": self.default_course.id,
-            "student_user_id": student.user.id,
-            "grader_user_id": grader.user.id
+            "student_user_id": student.user_id,
+            "grader_user_id": grader.user_id
         }
         response = self.client.post(reverse("unassign_student", kwargs=kwargs), follow=True)
         self.assertEqual(response.status_code, 200)
@@ -402,8 +678,8 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         grader = self.get_test_grader()
         kwargs = {
             "course_id": self.default_course.id,
-            "student_user_id": student.user.id,
-            "grader_user_id": grader.user.id
+            "student_user_id": student.user_id,
+            "grader_user_id": grader.user_id
         }
         url = reverse("unassign_student", kwargs=kwargs)
         for role in [Roles.grader, Roles.student]:
@@ -476,6 +752,7 @@ class TestViews(SGATestCase):  # pylint: disable=too-many-public-methods
         """
         Verify download_all_submissions returns a .zip file
         """
+        # Get zip file
         assignment = self.get_test_assignment()
         kwargs = {
             "course_id": self.default_course.id,

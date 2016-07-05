@@ -16,18 +16,18 @@
     <h4>Frequently Used Links</h4>
     <ul>
         <li>
-            <a href="{% url 'view_student_list' course_id=course_id %}">
+            <a href="{% url 'view_student_list' course_id=request.course.id %}">
                 View Student List
             </a>
         </li>
         <li>
-            <a href="{% url 'view_assignment_list' course_id=course_id %}">
+            <a href="{% url 'view_assignment_list' course_id=request.course.id %}">
                 View Assignment List
             </a>
         </li>
         {% if request.role == Roles.admin %}
         <li>
-            <a href="{% url 'view_grader_list' course_id=course_id %}">
+            <a href="{% url 'view_grader_list' course_id=request.course.id %}">
                 View Grader List
             </a>
         </li>

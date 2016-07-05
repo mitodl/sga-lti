@@ -93,7 +93,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
     'sga.middleware.SGAMiddleware',
@@ -280,16 +279,19 @@ REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
 
 # django-storages configurations
 AWS_S3_SECURE_URLS = True  # use https instead of http
-AWS_QUERYSTRING_AUTH = False  # don't add complex authentication-related query parameters for requests
 AWS_STORAGE_BUCKET_NAME = get_var('AWS_STORAGE_BUCKET_NAME', '')
 AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = get_var('AWS_SECRET_ACCESS_KEY', '')
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
 
 # Media storage
 MEDIAFILES_LOCATION = get_var('MEDIAFILES_LOCATION', '')  # Set this to use base folder in bucket
-MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'sga.custom_storages.MediaStorage'
+AWS_LOCATION = MEDIAFILES_LOCATION
+AWS_DEFAULT_ACL = "private"
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 # Development flag
 DEVELOPMENT = get_var('DEVELOPMENT', False)
+
+MAX_FILE_SIZE_MB = get_var("MAX_FILE_SIZE_MB", 5)
+VALID_FILE_UPLOAD_EXTENSIONS = get_var("VALID_FILE_UPLOAD_EXTENSIONS", [".pdf"])

@@ -5,7 +5,6 @@ from django.conf.urls import url
 
 from sga.views import (
     index,
-    dev_start,
     view_submission_as_student,
     view_student_list,
     view_assignment,
@@ -32,7 +31,6 @@ urlpatterns = [
     url(r"^not-graded-block$", not_graded_block_error_page, name="not_graded_block_error_page"),
     url(r"^studio$", studio_message_page, name="studio_message_page"),
     url(r"^home/(?P<course_id>\d+)$", staff_index, name="staff_index"),
-    url(r"^dev-start$", dev_start, name="dev_start"),
     url(r"^view-student-list/(?P<course_id>\d+)$", view_student_list, name="view_student_list"),
     url(r"^view-grader-list/(?P<course_id>\d+)$", view_grader_list, name="view_grader_list"),
     url(r"^view-assignment-list/(?P<course_id>\d+)$", view_assignment_list, name="view_assignment_list"),
