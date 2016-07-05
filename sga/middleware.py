@@ -26,11 +26,8 @@ class SGAMiddleware(object):
         if "course_roles" not in request.session:
             request.session["course_roles"] = {}
 
-        initial_lti_request = (request.method == "POST" and
-                               request.POST.get("lti_message_type") == "basic-lti-launch-request")
-        request.initial_lti_request = initial_lti_request
-        if initial_lti_request:
-            if not request.user.is_authenticated():
+        if request.lti_initial_request:
+            if not request.lti_authentication_successful:
                 # Raise 400; user is using bad LTI credentials
                 raise SuspiciousOperation("Bad LTI credentials")
             if not request.LTI.get("context_id"):
