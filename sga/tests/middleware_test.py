@@ -1,7 +1,6 @@
 """
 Tests for the SGAMiddleware
 """
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.core.urlresolvers import reverse
 from mock import MagicMock
@@ -23,6 +22,8 @@ class MiddlewareTest(SGATestCase):
         request = MagicMock()
         request.LTI = dict(DEFAULT_LTI_PARAMS)
         request.method = "POST"
+        request.lti_initial_request = True
+        request.lti_authentication_successful = True
         request.POST = {
             "lti_message_type": "basic-lti-launch-request",
             "custom_component_display_name": "Not Scored Assignment"
@@ -59,7 +60,7 @@ class MiddlewareTest(SGATestCase):
         Test that the middleware does not allow an unauthenticated user through
         """
         request = self.get_test_request()
-        request.user = AnonymousUser()
+        request.lti_authentication_successful = False
         middleware = SGAMiddleware()
         self.assertRaisesMessage(
             SuspiciousOperation,
@@ -94,23 +95,23 @@ class MiddlewareTest(SGATestCase):
         """
         Test that the middleware redirects if it's embedded in a not graded block
         """
-        # Must change the default lti_params and POST request to spoof initial_lti_request
-        lti_params = dict(DEFAULT_LTI_PARAMS)  # Make a copy so we don't change the original dict
-        lti_params.pop("lis_outcome_service_url")
-        self.log_in_as_admin(lti_params=lti_params)
-        response = self.client.post(reverse("sga_index"), data={"lti_message_type": "basic-lti-launch-request"})
-        self.assertRedirects(response, reverse("not_graded_block_error_page"))
+        request = self.get_test_request()
+        request.LTI.pop("lis_outcome_service_url")
+        middleware = SGAMiddleware()
+        http_response = middleware.process_request(request)
+        self.assertEqual(http_response.status_code, 302)
+        self.assertEqual(http_response.url, reverse("not_graded_block_error_page"))
 
     def test_studio_redirect(self):
         """
         Test that the middleware redirects if it's launched from studio
         """
-        # Must change the default lti_params and POST request to spoof initial_lti_request
-        user = self.get_test_user(username=STUDIO_USER_USERNAME)
-        self.client.force_login(user)
-        self.set_up_session_params(user)
-        response = self.client.post(reverse("sga_index"), data={"lti_message_type": "basic-lti-launch-request"})
-        self.assertRedirects(response, reverse("studio_message_page"))
+        request = self.get_test_request()
+        request.user = self.get_test_user(username=STUDIO_USER_USERNAME)
+        middleware = SGAMiddleware()
+        http_response = middleware.process_request(request)
+        self.assertEqual(http_response.status_code, 302)
+        self.assertEqual(http_response.url, reverse("studio_message_page"))
 
     def test_admin_LTI_request(self):
         """
