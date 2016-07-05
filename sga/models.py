@@ -249,6 +249,7 @@ class Submission(TimeStampedModel):
     student_document = models.FileField(
         upload_to=student_submission_file_path,
         null=True,
+        max_length=512,
         validators=[validate_file_extension, validate_file_size]
     )
     description = models.TextField(null=True)
@@ -258,6 +259,7 @@ class Submission(TimeStampedModel):
     grader_document = models.FileField(
         upload_to=grader_submission_file_path,
         null=True,
+        max_length=512,
         validators=[validate_file_extension, validate_file_size]
     )
     feedback = models.TextField(null=True)

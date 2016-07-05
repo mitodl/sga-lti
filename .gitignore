@@ -71,6 +71,7 @@ node_modules
 # Editor stuff
 *.swp
 *.orig
+.settings
 
 /nbproject
 .idea/
