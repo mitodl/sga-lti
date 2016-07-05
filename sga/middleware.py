@@ -3,6 +3,7 @@ Custom middleware
 """
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.dateparse import parse_datetime
 
@@ -29,7 +30,7 @@ class SGAMiddleware(object):
         if request.lti_initial_request:
             if not request.lti_authentication_successful:
                 # Raise 400; user is using bad LTI credentials
-                raise SuspiciousOperation("Bad LTI credentials")
+                return HttpResponseBadRequest("Bad or missing LTI credentials")
             if not request.LTI.get("context_id"):
                 # Raise a 400 error
                 raise SuspiciousOperation("No context_id in LTI parameters")
