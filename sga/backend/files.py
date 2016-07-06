@@ -9,7 +9,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 from django.http.response import StreamingHttpResponse
 
-from sga.backend.constants import INVALID_S3_CHARACTERS_REGEX
+from sga.backend.constants import INVALID_S3_CHARACTERS_REGEX, Roles
 
 
 class StreamingBytesIO(BytesIO):
@@ -89,3 +89,25 @@ def grader_submission_file_path(instance, filename):
         extension=os.path.splitext(filename)[1]
     )
     return convert_illegal_S3_chars(path)
+
+
+def get_submitted_submissions(request, assignment, not_graded_only=False):
+    """
+    Retrieves a lazy list of submitted submissions for this assignment, taking into account the role of the user
+    """
+    from sga.models import Submission, Grader
+    # We can chain QuerySets because they are lazy
+    submissions = Submission.objects.filter(
+        assignment=assignment,
+        student__student__deleted=False,
+        submitted=True
+    ).exclude(
+        student_document=""
+    )
+    if request.role == Roles.grader:
+        grader = Grader.objects.get(user=request.user, course=assignment.course_id)
+        student_users = [student.user for student in grader.students.filter(deleted=False)]
+        submissions = submissions.filter(student__in=student_users)
+    if not_graded_only:
+        submissions = submissions.exclude(graded=True)
+    return submissions

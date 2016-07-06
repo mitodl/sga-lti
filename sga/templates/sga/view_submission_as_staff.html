@@ -58,13 +58,15 @@
             </div>
             {% if role == Roles.admin %}
             <div class="col-sm-6">
+            {% if submission.submitted %}
                 <form action="{% url 'unsubmit_submission' course_id=request.course.id assignment_id=submission.assignment.id student_user_id=student_user.id %}"
                       method="post" onsubmit="return confirm('{{ UNSUBMIT_CONFIRM }}');">
                     {% csrf_token %}
-                    <button class="btn btn-primary btn-block" type="submit">
-                        Mark as Not Submitted
-                    </button>
+                    <button class="btn btn-primary btn-block" type="submit">Mark as Not Submitted</button>
                 </form>
+            {% else %}
+                <button class="btn btn-primary btn-block" disabled>Submission Not Submitted</button>
+            {% endif %}
             </div>
             {% endif %}
         </div>
