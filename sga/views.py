@@ -281,7 +281,7 @@ def view_assignment(request, course_id, assignment_id):
         student_users = assignment.course.students.filter(student__deleted=False)
     else:
         grader = Grader.objects.get(user_id=request.user.id, course_id=course_id)
-        student_users = grader.students.filter(deleted=False)
+        student_users = [student.user for student in grader.students.filter(deleted=False)]
     for student_user in student_users:
         submission, _ = Submission.objects.get_or_create(student=student_user, assignment=assignment)
         student_user.submitted = "Yes" if submission.submitted else "No"
