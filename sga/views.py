@@ -17,7 +17,7 @@ from sga.backend.constants import (
     UNASSIGN_GRADER_CONFIRM,
     UNASSIGN_STUDENT_CONFIRM,
     UNSUBMIT_CONFIRM)
-from sga.backend.files import serve_zip_file
+from sga.backend.files import serve_zip_file, get_submitted_submissions
 from sga.backend.send_grades import send_grade
 from sga.forms import (
     StudentAssignmentSubmissionForm,
@@ -277,10 +277,12 @@ def view_assignment(request, course_id, assignment_id):
     View assignment
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
+    submitted_submissions = get_submitted_submissions(request, assignment)
+    not_graded_submissions = submitted_submissions.exclude(graded=True)
     if request.role == Roles.admin:
         student_users = assignment.course.students.filter(student__deleted=False)
     else:
-        grader = Grader.objects.get(user_id=request.user.id, course_id=course_id)
+        grader = Grader.objects.get(user=request.user, course_id=course_id)
         student_users = [student.user for student in grader.students.filter(deleted=False)]
     for student_user in student_users:
         submission, _ = Submission.objects.get_or_create(student=student_user, assignment=assignment)
@@ -289,7 +291,9 @@ def view_assignment(request, course_id, assignment_id):
     return render(request, "sga/view_assignment.html", context={
         "student_users": student_users,
         "course": assignment.course,
-        "assignment": assignment
+        "assignment": assignment,
+        "has_not_graded_submissions": bool(not_graded_submissions.count()),
+        "has_submitted_submissions": bool(submitted_submissions.count())
     })
 
 
@@ -299,19 +303,7 @@ def download_all_submissions(request, course_id, assignment_id, not_graded_only=
     Generate and serve zip file with submission files
     """
     assignment = Assignment.get_or_404_check_course(course_id, id=assignment_id)
-    # Filter out submissions - we can chain QuerySets because they are lazy
-    submissions = Submission.objects.filter(
-        assignment=assignment,
-        student__student__deleted=False
-    ).exclude(
-        student_document=""
-    )
-    if request.role == Roles.grader:
-        grader = Grader.objects.get(user=request.user, course=assignment.course)
-        student_users = [s.user for s in grader.students.filter(deleted=False)]
-        submissions = submissions.filter(student__in=student_users)
-    if not_graded_only:
-        submissions = submissions.exclude(graded=True)
+    submissions = get_submitted_submissions(request, assignment, not_graded_only=not_graded_only)
     course = Course.objects.get(id=course_id)
     full_zipname = "{course_edx_id} - {zipname}".format(course_edx_id=course.edx_id, zipname=zipname)
     return serve_zip_file(submissions, full_zipname)
