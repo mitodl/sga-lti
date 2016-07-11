@@ -193,7 +193,12 @@ def view_assignment_list(request, course_id):
         if grader_user:
             assgnmnt.not_submitted_count = assgnmnt.not_submitted_submissions_count_by_grader(grader_user=grader_user)
             assgnmnt.not_graded_count = assgnmnt.not_graded_submissions_count_by_grader(grader_user=grader_user)
-            assgnmnt.graded_count = assgnmnt.graded_submissions_count_by_grader(grader_user=grader_user)
+            # For graded count, we want to include all of the ones the Grader graded, even if the Student is no longer
+            # assigned to this Grader
+            assgnmnt.graded_count = assgnmnt.graded_submissions_count_by_grader(
+                grader_user=grader_user,
+                limit_to_current_students=False
+            )
         else:
             assgnmnt.not_submitted_count = assgnmnt.not_submitted_submissions_count()
             assgnmnt.not_graded_count = assgnmnt.not_graded_submissions_count()
