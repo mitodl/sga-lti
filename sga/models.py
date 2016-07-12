@@ -72,7 +72,8 @@ class Grader(CourseModel):
 
     def graded_submissions_count(self):
         """
-        Returns a count of submission that are graded by this grader
+        Returns a count of submission that are graded by this grader (will count all Submissions graded
+        by this Grader, even if the Student for that Submission is no longer assigned to this Grader)
         """
         return Submission.objects.filter(
             graded_by=self.user,
@@ -177,19 +178,24 @@ class Assignment(CourseModel):
         """
         return self.submissions.filter(submitted=True, graded=True, student__student__deleted=False).count()
 
-    def graded_submissions_count_by_grader(self, grader=None, grader_user=None):
+    def graded_submissions_count_by_grader(self, grader=None, grader_user=None, limit_to_current_students=True):
         """
-        Returns a count of submissions for this assignment for this grader that are graded
+        Returns a count of submissions for this assignment for this grader that are graded (only counts
+        Submissions for students currently assigned to the Grader unless limit_to_current_students=False)
         """
-        if not grader_user:
-            grader_user = grader.user
-        return Submission.objects.filter(
-            graded_by=grader_user,
+        if not grader:
+            grader = Grader.objects.get(user=grader_user, course=self.course)
+        submissions = Submission.objects.filter(
+            graded_by=grader.user,
             student__student__deleted=False,
             assignment=self,
             submitted=True,
             graded=True
-        ).count()
+        )
+        if limit_to_current_students:
+            student_users = [s.user for s in grader.students.filter(deleted=False)]
+            submissions = submissions.filter(student__in=student_users)
+        return submissions.count()
 
     def not_graded_submissions_count(self):
         """
