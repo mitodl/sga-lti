@@ -4,9 +4,7 @@ Test end to end django models.
 from datetime import datetime
 from time import sleep
 
-from django.core.exceptions import PermissionDenied
-
-from sga.models import Course, Submission, Grader
+from sga.models import Course, Submission
 from sga.tests.common import SGATestCase
 
 
@@ -257,11 +255,3 @@ class TestModels(SGATestCase):
         self.assertEqual(submission.grade_display(), "(Not Graded)")
         submission.update(grade=70)
         self.assertEqual(submission.grade_display(), "70/100 (70%)")
-
-    def test_course_get_or_404_check_course(self):
-        """
-        Tests the .get_or_404_check_course() method on CourseModel
-        """
-        grader = self.get_test_grader()
-        self.assertEqual(Grader.get_or_404_check_course(grader.course_id, id=grader.id), grader)
-        self.assertRaises(PermissionDenied, Grader.get_or_404_check_course, grader.course_id + 1, id=grader.id)

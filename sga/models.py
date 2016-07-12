@@ -5,10 +5,8 @@ from datetime import datetime
 
 import pytz
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.shortcuts import get_object_or_404
 
 from sga.backend.files import student_submission_file_path, grader_submission_file_path
 from sga.backend.validators import validate_file_extension, validate_file_size
@@ -35,27 +33,7 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
-class CourseModel(TimeStampedModel):
-    """
-    Base model for models relating to the course to allow authentication checks
-    """
-    @classmethod
-    def get_or_404_check_course(cls, course_id, **kwargs):
-        """
-        Runs a get_or_404 on the object class with kwargs. If an object is returned, checks if the object is
-        part of the course with id course_id.
-        """
-        obj = get_object_or_404(cls, **kwargs)
-        # Cast to string because course_id is passed as str from view
-        if str(obj.course_id) != str(course_id):
-            raise PermissionDenied()
-        return obj
-
-    class Meta:
-        abstract = True
-
-
-class Grader(CourseModel):
+class Grader(TimeStampedModel):
     """
     Grader model (intermediate between Course and User)
     """
@@ -104,7 +82,7 @@ class Grader(CourseModel):
         unique_together = (("user", "course"),)
 
 
-class Student(CourseModel):
+class Student(TimeStampedModel):
     """
     Student model (intermediate between Course and User)
     """
@@ -161,7 +139,7 @@ class Course(TimeStampedModel):
         ).count()
 
 
-class Assignment(CourseModel):
+class Assignment(TimeStampedModel):
     """
     Assignment model
     """
