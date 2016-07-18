@@ -1,13 +1,10 @@
 function filterReset(table) {
-    console.log("hi");
-    console.log($(this));
-    console.log("hi");
     table.search("").columns().search("").draw();
 }
 
 function filterHasNoGrader(table, column) {
     filterReset(table);
-    table.columns(column).search("^(No Grader)$").draw();
+    table.columns(column).search("(No Grader)").draw();
 }
 
 function filterHasGrader(table, column) {
