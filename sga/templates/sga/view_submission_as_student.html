@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Assignment: {{ assignment.name }}</h1>
+    <h3>Assignment: {{ assignment.name }}</h3>
     <hr>
     {% include "common/submission_status.html" %}
     {% if not submission.submitted %}
