@@ -15,3 +15,4 @@ django-forms-bootstrap==3.0.1
 git+https://github.com/zagaran/django-auth-lti.git@v1.2.8
 boto==2.41.0
 django-storages==1.4.1
+django-cors-middleware==1.2.0
