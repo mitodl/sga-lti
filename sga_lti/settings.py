@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'server_status',
     'django_forms_bootstrap',
     # Our INSTALLED_APPS
@@ -88,6 +89,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -283,6 +285,12 @@ AWS_STORAGE_BUCKET_NAME = get_var('AWS_STORAGE_BUCKET_NAME', '')
 AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = get_var('AWS_SECRET_ACCESS_KEY', '')
 
+# CORS config
+CORS_ORIGIN_WHITELIST = (
+    'edge.edx.org',
+    'courses.edx.org',
+    'preview.edge.edx.org'
+)
 
 # Media storage
 MEDIAFILES_LOCATION = get_var('MEDIAFILES_LOCATION', '')  # Set this to use base folder in bucket
