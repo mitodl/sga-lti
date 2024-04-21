@@ -10,7 +10,7 @@ psycopg2==2.7.5
 six==1.10.0
 tox==2.3.1
 static3==0.5.1
-newrelic==2.54.0.41
+newrelic==2.106.1.88
 django-forms-bootstrap==3.1.0
 git+https://github.com/zagaran/django-auth-lti.git@v1.2.8
 boto==2.49.0
