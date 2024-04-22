@@ -1,6 +1,6 @@
 ipython
 pylint==1.9.5
-pylint-django==0.7.1
+pylint-django==0.11.1
 pytest-cov==2.2.0
 pytest-django==2.9.1
 pytest-pep8==1.0.6
