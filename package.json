@@ -30,7 +30,7 @@
     "react-dom": "0.14.10",
     "react-ga": "1.5.0",
     "react-redux": "4.4.10",
-    "react-router": "2.0.0",
+    "react-router": "2.8.1",
     "redux-actions": "0.9.1",
     "redux-devtools": "2.1.5",
     "redux-logger": "2.6.1",
