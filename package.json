@@ -34,7 +34,7 @@
     "redux-actions": "0.13.0",
     "redux-devtools": "2.1.5",
     "redux-logger": "2.10.2",
-    "redux-thunk": "2.0.1",
+    "redux-thunk": "2.4.2",
     "sass-loader": "3.1.2",
     "style-loader": "0.13.0",
     "webpack": "1.12.14",
