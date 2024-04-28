@@ -9,7 +9,7 @@ uwsgi==2.0.25.1
 psycopg2==2.9.9
 six==1.16.0
 tox==2.3.1
-static3==0.5.1
+static3==0.7.0
 newrelic==2.106.1.88
 django-forms-bootstrap==3.1.0
 git+https://github.com/zagaran/django-auth-lti.git@v1.2.8
