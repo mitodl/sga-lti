@@ -8,7 +8,7 @@ fake-factory==0.7.4
 uwsgi==2.0.25.1
 psycopg2==2.9.9
 six==1.16.0
-tox==2.3.1
+tox==2.9.1
 static3==0.7.0
 newrelic==2.106.1.88
 django-forms-bootstrap==3.1.0
