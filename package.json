@@ -2,7 +2,7 @@
   "name": "sga-lti",
   "version": "0.0.0",
   "devDependencies": {
-    "babel-eslint": "5.0.4",
+    "babel-eslint": "10.1.0",
     "babel-plugin-transform-react-jsx": "6.24.1",
     "eslint": "2.13.1",
     "eslint-config-defaults": "9.0.0",
