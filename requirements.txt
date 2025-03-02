@@ -14,4 +14,4 @@ newrelic==2.106.1.88
 django-forms-bootstrap==3.1.0
 git+https://github.com/zagaran/django-auth-lti.git@v1.2.8
 boto==2.49.0
-django-storages==1.14.4
+django-storages==1.14.5
