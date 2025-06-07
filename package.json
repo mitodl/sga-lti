@@ -21,7 +21,7 @@
     "babel-plugin-jsx": "1.2.0",
     "babel-preset-es2015": "6.24.1",
     "babel-preset-react": "6.24.1",
-    "bourbon-neat": "1.9.1",
+    "bourbon-neat": "4.0.0",
     "css-loader": "0.28.11",
     "history": "2.1.2",
     "node-neat": "1.7.2",
